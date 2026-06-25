@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gesundheitsakte</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0891b2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Gesundheitsakte">
+
+  <!-- Favicon -->
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/icon-64.png">
+
+  <!-- iOS Homescreen-Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+
+  <!-- Schriftarten lokal -->
+  <link rel="stylesheet" href="fonts/fonts.css?v=2">
+
+  <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+<!-- ═══ Landing-Page ═══ -->
+<div id="landing" class="landing"></div>
+
+<!-- ═══ Onboarding ═══ -->
+<div id="onboarding" class="onboarding" style="display:none"></div>
+
+<!-- ═══ Haupt-App (initial versteckt) ═══ -->
+<div class="app-shell" id="app-shell" style="display:none">
+
+  <!-- Demo-Banner -->
+  <div class="demo-banner" id="demo-banner" style="display:none">
+    <strong>Demo-Modus</strong>
+    <button class="demo-banner-btn" onclick="backToLanding()">Eigene Datenbank anlegen</button>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-wrap">
+        <img src="icons/icon-192.png" class="logo-img" alt="Gesundheitsakte">
+        <span class="unsaved-dot" id="unsaved-dot" style="display:none"
+              title="Nicht exportierte Änderungen vorhanden"></span>
+      </div>
+      <h1>Gesundheitsakte</h1>
+    </div>
+    <div class="topbar-controls">
+      <button class="btn btn-ghost btn-sm icon-btn" id="topbar-print-btn"
+              onclick="openPrintReport()" style="display:none" title="Arztbericht drucken"
+              aria-label="Arztbericht drucken">
+      </button>
+      <button class="btn btn-ghost btn-sm icon-btn" id="theme-toggle-btn"
+              title="Dark Mode umschalten"
+              aria-label="Dark Mode umschalten">
+      </button>
+      <div class="person-selector" id="person-selector">
+        <div class="pd-trigger" id="pd-trigger" onclick="togglePersonDropdown()"
+             role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false"
+             aria-label="Person auswählen">
+          <span class="pd-label" id="pd-label">–</span>
+          <svg class="pd-chevron" id="pd-chevron" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="pd-menu" id="pd-menu"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="subnav-wrapper" id="subnav-wrapper">
+    <nav class="subnav" id="subnav" role="tablist"></nav>
+  </div>
+
+  <main class="main-content">
+    <section class="panel" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+    <section class="panel" id="panel-allmetrics" role="tabpanel" aria-labelledby="tab-allmetrics">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+    <section class="panel" id="panel-graphs" role="tabpanel" aria-labelledby="tab-graphs">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+    <section class="panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+    <section class="panel" id="panel-entry" role="tabpanel" aria-labelledby="tab-entry">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+    <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Verstecktes Input für Apple-Health-ZIP-Import -->
+<input type="file" id="health-import-input" accept=".zip,application/zip"
+       style="display:none" onchange="handleHealthFile(this)">
+
+<!-- ═══ Globale Drop-Overlay ═══ -->
+<div id="drop-overlay" class="drop-overlay">
+  <div class="drop-overlay-inner">
+    <div class="drop-overlay-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+      </svg>
+    </div>
+    <div class="drop-overlay-text">JSON-Datei hier ablegen</div>
+    <div class="drop-overlay-sub">zum Öffnen einer Datenbank</div>
+  </div>
+</div>
+
+<script src="config.js?v=2"></script>
+<script src="crypto.js?v=2"></script>
+<script src="vendor/fflate.min.js?v=2"></script>
+<!-- App in thematische Module aufgeteilt (klassische Scripts, gemeinsamer Scope).
+     Reihenfolge: zuerst das Fundament (core), dann die Tab-Module, zuletzt
+     navigation.js (startet die App via DOMContentLoaded). -->
+<script src="core.js?v=2"></script>
+<script src="dashboard.js?v=2"></script>
+<script src="graphs.js?v=2"></script>
+<script src="history.js?v=2"></script>
+<script src="entry.js?v=2"></script>
+<script src="settings.js?v=2"></script>
+<script src="data.js?v=2"></script>
+<script src="merge.js?v=2"></script>
+<script src="health-import.js?v=2"></script>
+<script src="navigation.js?v=2"></script>
+</body>
+</html>

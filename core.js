@@ -1,0 +1,327 @@
+/* ═══════════════════════════════════════════════
+   Familien-Gesundheitsakte — core.js
+   ───────────────────────────────────────────────
+   Fundament: globaler State, Helfer (esc/Datum/Alter), Daten-Zugriff,
+      Metrik-Historie & Normbereiche, Checkup-/Target-Datenfunktionen.
+
+   Teil eines klassischen Multi-Script-Setups (kein ES-Modul):
+   alle Dateien teilen denselben globalen Scope. Reihenfolge der
+   <script>-Tags siehe index.html.
+   ═══════════════════════════════════════════════ */
+'use strict';
+
+// ── State ──────────────────────────────────────
+let CONFIG          = null;   // aus config.js (Checkups + Standard-Metriken)
+let DATA            = null;   // die geladene/erstellte Datenbank (persons, entries, customMetrics)
+let currentPersonId = null;
+let activeGraphKey   = null;
+let activeGraphRange = 'all';
+
+let appMode          = null;  // 'landing' | 'app'
+let isDemoMode       = false; // true wenn Demo-Daten geladen
+let hasUnsavedChanges = false; // für roten Punkt am Logo
+let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert werden soll
+                              // (Passwort liegt in crypto.js _sessionPassword)
+
+const AVATAR_COLORS = [
+  '#0891b2','#7c3aed','#db2777','#d97706',
+  '#059669','#dc2626','#2563eb','#65a30d',
+];
+
+
+// ═══════════════════════════════════════════════
+// COMBINED METRICS — Standard (config) + benutzerdefiniert (DATA)
+// ═══════════════════════════════════════════════
+function allMetrics() {
+  const custom = (DATA?.customMetrics || []).map(m => ({ ...m, custom: true }));
+  const all = [...CONFIG.metrics, ...custom];
+  // Metriken mit appliesTo.gender nur für Personen des entsprechenden Geschlechts.
+  const person = getPersonList().find(p => p.id === currentPersonId);
+  if (!person) return all;
+  return all.filter(m => {
+    if (!m.appliesTo?.gender) return true;
+    return m.appliesTo.gender === person.gender;
+  });
+}
+function metricDef(key) {
+  // metricDef sucht in allen Metriken (unabhängig von Person),
+  // damit Werte alter Einträge immer korrekt beschriftet werden.
+  const custom = (DATA?.customMetrics || []).map(m => ({ ...m, custom: true }));
+  return [...CONFIG.metrics, ...custom].find(m => m.key === key);
+}
+// Personen kommen jetzt aus DATA statt CONFIG
+function getPersonList() { return DATA?.persons || []; }
+function getCheckups()    { return DATA?.checkups  || []; }
+
+// ═══════════════════════════════════════════════
+// DATEN — In-Memory + localStorage-Persistenz
+// ═══════════════════════════════════════════════
+function saveData() {
+  DATA.lastModified = new Date().toISOString();
+  markUnsaved();
+}
+function markUnsaved() {
+  if (isDemoMode) return;
+  hasUnsavedChanges = true;
+  updateUnsavedIndicator();
+  schedulePersist();
+}
+function markSaved() {
+  // "Gespeichert" = als Datei exportiert. Der lokale Stand bleibt in
+  // localStorage erhalten; nur der "ungesichert"-Indikator wird gelöscht.
+  hasUnsavedChanges = false;
+  updateUnsavedIndicator();
+  persistNow();   // aktuellen Stand sofort sichern
+}
+
+// ── localStorage-Persistenz ───────────────────────
+// Gesundheitsdaten werden als KLARTEXT in localStorage gehalten, damit die
+// App nach einem Reload sofort (ohne Passwort) weiterarbeiten kann. Die
+// Verschlüsselung greift bewusst nur beim Datei-Export. Auf einem geteilten
+// Gerät bedeutet das: lokale Daten ruhen unverschlüsselt — bewusster
+// Trade-off zugunsten der Bequemlichkeit (vom Nutzer so gewählt).
+const STORAGE_KEY = 'health-db-v1';
+let _persistTimer = null;
+
+function schedulePersist() {
+  if (_persistTimer) return;
+  _persistTimer = setTimeout(() => {
+    _persistTimer = null;
+    persistNow();
+  }, 600);
+}
+
+function persistNow() {
+  if (_persistTimer) { clearTimeout(_persistTimer); _persistTimer = null; }
+  if (isDemoMode || !DATA) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      isEncrypted,
+      hasUnsavedChanges,
+      data: DATA,
+    }));
+  } catch (e) {
+    console.warn('Speichern in localStorage fehlgeschlagen:', e);
+  }
+}
+
+function clearPersistedData() {
+  if (_persistTimer) { clearTimeout(_persistTimer); _persistTimer = null; }
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+}
+
+function readPersistedData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+// ═══════════════════════════════════════════════
+// HELFER
+// ═══════════════════════════════════════════════
+// HTML-Escaping — verhindert dass Namen/Notizen mit < > & " ' das
+// Layout oder value="…"-Attribute zerschießen. Überall verwenden, wo
+// Nutzerdaten in innerHTML / Attribute interpoliert werden.
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+const escAttr = esc; // identisch — nur als lesbarer Hinweis an value="…"
+
+// Geschlecht menschenlesbar — 'other'/Divers wird nicht mehr fälschlich
+// als "weiblich" angezeigt.
+function genderLabel(g) {
+  return g === 'male' ? 'männlich' : g === 'female' ? 'weiblich' : 'divers';
+}
+
+function getAge(bd) {
+  const b = new Date(bd), n = new Date();
+  let a = n.getFullYear() - b.getFullYear();
+  if (n.getMonth() - b.getMonth() < 0 ||
+     (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a--;
+  return a;
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  return new Date(s + 'T00:00:00').toLocaleDateString('de-AT',
+    { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function fmtShort(s) {
+  if (!s) return '';
+  return new Date(s + 'T00:00:00').toLocaleDateString('de-AT',
+    { day:'2-digit', month:'2-digit', year:'2-digit' });
+}
+function initials(name) { return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function avatarColor(pid) {
+  const i = getPersonList().findIndex(p=>p.id===pid);
+  return AVATAR_COLORS[i % AVATAR_COLORS.length];
+}
+function genId() { return 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+
+function checkupApplies(c, person) {
+  const r = c.appliesTo || {}, a = getAge(person.birthday);
+  if (r.minAge !== undefined && a < r.minAge) return false;
+  if (r.maxAge !== undefined && a > r.maxAge) return false;
+  if (r.gender  !== undefined && person.gender !== r.gender) return false;
+  return true;
+}
+function lastCheckupEntry(pid, cid) {
+  return DATA.entries
+    .filter(e => e.personId===pid && e.checkupId===cid)
+    .sort((a,b)=>new Date(b.date)-new Date(a.date))[0] || null;
+}
+function checkupStatus(checkup, pid) {
+  const last = lastCheckupEntry(pid, checkup.id);
+  if (!last) return { status:'overdue', label:'Noch nie', dueDate: todayISO() };
+  const due = new Date(last.date+'T00:00:00');
+  due.setMonth(due.getMonth() + checkup.intervalMonths);
+  const dueISO = due.toISOString().slice(0,10);
+  const diff = Math.round((due - new Date()) / 86400000);
+  if (diff < 0)  return { status:'overdue', label:`${Math.abs(diff)} Tage überfällig`, lastDate:last.date, dueDate: dueISO };
+  if (diff <= 30) return { status:'warning', label:`In ${diff} Tagen fällig`,           lastDate:last.date, dueDate: dueISO };
+  return               { status:'ok',      label:`Bis ${fmtShort(dueISO)}`,              lastDate:last.date, dueDate: dueISO };
+}
+
+// Heutiges Datum als YYYY-MM-DD (lokale Zeit).
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Alle Metric-Werte einer Person über alle Einträge, chronologisch.
+// Sucht sowohl in e.metrics (Standard) als auch in e.customMetrics (eigene Metriken).
+function metricHistory(pid, key) {
+  const def = metricDef(key);
+  const isBool   = def?.type === 'boolean';
+  const isSelect = def?.type === 'select';
+
+  function validValue(v) {
+    if (v === undefined || v === null || v === '') return false;
+    if (isBool)   return v === true || v === 'true' || v === false || v === 'false';
+    if (isSelect) return typeof v === 'string' && v.length > 0;
+    return !isNaN(parseFloat(v));
+  }
+  function parseValue(v) {
+    if (isBool)   return v === true || v === 'true';
+    if (isSelect) return String(v);
+    return parseFloat(v);
+  }
+
+  return DATA.entries
+    .filter(e => {
+      if (e.personId !== pid) return false;
+      const v  = e.metrics?.[key];
+      if (validValue(v)) return true;
+      const cv = e.customMetrics?.[key]?.value;
+      return validValue(cv);
+    })
+    .sort((a,b)=>new Date(a.date)-new Date(b.date))
+    .map(e => {
+      const v  = e.metrics?.[key];
+      const cv = e.customMetrics?.[key]?.value;
+      const raw = validValue(v) ? v : cv;
+      return { date: e.date, value: parseValue(raw) };
+    });
+}
+
+// Letzter bekannter Wert eines Metrics
+function lastMetricValue(pid, key) {
+  const h = metricHistoryResolved(pid, key);
+  return h.length ? h[h.length-1] : null;
+}
+
+// ── Berechnete Metriken ───────────────────────
+// Gibt für einen computed-Metric die synthetische Zeitreihe zurück.
+// Aktuell: BMI aus Gewicht + Größe.
+function computedMetricHistory(pid, key) {
+  if (key === 'bmi') {
+    const weights = metricHistory(pid, 'weight');
+    const heights = metricHistory(pid, 'height');
+    if (!weights.length || !heights.length) return [];
+    const allDates = [...new Set([...weights.map(d=>d.date),...heights.map(d=>d.date)])].sort();
+    function lastBefore(series, date) { const f=series.filter(d=>d.date<=date); return f.length?f[f.length-1].value:null; }
+    const points = [];
+    for (const date of allDates) {
+      const w = lastBefore(weights, date), h = lastBefore(heights, date);
+      if (w && h && h > 0) { const hm=h/100; points.push({ date, value: parseFloat((w/(hm*hm)).toFixed(1)) }); }
+    }
+    return points;
+  }
+
+  if (key === 'whr') {
+    const waists = metricHistory(pid, 'waist_circumference');
+    const hips   = metricHistory(pid, 'hip_circumference');
+    if (!waists.length || !hips.length) return [];
+    const allDates = [...new Set([...waists.map(d=>d.date),...hips.map(d=>d.date)])].sort();
+    function lastBefore(series, date) { const f=series.filter(d=>d.date<=date); return f.length?f[f.length-1].value:null; }
+    const points = [];
+    for (const date of allDates) {
+      const w = lastBefore(waists, date), h = lastBefore(hips, date);
+      if (w && h && h > 0) { points.push({ date, value: parseFloat((w/h).toFixed(2)) }); }
+    }
+    return points;
+  }
+
+  return [];
+}
+
+// ── Einheitlicher Zugangspunkt für Metric-History ─
+// Leitet computed-Metriken an computedMetricHistory weiter.
+function metricHistoryResolved(pid, key) {
+  const def = metricDef(key);
+  if (def?.computed) return computedMetricHistory(pid, key);
+  return metricHistory(pid, key);
+}
+
+// ── Normalbereich für eine Person ermitteln ───
+// Wählt die spezifischste passende Regel:
+// Geschlecht+Alter > nur Alter > nur Geschlecht > catch-all
+function resolveNormalRange(metricKey, personId) {
+  const def = metricDef(metricKey);
+  if (!def?.normalRanges?.length) return null;
+  const person = getPersonList().find(p => p.id === personId);
+  if (!person) return null;
+  const age = getAge(person.birthday);
+
+  // Spezifizitäts-Score: gender(+2) + minAge(+1) + maxAge(+1)
+  function specificity(r) {
+    const a = r.appliesTo || {};
+    return (a.gender ? 2 : 0) + (a.minAge != null ? 1 : 0) + (a.maxAge != null ? 1 : 0);
+  }
+  function matches(r) {
+    const a = r.appliesTo || {};
+    if (a.gender  && a.gender !== person.gender) return false;
+    if (a.minAge != null && age < a.minAge)      return false;
+    if (a.maxAge != null && age > a.maxAge)      return false;
+    return true;
+  }
+  const candidates = def.normalRanges.filter(matches);
+  if (!candidates.length) return null;
+  candidates.sort((a,b) => specificity(b) - specificity(a));
+  return candidates[0];
+}
+
+
+// ═══════════════════════════════════════════════
+// CHECKUPS — aus DATA.checkups
+// ═══════════════════════════════════════════════
+
+function saveCheckups(checkups) {
+  DATA.checkups = checkups;
+  markUnsaved();
+}
+
+// ── Zielwerte: DATA.targets = { "personId__metricKey": number } ──────────
+function getTargets() { return DATA.targets || {}; }
+function getTarget(pid, key) { return getTargets()[`${pid}__${key}`] ?? null; }
+function setTarget(pid, key, value) {
+  if (!DATA.targets) DATA.targets = {};
+  if (value === null || value === '' || isNaN(value)) {
+    delete DATA.targets[`${pid}__${key}`];
+  } else {
+    DATA.targets[`${pid}__${key}`] = parseFloat(value);
+  }
+  markUnsaved();
+}

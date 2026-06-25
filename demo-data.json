@@ -1,0 +1,927 @@
+{
+  "version": "2.0",
+  "createdAt": "2026-06-22T10:00:00",
+  "isDemo": true,
+
+  "customMetrics": [
+    {
+      "key": "custom_iron",
+      "label": "Eisen (Serum)",
+      "unit": "µg/dL",
+      "group": "Blutbild",
+      "graphable": true
+    },
+    {
+      "key": "custom_uric_acid",
+      "label": "Harnsäure",
+      "unit": "mg/dL",
+      "group": "Blutbild",
+      "graphable": true
+    }
+  ],
+
+  "targets": {
+    "person_1__weight": 78,
+    "person_1__blood_pressure_sys": 120,
+    "person_1__blood_pressure_dia": 80,
+    "person_2__weight": 65,
+    "person_2__tsh": 2.0
+  },
+
+  "healthImports": {
+    "person_1": {
+      "weight:2025-06-14": true,
+      "weight:2025-09-10": true,
+      "weight:2025-11-03": true,
+      "weight:2026-01-08": true,
+      "weight:2026-04-14": true,
+      "pulse:2025-06-14": true,
+      "pulse:2025-09-10": true,
+      "pulse:2025-11-03": true,
+      "blood_pressure_sys:2025-06-14": true,
+      "blood_pressure_dia:2025-06-14": true
+    }
+  },
+
+  "persons": [
+    {
+      "id": "person_1",
+      "name": "Max Mustermann",
+      "birthday": "1985-03-14",
+      "gender": "male",
+      "bloodType": "A+",
+      "conditions": [
+        {
+          "name": "Bluthochdruck",
+          "since": "2019",
+          "notes": "Medikamentös eingestellt, gut kontrolliert"
+        },
+        {
+          "name": "Heuschnupfen",
+          "since": "2005",
+          "notes": "Saisonal, April–Juni"
+        }
+      ],
+      "familyHistory": [
+        {
+          "condition": "Herzinfarkt",
+          "relation": "Vater",
+          "notes": "Mit 58 Jahren"
+        },
+        {
+          "condition": "Diabetes Typ 2",
+          "relation": "Großmutter",
+          "notes": "Mütterlicherseits"
+        },
+        {
+          "condition": "Darmkrebs",
+          "relation": "Onkel",
+          "notes": "Väterlicherseits, daher Darmspiegelung ab 40"
+        }
+      ],
+      "medications": [
+        {
+          "name": "Ramipril",
+          "dosage": "5 mg täglich, morgens",
+          "since": "2019",
+          "notes": "Blutdrucksenker, gut verträglich"
+        },
+        {
+          "name": "Cetirizin",
+          "dosage": "10 mg bei Bedarf",
+          "since": "2005",
+          "notes": "Gegen Heuschnupfen, saisonal April–Juni"
+        }
+      ],
+      "vaccinations": [
+        {
+          "name": "Tetanus / Diphtherie / Pertussis",
+          "date": "2021-04-15",
+          "nextDue": "2031",
+          "notes": "Boostrix"
+        },
+        {
+          "name": "Influenza",
+          "date": "2025-10-18",
+          "nextDue": "2026-10",
+          "notes": "Jährliche Grippeimpfung"
+        },
+        {
+          "name": "COVID-19",
+          "date": "2023-09-05",
+          "nextDue": "",
+          "notes": "Bivalenter Booster"
+        },
+        {
+          "name": "FSME",
+          "date": "2023-03-12",
+          "nextDue": "2026-03",
+          "notes": "Auffrischung, Freizeit im Wald"
+        }
+      ],
+      "allergies": [
+        {
+          "name": "Birken- und Gräserpollen",
+          "severity": "Moderat",
+          "notes": "Rhinitis, Konjunktivitis"
+        },
+        {
+          "name": "Hausstaub",
+          "severity": "Leicht",
+          "notes": "Gelegentliches Niesen"
+        }
+      ]
+    },
+    {
+      "id": "person_2",
+      "name": "Maria Mustermann",
+      "birthday": "1987-07-22",
+      "gender": "female",
+      "bloodType": "0+",
+      "conditions": [
+        {
+          "name": "Hashimoto-Thyreoiditis",
+          "since": "2015",
+          "notes": "L-Thyroxin 75µg täglich, TSH zuletzt stabil"
+        }
+      ],
+      "familyHistory": [
+        {
+          "condition": "Brustkrebs",
+          "relation": "Mutter",
+          "notes": "Mit 52 Jahren, daher jährliche Mammographie empfohlen"
+        },
+        {
+          "condition": "Osteoporose",
+          "relation": "Großmutter",
+          "notes": "Mütterlicherseits, Vitamin D Supplementierung"
+        }
+      ],
+      "medications": [
+        {
+          "name": "L-Thyroxin",
+          "dosage": "75 µg täglich, nüchtern",
+          "since": "2015",
+          "notes": "Schilddrüsenhormone, 30 Min. vor dem Frühstück"
+        },
+        {
+          "name": "Vitamin D3",
+          "dosage": "2000 IE täglich",
+          "since": "2021",
+          "notes": "Substitution bei Mangel, mit Mahlzeit"
+        }
+      ],
+      "vaccinations": [
+        {
+          "name": "Tetanus / Diphtherie",
+          "date": "2020-06-10",
+          "nextDue": "2030",
+          "notes": "Auffrischung"
+        },
+        {
+          "name": "HPV (Gardasil 9)",
+          "date": "2018-03-22",
+          "nextDue": "",
+          "notes": "3-Dosen-Serie abgeschlossen"
+        },
+        {
+          "name": "COVID-19",
+          "date": "2023-11-12",
+          "nextDue": "",
+          "notes": "Bivalenter Booster"
+        },
+        {
+          "name": "Influenza",
+          "date": "2025-10-22",
+          "nextDue": "2026-10",
+          "notes": "Jährliche Grippeimpfung"
+        }
+      ],
+      "allergies": [
+        {
+          "name": "Latex",
+          "severity": "Moderat",
+          "notes": "Kontaktdermatitis, Handschuhe bei Arzt angeben"
+        },
+        {
+          "name": "Penicillin",
+          "severity": "Schwer",
+          "notes": "Urtikaria in der Vorgeschichte, Alternativen verwenden"
+        }
+      ]
+    },
+    {
+      "id": "person_3",
+      "name": "Leon Mustermann",
+      "birthday": "2015-11-05",
+      "gender": "male",
+      "bloodType": null,
+      "conditions": [],
+      "familyHistory": [],
+      "medications": [],
+      "vaccinations": [
+        {
+          "name": "MMR (Masern / Mumps / Röteln)",
+          "date": "2016-05-10",
+          "nextDue": "",
+          "notes": "2. Dosis 2017"
+        },
+        {
+          "name": "Varizellen",
+          "date": "2016-07-20",
+          "nextDue": "",
+          "notes": "2. Dosis 2018"
+        },
+        {
+          "name": "FSME",
+          "date": "2022-04-08",
+          "nextDue": "2025-04",
+          "notes": "Grundimmunisierung komplett, Auffrischung überfällig"
+        },
+        {
+          "name": "Influenza",
+          "date": "2025-10-15",
+          "nextDue": "2026-10",
+          "notes": ""
+        },
+        {
+          "name": "Hepatitis A+B",
+          "date": "2023-06-01",
+          "nextDue": "",
+          "notes": "Vor Ferienreise, 3-Dosen-Serie"
+        }
+      ],
+      "allergies": [
+        {
+          "name": "Erdnüsse",
+          "severity": "Schwer",
+          "notes": "Anaphylaxie-Risiko, Epipen immer dabei"
+        },
+        {
+          "name": "Baumnüsse",
+          "severity": "Moderat",
+          "notes": "Kreuzallergie zu Erdnüssen, Vorsicht geboten"
+        }
+      ]
+    },
+    {
+      "id": "person_4",
+      "name": "Sophie Mustermann",
+      "birthday": "2018-04-30",
+      "gender": "female",
+      "bloodType": null,
+      "conditions": [
+        {
+          "name": "Laktoseintoleranz",
+          "since": "2021",
+          "notes": "Laktasepräparat bei Bedarf, laktosefreie Produkte bevorzugen"
+        }
+      ],
+      "familyHistory": [],
+      "medications": [
+        {
+          "name": "Laktase-Tabletten",
+          "dosage": "1 Tablette vor Milchprodukten",
+          "since": "2021",
+          "notes": "Bei Bedarf, z.B. beim Essen außer Haus"
+        }
+      ],
+      "vaccinations": [
+        {
+          "name": "MMR (Masern / Mumps / Röteln)",
+          "date": "2019-06-12",
+          "nextDue": "",
+          "notes": "2. Dosis 2020"
+        },
+        {
+          "name": "Varizellen",
+          "date": "2019-08-01",
+          "nextDue": "",
+          "notes": "2. Dosis 2020"
+        },
+        {
+          "name": "FSME",
+          "date": "2023-05-10",
+          "nextDue": "2026-05",
+          "notes": "Grundimmunisierung komplett, Auffrischung fällig"
+        },
+        {
+          "name": "Influenza",
+          "date": "2025-10-16",
+          "nextDue": "2026-10",
+          "notes": ""
+        }
+      ],
+      "allergies": [
+        {
+          "name": "Laktose",
+          "severity": "Leicht–Moderat",
+          "notes": "Verdauungsbeschwerden, kein anaphylaktisches Risiko"
+        },
+        {
+          "name": "Katzenhaar",
+          "severity": "Leicht",
+          "notes": "Rhinitis bei längerem Kontakt"
+        }
+      ]
+    }
+  ],
+
+  "entries": [
+    {
+      "id": "entry_d1",
+      "personId": "person_1",
+      "entryType": "doctor",
+      "date": "2024-03-20",
+      "doctor": "Dr. Huber, Hausarzt",
+      "reason": "Jahres-Check-up",
+      "diagnosis": "Blutdruck grenzwertig, Gewicht erhöht",
+      "checkupId": "general_physician",
+      "metrics": {
+        "weight": 86.0,
+        "height": 181,
+        "blood_pressure_sys": 145,
+        "blood_pressure_dia": 92,
+        "pulse": 76,
+        "cholesterol_total": 220,
+        "cholesterol_hdl": 48,
+        "cholesterol_ldl": 142,
+        "glucose": 99,
+        "custom_uric_acid": 7.2
+      },
+      "notes": "Blutdruckmedikation begonnen. Empfehlung: Gewichtsreduktion, weniger Salz.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d2",
+      "personId": "person_1",
+      "entryType": "doctor",
+      "date": "2024-09-15",
+      "doctor": "Dr. Huber, Hausarzt",
+      "reason": "Blutdruckkontrolle",
+      "diagnosis": "Blutdruck deutlich besser, Medikation beibehalten",
+      "checkupId": "blood_pressure",
+      "metrics": {
+        "weight": 84.5,
+        "blood_pressure_sys": 138,
+        "blood_pressure_dia": 88,
+        "pulse": 72,
+        "cholesterol_total": 210,
+        "custom_uric_acid": 6.8
+      },
+      "notes": "Gewichtsabnahme sichtbar.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d3",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2024-12-01",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 83.0,
+        "blood_pressure_sys": 134,
+        "blood_pressure_dia": 85,
+        "pulse": 70
+      },
+      "notes": "Morgens nüchtern gemessen",
+      "attachment": null
+    },
+    {
+      "id": "entry_d4",
+      "personId": "person_1",
+      "entryType": "doctor",
+      "date": "2025-03-18",
+      "doctor": "Dr. Huber, Hausarzt",
+      "reason": "Jahres-Check-up",
+      "diagnosis": "Deutliche Besserung aller Werte",
+      "checkupId": "general_physician",
+      "metrics": {
+        "weight": 82.0,
+        "height": 181,
+        "blood_pressure_sys": 128,
+        "blood_pressure_dia": 82,
+        "pulse": 68,
+        "cholesterol_total": 195,
+        "cholesterol_hdl": 54,
+        "cholesterol_ldl": 120,
+        "glucose": 92,
+        "custom_iron": 95,
+        "custom_uric_acid": 6.4
+      },
+      "notes": "Gewichtsabnahme von 4 kg zeigt Wirkung. Alle Blutbild-Werte im Normbereich.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d5",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2025-06-14",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 81.8,
+        "blood_pressure_sys": 126,
+        "blood_pressure_dia": 81,
+        "pulse": 67
+      },
+      "notes": "Importiert aus Apple Health",
+      "attachment": null
+    },
+    {
+      "id": "entry_d6",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2025-09-10",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 81.0,
+        "blood_pressure_sys": 125,
+        "blood_pressure_dia": 80,
+        "pulse": 65
+      },
+      "notes": "Importiert aus Apple Health",
+      "attachment": null
+    },
+    {
+      "id": "entry_d7",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2025-11-03",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 80.8,
+        "blood_pressure_sys": 122,
+        "blood_pressure_dia": 79,
+        "pulse": 64
+      },
+      "notes": "Importiert aus Apple Health",
+      "attachment": null
+    },
+    {
+      "id": "entry_d8",
+      "personId": "person_1",
+      "entryType": "doctor",
+      "date": "2026-01-12",
+      "doctor": "Dr. Schneider, Zahnarzt",
+      "reason": "Routinekontrolle",
+      "diagnosis": "Kein Befund, Zähne in gutem Zustand",
+      "checkupId": "dentist",
+      "metrics": {},
+      "notes": "Professionelle Reinigung durchgeführt. Nächster Termin in 6 Monaten.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d9",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2026-01-08",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 80.5,
+        "blood_pressure_sys": 123,
+        "blood_pressure_dia": 78
+      },
+      "notes": "Importiert aus Apple Health",
+      "attachment": null
+    },
+    {
+      "id": "entry_d10",
+      "personId": "person_1",
+      "entryType": "doctor",
+      "date": "2026-03-22",
+      "doctor": "Dr. Huber, Hausarzt",
+      "reason": "Jahres-Check-up",
+      "diagnosis": "Alle Werte stabil, Blutdruck optimal",
+      "checkupId": "general_physician",
+      "metrics": {
+        "weight": 80.5,
+        "height": 181,
+        "blood_pressure_sys": 124,
+        "blood_pressure_dia": 78,
+        "pulse": 66,
+        "cholesterol_total": 188,
+        "cholesterol_hdl": 56,
+        "cholesterol_ldl": 112,
+        "glucose": 90,
+        "custom_iron": 102,
+        "custom_uric_acid": 6.1
+      },
+      "notes": "Sehr zufrieden mit der Entwicklung. Zielgewicht fast erreicht.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d11",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2026-04-14",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 80.2,
+        "blood_pressure_sys": 121,
+        "blood_pressure_dia": 77
+      },
+      "notes": "Importiert aus Apple Health",
+      "attachment": null
+    },
+    {
+      "id": "entry_d12",
+      "personId": "person_1",
+      "entryType": "self",
+      "date": "2026-06-10",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 79.8,
+        "blood_pressure_sys": 120,
+        "blood_pressure_dia": 76,
+        "pulse": 63
+      },
+      "notes": "Morgens gemessen",
+      "attachment": null
+    },
+    {
+      "id": "entry_d13",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2024-08-14",
+      "doctor": "Dr. Berger, Internistin",
+      "reason": "TSH-Kontrolle Hashimoto",
+      "diagnosis": "TSH leicht erhöht, Dosis anpassen",
+      "checkupId": "",
+      "metrics": {
+        "tsh": 3.8,
+        "weight": 68.0,
+        "hemoglobin": 13.2,
+        "ferritin": 28,
+        "vitamin_d": 22
+      },
+      "notes": "L-Thyroxin-Dosis auf 75µg erhöht. Vitamin-D-Mangel festgestellt, Substitution begonnen.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d14",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2025-02-20",
+      "doctor": "Dr. Berger, Internistin",
+      "reason": "TSH-Kontrolle",
+      "diagnosis": "TSH normalisiert, Vitamin D besser",
+      "checkupId": "",
+      "metrics": {
+        "tsh": 2.1,
+        "weight": 67.0,
+        "hemoglobin": 13.6,
+        "ferritin": 35,
+        "cholesterol_total": 192,
+        "vitamin_d": 38
+      },
+      "notes": "Dosis passt jetzt. Vitamin D Wert verbessert durch Substitution.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d15",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2025-05-30",
+      "doctor": "Dr. Wagner, Gynäkologin",
+      "reason": "Jährliche Vorsorge",
+      "diagnosis": "Befund unauffällig",
+      "checkupId": "gynecology",
+      "metrics": {},
+      "notes": "Mammographie empfohlen aufgrund Familienanamnese. Termin vereinbaren.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d16",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2025-09-08",
+      "doctor": "Dr. Schneider, Zahnarzt",
+      "reason": "Routinekontrolle",
+      "diagnosis": "Kleine Karies an Zahn 36",
+      "checkupId": "dentist",
+      "metrics": {},
+      "notes": "Füllung gelegt. Nächste Kontrolle in 6 Monaten.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d17",
+      "personId": "person_2",
+      "entryType": "self",
+      "date": "2025-11-15",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 66.5,
+        "temperature": 36.8
+      },
+      "notes": "Leichte Erkältung, Temperatur gemessen",
+      "attachment": null
+    },
+    {
+      "id": "entry_d18",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2026-02-14",
+      "doctor": "Dr. Berger, Internistin",
+      "reason": "TSH-Kontrolle & Jahreskontrolle",
+      "diagnosis": "Alle Werte im Normbereich",
+      "checkupId": "",
+      "metrics": {
+        "tsh": 1.9,
+        "weight": 66.0,
+        "hemoglobin": 13.8,
+        "ferritin": 42,
+        "cholesterol_total": 187,
+        "cholesterol_hdl": 62,
+        "cholesterol_ldl": 108,
+        "vitamin_d": 44
+      },
+      "notes": "Jahreskontrolle erfolgreich. Vitamin D im guten Bereich. Dosis beibehalten.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d19",
+      "personId": "person_2",
+      "entryType": "doctor",
+      "date": "2026-05-28",
+      "doctor": "Dr. Wagner, Gynäkologin",
+      "reason": "Jährliche Vorsorge",
+      "diagnosis": "Befund unauffällig, Mammographie unauffällig",
+      "checkupId": "gynecology",
+      "metrics": {},
+      "notes": "Mammographie durchgeführt und ausgewertet, kein Befund. Nächste Vorsorge in einem Jahr.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d20",
+      "personId": "person_3",
+      "entryType": "doctor",
+      "date": "2025-04-20",
+      "doctor": "Dr. Müller, Kinderarzt",
+      "reason": "U-Untersuchung",
+      "diagnosis": "Altersgerecht entwickelt, aktiv und gesund",
+      "checkupId": "pediatric_checkup",
+      "metrics": {
+        "weight": 22.0,
+        "height": 116
+      },
+      "notes": "Erdnuss-Allergie dokumentiert, Epipen-Verschreibung erneuert.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d21",
+      "personId": "person_3",
+      "entryType": "self",
+      "date": "2025-10-03",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 23.0,
+        "temperature": 38.6
+      },
+      "notes": "Fieber bei Erkältung",
+      "attachment": null
+    },
+    {
+      "id": "entry_d22",
+      "personId": "person_3",
+      "entryType": "doctor",
+      "date": "2026-04-25",
+      "doctor": "Dr. Müller, Kinderarzt",
+      "reason": "U-Untersuchung",
+      "diagnosis": "Gesund, gut entwickelt",
+      "checkupId": "pediatric_checkup",
+      "metrics": {
+        "weight": 24.5,
+        "height": 119
+      },
+      "notes": "Sehtest empfohlen. FSME-Auffrischung besprechen.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d23",
+      "personId": "person_4",
+      "entryType": "doctor",
+      "date": "2025-06-12",
+      "doctor": "Dr. Müller, Kinderarzt",
+      "reason": "U-Untersuchung",
+      "diagnosis": "Gut entwickelt, altersgerecht",
+      "checkupId": "pediatric_checkup",
+      "metrics": {
+        "weight": 17.0,
+        "height": 105
+      },
+      "notes": "Laktoseintoleranz stabil. Ernährungshinweise gegeben.",
+      "attachment": null
+    },
+    {
+      "id": "entry_d24",
+      "personId": "person_4",
+      "entryType": "self",
+      "date": "2026-02-08",
+      "doctor": "",
+      "reason": "",
+      "diagnosis": "",
+      "checkupId": "",
+      "metrics": {
+        "weight": 17.8,
+        "temperature": 39.1
+      },
+      "notes": "Hohes Fieber, Grippe",
+      "attachment": null
+    },
+    {
+      "id": "entry_d25",
+      "personId": "person_4",
+      "entryType": "doctor",
+      "date": "2026-05-10",
+      "doctor": "Dr. Müller, Kinderarzt",
+      "reason": "U-Untersuchung",
+      "diagnosis": "Gut entwickelt, Wachstum im Normbereich",
+      "checkupId": "pediatric_checkup",
+      "metrics": {
+        "weight": 18.0,
+        "height": 108
+      },
+      "notes": "Laktoseintoleranz besprochen. FSME-Auffrischung geplant.",
+      "attachment": null
+    },
+    { "id": "entry_z01", "personId": "person_2", "entryType": "self", "date": "2026-04-01", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.4 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z02", "personId": "person_2", "entryType": "self", "date": "2026-04-02", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z03", "personId": "person_2", "entryType": "self", "date": "2026-04-03", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z04", "personId": "person_2", "entryType": "self", "date": "2026-04-04", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.4, "cervical_mucus": "trocken" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z05", "personId": "person_2", "entryType": "self", "date": "2026-04-05", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "trocken" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z06", "personId": "person_2", "entryType": "self", "date": "2026-04-08", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.3, "cervical_mucus": "cremig" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z07", "personId": "person_2", "entryType": "self", "date": "2026-04-11", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "wässrig", "lh_value": 8.2 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z08", "personId": "person_2", "entryType": "self", "date": "2026-04-13", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.5, "cervical_mucus": "glasig-dehnbar (spinnbar)", "lh_value": 42.1 }, "customMetrics": {}, "notes": "LH-Peak, Eisprung wahrscheinlich heute", "attachment": null },
+    { "id": "entry_z09", "personId": "person_2", "entryType": "self", "date": "2026-04-14", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.8, "cervical_mucus": "cremig", "lh_value": 18.3 }, "customMetrics": {}, "notes": "Temperaturanstieg nach Eisprung", "attachment": null },
+    { "id": "entry_z10", "personId": "person_2", "entryType": "self", "date": "2026-04-15", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.9 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z11", "personId": "person_2", "entryType": "self", "date": "2026-04-18", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 37.0 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z12", "personId": "person_2", "entryType": "self", "date": "2026-04-22", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.9 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z13", "personId": "person_2", "entryType": "self", "date": "2026-04-28", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.6 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z14", "personId": "person_2", "entryType": "self", "date": "2026-04-30", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z15", "personId": "person_2", "entryType": "self", "date": "2026-05-01", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z16", "personId": "person_2", "entryType": "self", "date": "2026-05-02", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z17", "personId": "person_2", "entryType": "self", "date": "2026-05-03", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.4 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z18", "personId": "person_2", "entryType": "self", "date": "2026-05-04", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "trocken" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z19", "personId": "person_2", "entryType": "self", "date": "2026-05-08", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.3, "cervical_mucus": "cremig" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z20", "personId": "person_2", "entryType": "self", "date": "2026-05-12", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "wässrig", "lh_value": 7.8 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z21", "personId": "person_2", "entryType": "self", "date": "2026-05-14", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.5, "cervical_mucus": "glasig-dehnbar (spinnbar)", "lh_value": 38.7 }, "customMetrics": {}, "notes": "LH-Peak", "attachment": null },
+    { "id": "entry_z22", "personId": "person_2", "entryType": "self", "date": "2026-05-15", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.85 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z23", "personId": "person_2", "entryType": "self", "date": "2026-05-20", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 37.0 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z24", "personId": "person_2", "entryType": "self", "date": "2026-05-28", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.5 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z25", "personId": "person_2", "entryType": "self", "date": "2026-06-01", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z26", "personId": "person_2", "entryType": "self", "date": "2026-06-02", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.3 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z27", "personId": "person_2", "entryType": "self", "date": "2026-06-03", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.4 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z28", "personId": "person_2", "entryType": "self", "date": "2026-06-04", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "ja",  "basal_temp": 36.4 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z29", "personId": "person_2", "entryType": "self", "date": "2026-06-08", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "trocken" }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z30", "personId": "person_2", "entryType": "self", "date": "2026-06-12", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.4, "cervical_mucus": "wässrig", "lh_value": 9.1 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z31", "personId": "person_2", "entryType": "self", "date": "2026-06-15", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.5, "cervical_mucus": "glasig-dehnbar (spinnbar)", "lh_value": 44.2 }, "customMetrics": {}, "notes": "LH-Peak", "attachment": null },
+    { "id": "entry_z32", "personId": "person_2", "entryType": "self", "date": "2026-06-16", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 36.9, "lh_value": 15.1 }, "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_z33", "personId": "person_2", "entryType": "self", "date": "2026-06-20", "doctor": "", "reason": "", "diagnosis": "", "checkupId": "", "metrics": { "menstruation": "nein", "basal_temp": 37.1 }, "customMetrics": {}, "notes": "", "attachment": null },
+
+    { "id": "entry_f01", "personId": "person_1", "entryType": "self", "date": "2024-03-20",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 98, "hip_circumference": 104, "chest_circumference": 106, "upper_arm": 36, "thigh": 58, "calf": 39, "body_fat": 24.5, "resting_pulse": 72, "oxygen_saturation": 97 },
+      "customMetrics": {}, "notes": "Erstmessung — Sport wieder aufgenommen", "attachment": null },
+    { "id": "entry_f02", "personId": "person_1", "entryType": "self", "date": "2024-09-15",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 95, "hip_circumference": 103, "chest_circumference": 105, "upper_arm": 37, "thigh": 59, "calf": 39, "body_fat": 22.8, "resting_pulse": 69, "oxygen_saturation": 98, "hrv": 38 },
+      "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_f03", "personId": "person_1", "entryType": "self", "date": "2025-03-18",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 91, "hip_circumference": 102, "chest_circumference": 104, "upper_arm": 38, "thigh": 60, "calf": 40, "body_fat": 20.1, "resting_pulse": 65, "oxygen_saturation": 98, "hrv": 44 },
+      "customMetrics": {}, "notes": "Körperzusammensetzung verbessert", "attachment": null },
+    { "id": "entry_f04", "personId": "person_1", "entryType": "self", "date": "2025-09-10",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 88, "hip_circumference": 101, "chest_circumference": 104, "upper_arm": 39, "thigh": 61, "calf": 40, "body_fat": 18.8, "resting_pulse": 63, "hrv": 51 },
+      "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_f05", "personId": "person_1", "entryType": "self", "date": "2026-03-22",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 85, "hip_circumference": 100, "chest_circumference": 103, "upper_arm": 40, "thigh": 62, "calf": 40, "body_fat": 17.5, "resting_pulse": 60, "oxygen_saturation": 99, "hrv": 58, "respiratory_rate": 14 },
+      "customMetrics": {}, "notes": "Beste Werte bisher — Kraft- und Ausdauertraining kombiniert", "attachment": null },
+    { "id": "entry_f06", "personId": "person_1", "entryType": "self", "date": "2026-06-10",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 84, "hip_circumference": 100, "body_fat": 17.2, "resting_pulse": 59, "hrv": 61, "respiratory_rate": 13 },
+      "customMetrics": {}, "notes": "", "attachment": null },
+
+    { "id": "entry_f07", "personId": "person_2", "entryType": "self", "date": "2024-08-14",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 72, "hip_circumference": 96, "body_fat": 28.5, "resting_pulse": 68, "oxygen_saturation": 98 },
+      "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_f08", "personId": "person_2", "entryType": "self", "date": "2025-02-20",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 70, "hip_circumference": 94, "body_fat": 27.1, "resting_pulse": 65, "oxygen_saturation": 98, "hrv": 45 },
+      "customMetrics": {}, "notes": "", "attachment": null },
+    { "id": "entry_f09", "personId": "person_2", "entryType": "self", "date": "2026-02-14",
+      "doctor": "", "reason": "", "diagnosis": "", "checkupId": "",
+      "metrics": { "waist_circumference": 68, "hip_circumference": 93, "body_fat": 25.8, "resting_pulse": 63, "oxygen_saturation": 99, "hrv": 52, "respiratory_rate": 14 },
+      "customMetrics": {}, "notes": "", "attachment": null }
+  ],
+
+  "checkups": [
+    {
+      "id": "dentist",
+      "name": "Zahnarzt Kontrolle",
+      "intervalMonths": 6,
+      "description": "Regelmäßige Zahnkontrolle und professionelle Reinigung",
+      "phone": "+43 1 512 34 56",
+      "url": "https://zahnarztpraxis-schneider.at/termin",
+      "appliesTo": {
+        "minAge": 3
+      }
+    },
+    {
+      "id": "general_physician",
+      "name": "Hausarzt Check-up",
+      "intervalMonths": 12,
+      "description": "Allgemeiner Gesundheitscheck, Blutdruck, Laborwerte",
+      "phone": "+43 1 876 54 32",
+      "url": "https://ordination-huber.at",
+      "appliesTo": {
+        "minAge": 18
+      }
+    },
+    {
+      "id": "eye_check",
+      "name": "Augenarzt Kontrolle",
+      "intervalMonths": 24,
+      "description": "Sehtest und Augenhintergrundkontrolle",
+      "phone": "+43 1 234 56 78",
+      "url": "https://augenarzt-wien.at/online-termin",
+      "appliesTo": {
+        "minAge": 40
+      }
+    },
+    {
+      "id": "gynecology",
+      "name": "Gynäkologie Vorsorge",
+      "intervalMonths": 12,
+      "description": "Jährliche Vorsorgeuntersuchung inkl. Abstrich",
+      "phone": "+43 1 345 67 89",
+      "url": "https://dr-wagner-gynaekologie.at",
+      "appliesTo": {
+        "gender": "female",
+        "minAge": 18
+      }
+    },
+    {
+      "id": "pediatric_checkup",
+      "name": "Kinderarzt Vorsorge",
+      "intervalMonths": 12,
+      "description": "Jährliche Kindervorsorge, Impfkontrolle, Entwicklungscheck",
+      "phone": "+43 1 456 78 90",
+      "url": "https://kinderarzt-mueller.at",
+      "appliesTo": {
+        "maxAge": 17
+      }
+    },
+    {
+      "id": "blood_pressure",
+      "name": "Blutdruckmessung",
+      "intervalMonths": 6,
+      "description": "Regelmäßige Blutdruckkontrolle beim Hausarzt",
+      "phone": "+43 1 876 54 32",
+      "url": "https://ordination-huber.at",
+      "appliesTo": {
+        "minAge": 30
+      }
+    },
+    {
+      "id": "colonoscopy",
+      "name": "Darmspiegelung",
+      "intervalMonths": 120,
+      "description": "Darmkrebsvorsorge alle 10 Jahre, ab 40 aufgrund Familiengeschichte",
+      "phone": "+43 1 567 89 01",
+      "url": "https://gastro-wien.at/vorsorge",
+      "appliesTo": {
+        "minAge": 40
+      }
+    }
+  ]
+}

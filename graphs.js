@@ -1,0 +1,657 @@
+/* ═══════════════════════════════════════════════
+   Familien-Gesundheitsakte — graphs.js
+   ───────────────────────────────────────────────
+   Diagramme-Tab: Messwert-Auswahl, SVG-Liniendiagramm, Animation,
+      Tooltip, Messwert-Tabelle, Normbereich-Karte.
+
+   Teil eines klassischen Multi-Script-Setups (kein ES-Modul):
+   alle Dateien teilen denselben globalen Scope. Reihenfolge der
+   <script>-Tags siehe index.html.
+   ═══════════════════════════════════════════════ */
+'use strict';
+
+// ═══════════════════════════════════════════════
+// GRAPH-TAB
+// ═══════════════════════════════════════════════
+const GRAPH_RANGES = [
+  { key:'1m',  label:'1 M'   },
+  { key:'6m',  label:'6 M'   },
+  { key:'1y',  label:'1 J'   },
+  { key:'5y',  label:'5 J'   },
+  { key:'all', label:'Gesamt'},
+];
+
+// Für Boolean-Kalender: Startmonat-Offset (0 = aktuelle 3 Monate, -1 = 3 Monate zurück, …)
+let _boolCalOffset = 0;
+
+// Metriken die als Kalender (statt Liniendiagramm) angezeigt werden:
+// boolean ODER select mit genau zwei Optionen (ja/nein-Charakter).
+function isCalendarMetric(def) {
+  if (!def) return false;
+  if (def.type === 'boolean') return true;
+  if (def.type === 'select' && def.graphable) return true;
+  return false;
+}
+
+function renderGraphs() {
+  const panel = document.getElementById('panel-graphs');
+
+  // Alle graphable-Metriken anzeigen — auch ohne ausreichend Daten
+  const graphableMetrics = allMetrics().filter(m => m.graphable);
+
+  // activeGraphKey: ungültig → bevorzugt erste Metrik mit ≥2 Punkten, sonst einfach erste
+  const keyStillValid = activeGraphKey && graphableMetrics.find(m => m.key === activeGraphKey);
+  if (!keyStillValid) {
+    const withData = graphableMetrics.find(m =>
+      metricHistoryResolved(currentPersonId, m.key).length >= 2
+    );
+    activeGraphKey = (withData ?? graphableMetrics[0])?.key ?? null;
+  }
+
+  if (graphableMetrics.length === 0) {
+    panel.innerHTML = `<div class="empty-state" style="padding-top:4rem">
+      <div class="empty-icon">📈</div>
+      <p>Keine Messwerte konfiguriert.</p>
+    </div>`;
+    return;
+  }
+
+  const groups = [...new Set(graphableMetrics.map(m=>m.group))];
+  const metricButtons = groups.map(g=>`
+    <div class="metric-group-label">${esc(g)}</div>
+    <div class="metric-btn-row">
+      ${graphableMetrics.filter(m=>m.group===g).map(m=>{
+        const pts = metricHistoryResolved(currentPersonId, m.key).length;
+        const dim  = pts < 2 ? ' metric-btn--no-data' : '';
+        return `<button class="metric-btn${activeGraphKey===m.key?' active':''}${dim}"
+                data-key="${m.key}"
+                onclick="selectGraphMetric('${m.key}')">${esc(m.label)}</button>`;
+      }).join('')}
+    </div>`).join('');
+
+  const rangeBtns = GRAPH_RANGES.map(r=>`
+    <button class="range-btn${activeGraphRange===r.key?' active':''}"
+            data-range="${r.key}"
+            onclick="selectGraphRange('${r.key}')">${r.label}</button>`).join('');
+
+  panel.innerHTML = `
+    <div class="card collapsible-card" id="metric-selector-card" onclick="toggleMetricSelector()">
+      <button class="card-header collapsible-header" aria-expanded="false" aria-controls="metric-selector" tabindex="-1">
+        <span class="card-title">Messwert auswählen</span>
+        <svg class="collapse-chevron" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div id="metric-selector" class="collapsible-body" hidden onclick="event.stopPropagation()">${metricButtons}</div>
+    </div>
+    <div id="norm-range-card" style="display:none;margin-top:1rem"></div>
+    <div class="card" style="margin-top:1rem">
+      <div class="graph-card-header">
+        <div class="graph-card-title" id="graph-header">
+          <span class="card-title"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" id="graph-target-btn"
+                  onclick="openTargetDialog(activeGraphKey)"
+                  title="Zielwert setzen / ändern">◎ Zielwert</button>
+          <div class="range-btn-group" id="range-btn-group">${rangeBtns}</div>
+          <div class="bcal-nav" id="bcal-nav" style="display:none">
+            <button class="btn btn-ghost btn-sm bcal-nav-btn" onclick="shiftBoolCal(-1)" aria-label="Zurück">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+            </button>
+            <span class="bcal-nav-label" id="bcal-nav-label"></span>
+            <button class="btn btn-ghost btn-sm bcal-nav-btn" id="bcal-nav-fwd" onclick="shiftBoolCal(1)" aria-label="Vor">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="graph-area" style="margin-top:.75rem"></div>
+    </div>`;
+
+  // Navigator vs. Range-Buttons für den initialen Key korrekt setzen,
+  // da drawGraph() direkt aufgerufen wird (nicht über selectGraphMetric).
+  const initDef  = metricDef(activeGraphKey);
+  const initBool = isCalendarMetric(initDef);
+  const rgEl  = document.getElementById('range-btn-group');
+  const navEl = document.getElementById('bcal-nav');
+  if (rgEl)  rgEl.style.display  = initBool ? 'none' : '';
+  if (navEl) navEl.style.display = initBool ? '' : 'none';
+
+  drawGraph(activeGraphKey);
+}
+
+function toggleMetricSelector() {
+  const body = document.getElementById('metric-selector');
+  const btn  = document.querySelector('.collapsible-header');
+  if (!body || !btn) return;
+  const isOpen = !body.hidden;
+  body.hidden = isOpen;
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  btn.classList.toggle('is-open', !isOpen);
+}
+
+function selectGraphRange(range) {
+  activeGraphRange = range;
+  // Update button states without full re-render — match by data-range, nicht textContent
+  document.querySelectorAll('.range-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.range===range);
+  });
+  drawGraph(activeGraphKey);
+}
+
+function selectGraphMetric(key) {
+  activeGraphKey = key;
+  document.querySelectorAll('.metric-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.key===key);
+  });
+  const def = metricDef(key);
+  const isBool = isCalendarMetric(def);
+  // Range-Buttons vs. Kalender-Navigator
+  document.getElementById('range-btn-group').style.display = isBool ? 'none' : '';
+  const nav = document.getElementById('bcal-nav');
+  if (nav) nav.style.display = isBool ? '' : 'none';
+  if (isBool) _boolCalOffset = 0;  // beim Wechsel auf Boolean immer aktuelle Monate
+  drawGraph(key);
+}
+
+// ── Filter data by selected time range ───────
+function filterByRange(data) {
+  if (activeGraphRange === 'all') return data;
+  const now = new Date();
+  const cutoff = new Date(now);
+  if      (activeGraphRange === '1m') cutoff.setMonth(now.getMonth() - 1);
+  else if (activeGraphRange === '6m') cutoff.setMonth(now.getMonth() - 6);
+  else if (activeGraphRange === '1y') cutoff.setFullYear(now.getFullYear() - 1);
+  else if (activeGraphRange === '5y') cutoff.setFullYear(now.getFullYear() - 5);
+  return data.filter(d => new Date(d.date + 'T00:00:00') >= cutoff);
+}
+
+function drawGraph(key) {
+  const def      = metricDef(key);
+  const allData  = metricHistoryResolved(currentPersonId, key);
+  const data     = filterByRange(allData);
+  const hdr      = document.getElementById('graph-header');
+  const area     = document.getElementById('graph-area');
+  if (!hdr || !area) return;
+
+  hdr.innerHTML = `<span class="card-title">${esc(def?.label ?? key)}</span>
+    ${def?.unit?`<span style="font-size:.8125rem;color:var(--text-muted)">${esc(def.unit)}</span>`:''}`;
+  updateGraphTargetBtn(key);
+
+  // Normalbereich-Infokarte (wird ÜBER dem Graph eingefügt)
+  const normCardEl = document.getElementById('norm-range-card');
+  const normRangeForCard = resolveNormalRange(key, currentPersonId);
+  if (normRangeForCard && normCardEl) {
+    const person = getPersonList().find(p => p.id === currentPersonId);
+    const age = getAge(person?.birthday || '');
+    const nMin = normRangeForCard.min === 0 ? '—' : normRangeForCard.min;
+    const nMax = normRangeForCard.max >= 900 ? '—' : normRangeForCard.max;
+    const nUnit = def?.unit ? ' '+esc(def.unit) : '';
+    normCardEl.style.display = '';
+    normCardEl.innerHTML = `
+      <div class="norm-range-card">
+        <div class="norm-range-header">
+          <span class="norm-range-dot"></span>
+          <span class="norm-range-title">Referenzbereich: ${esc(normRangeForCard.label)}</span>
+        </div>
+        <div class="norm-range-values">
+          <span>Min: <strong>${nMin}${nUnit}</strong></span>
+          <span style="margin:0 .5rem">·</span>
+          <span>Max: <strong>${nMax}${nUnit}</strong></span>
+          ${normRangeForCard.appliesTo?.gender || normRangeForCard.appliesTo?.minAge != null
+            ? `<span style="margin:0 .5rem">·</span><span style="color:var(--text-muted)">Gilt für: ${[
+                normRangeForCard.appliesTo.gender === 'male' ? 'Männer' : normRangeForCard.appliesTo.gender === 'female' ? 'Frauen' : null,
+                normRangeForCard.appliesTo.minAge != null ? 'ab ' + normRangeForCard.appliesTo.minAge + ' J.' : null,
+                normRangeForCard.appliesTo.maxAge != null ? 'bis ' + normRangeForCard.appliesTo.maxAge + ' J.' : null,
+              ].filter(Boolean).join(', ')}</span>`
+            : ''}
+        </div>
+        <p class="norm-range-hint">Die Grenzwerte sind im Diagramm als grüne gestrichelte Linien eingezeichnet.</p>
+        ${normRangeForCard.source
+          ? `<a href="${normRangeForCard.source}" target="_blank" rel="noopener" class="norm-range-source">${
+               (() => { const l = sourceLabelForUrl(normRangeForCard.source); return l ? 'Quelle: ' + l : 'Quelle'; })()
+             } ↗</a>`
+          : ''}
+      </div>`;
+  } else if (normCardEl) {
+    normCardEl.style.display = 'none';
+  }
+
+  if (data.length < 2) {
+    const reason = allData.length === 0
+      ? 'Noch keine Messwerte erfasst.'
+      : data.length === 0
+        ? 'Keine Messwerte im gewählten Zeitraum.'
+        : 'Mindestens 2 Messpunkte für einen Graphen nötig.';
+    area.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📈</div><p>${reason}</p>
+    </div>`;
+    return;
+  }
+
+  // ── Kalender-Metriken (boolean oder select+graphable): Monatskalender-Ansicht ──
+  if (isCalendarMetric(def)) {
+    drawBooleanGraph(key, def, allData, area);
+    return;
+  }
+  // Taller viewBox → chart grows vertically on mobile (SVG scales with width:100%)
+  const W=680, H=260, PAD={top:20,right:20,bottom:48,left:52};
+  const iW = W - PAD.left - PAD.right;
+  const iH = H - PAD.top  - PAD.bottom;
+
+  const vals = data.map(d=>d.value);
+  const dataMin = Math.min(...vals);
+  const dataMax = Math.max(...vals);
+
+  // Normalbereich für diese Person ermitteln
+  const normRange = resolveNormalRange(key, currentPersonId);
+  const normMin   = normRange ? normRange.min : null;
+  const normMax   = normRange ? normRange.max : null;
+
+  // Target value for this person + metric
+  const targetVal = getTarget(currentPersonId, key);
+
+  // Y-Range: mindestens normMin*0.9 bis normMax*1.1, immer aber alle Datenpunkte + target sichtbar
+  let minV, maxV;
+  if (normMin !== null && normMax !== null) {
+    const nLo = normMin * 0.9;
+    const nHi = normMax * 1.1;
+    minV = Math.min(dataMin, nLo);
+    maxV = Math.max(dataMax, nHi);
+  } else {
+    minV = dataMin;
+    maxV = dataMax;
+  }
+  if (targetVal !== null) {
+    minV = Math.min(minV, targetVal * 0.98);
+    maxV = Math.max(maxV, targetVal * 1.02);
+  }
+  const rangeV = maxV - minV || 1;
+
+  // Datumsstempel für X-Achse
+  const dates = data.map(d=>new Date(d.date+'T00:00:00').getTime());
+  const minT  = Math.min(...dates);
+  const maxT  = Math.max(...dates);
+  const rangeT = maxT - minT || 1;
+
+  function xPos(t)  { return PAD.left + ((t-minT)/rangeT)*iW; }
+  function yPos(v)  { return PAD.top  + (1-(v-minV)/rangeV)*iH; }
+
+  // Punkte für Pfad
+  const pts = data.map(d=>({
+    x: xPos(new Date(d.date+'T00:00:00').getTime()),
+    y: yPos(d.value),
+    date: d.date,
+    value: d.value
+  }));
+
+  // ── Catmull-Rom → kubische Bézier ─────────────
+  // Jedes Segment P1→P2 bekommt Kontrollpunkte aus den Nachbarn P0 und P3.
+  // alpha=0.5 (centripetal) verhindert Overshoot und Schleifen.
+  // Einfacher linearer Pfad — M zum ersten Punkt, dann L zu jedem weiteren.
+  // Punkte liegen exakt auf der Linie, keine Versatz-Probleme.
+  function linearPath(points) {
+    if (points.length < 2) return '';
+    return `M${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`
+      + points.slice(1).map(p => ` L${p.x.toFixed(2)},${p.y.toFixed(2)}`).join('');
+  }
+
+  const linePath = linearPath(pts);
+  const areaPath = linePath
+    + ` L${pts[pts.length-1].x.toFixed(2)},${(PAD.top+iH).toFixed(2)}`
+    + ` L${pts[0].x.toFixed(2)},${(PAD.top+iH).toFixed(2)} Z`;
+
+  // Y-Achsen-Ticks — "nice" runde Zahlen
+  const yTicks = (() => {
+    const rawStep = rangeV / 4;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+    const normalized = rawStep / magnitude;
+    const niceStep = normalized <= 1 ? magnitude
+                   : normalized <= 2 ? 2 * magnitude
+                   : normalized <= 5 ? 5 * magnitude
+                   : 10 * magnitude;
+    const firstTick = Math.ceil(minV / niceStep) * niceStep;
+    const decimals = niceStep < 1 ? Math.max(0, -Math.floor(Math.log10(niceStep))) : 0;
+    const ticks = [];
+    for (let v = firstTick; v <= maxV + niceStep * 0.01; v = Math.round((v + niceStep) * 1e9) / 1e9) {
+      ticks.push({ v: v.toFixed(decimals), y: yPos(v) });
+      if (ticks.length >= 8) break;
+    }
+    return ticks;
+  })();
+
+  // X-Achsen-Ticks:
+  // - Immer: erster und letzter Punkt
+  // - Nur wenn ≥4 Datenpunkte und genug horizontaler Platz: bis zu 4 Zwischenticks
+  const xTickIndices = (() => {
+    const n = data.length;
+    if (n <= 1) return [0];
+    const indices = new Set([0, n-1]);
+    if (n >= 4) {
+      const slots = Math.min(4, n - 2);
+      for (let s = 1; s <= slots; s++) {
+        indices.add(Math.round(s * (n-1) / (slots+1)));
+      }
+    }
+    return [...indices].sort((a,b)=>a-b);
+  })();
+
+  // X-Ticks auf Mindestabstand filtern — verhindert Überlappung bei eng
+  // liegenden Datenpunkten. Erster und letzter Tick bleiben immer erhalten.
+  const MIN_TICK_PX = 48;
+  const xTicks = (() => {
+    const all = xTickIndices.map(i => ({
+      label:  fmtShort(data[i].date),
+      x:      xPos(new Date(data[i].date+'T00:00:00').getTime()),
+      isEdge: i === 0 || i === data.length - 1,
+    }));
+    const kept = [all[0]];
+    for (let i = 1; i < all.length - 1; i++) {
+      const prev = kept[kept.length - 1];
+      if (all[i].x - prev.x >= MIN_TICK_PX) kept.push(all[i]);
+    }
+    // Letzten immer hinzufügen, wenn er weit genug vom Vorletzten entfernt ist
+    if (all.length > 1) {
+      const last = all[all.length - 1];
+      if (last.x - kept[kept.length - 1].x >= MIN_TICK_PX / 2) kept.push(last);
+    }
+    return kept;
+  })();
+
+  // ── "Flat" start paths — alle Punkte auf der Baseline ────
+  // Selbe X-Positionen, aber Y immer auf PAD.top+iH (unterste Linie).
+  // Davon animieren wir zum echten Zielwert.
+  const ptsFlat = pts.map(p => ({ ...p, y: PAD.top + iH }));
+  const linePathFlat = linearPath(ptsFlat);
+  const areaPathFlat = linePathFlat
+    + ` L${ptsFlat[ptsFlat.length-1].x.toFixed(2)},${(PAD.top+iH).toFixed(2)}`
+    + ` L${ptsFlat[0].x.toFixed(2)},${(PAD.top+iH).toFixed(2)} Z`;
+
+  // Normalbereich-Band im SVG
+  const normBand = (normMin !== null && normMax !== null) ? (() => {
+    const yHi = yPos(normMax);
+    const yLo = yPos(normMin);
+    return `<line x1="${PAD.left}" y1="${yHi.toFixed(2)}" x2="${PAD.left+iW}" y2="${yHi.toFixed(2)}"
+              stroke="#059669" stroke-width="1.5" stroke-dasharray="4,4" opacity=".6"/>
+            <line x1="${PAD.left}" y1="${yLo.toFixed(2)}" x2="${PAD.left+iW}" y2="${yLo.toFixed(2)}"
+              stroke="#059669" stroke-width="1.5" stroke-dasharray="4,4" opacity=".6"/>`;
+  })() : '';
+
+  area.innerHTML = `
+    <div style="position:relative;overflow:visible">
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ggrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Zielwert-Linie -->
+        ${targetVal !== null ? (() => {
+          const ty = yPos(targetVal);
+          return `<line x1="${PAD.left}" y1="${ty.toFixed(2)}"
+                        x2="${PAD.left+iW}" y2="${ty.toFixed(2)}"
+                        stroke="var(--warning)" stroke-width="1.5"
+                        stroke-dasharray="6,3" opacity=".85"/>`;
+        })() : ''}
+        <!-- Grid lines -->
+        ${yTicks.map(t=>`<line x1="${PAD.left}" y1="${t.y}" x2="${PAD.left+iW}" y2="${t.y}"
+          stroke="var(--border)" stroke-width="1"/>`).join('')}
+        <!-- Normbereich-Linien (im Vordergrund, über Grid) -->
+        ${normBand}
+        <!-- Area fill — starts flat, animates to real shape -->
+        <path id="graph-area-path" d="${areaPathFlat}" fill="url(#ggrad)"/>
+        <!-- Line — starts flat, animates to real shape -->
+        <path id="graph-line-path" d="${linePathFlat}" fill="none" stroke="var(--accent)" stroke-width="2.5"
+          stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Y labels -->
+        ${yTicks.map(t=>`<text x="${PAD.left-10}" y="${t.y+4}" text-anchor="end"
+          class="graph-label graph-label-y" fill="var(--text-muted)" font-family="JetBrains Mono,monospace">${t.v}</text>`).join('')}
+        <!-- X labels (edge ticks always shown; middle ticks shown when space allows) -->
+        ${xTicks.map(t=>`<text x="${t.x}" y="${H-10}" text-anchor="middle"
+          class="graph-label ${t.isEdge ? 'xtick-edge' : 'xtick-mid'}" fill="var(--text-muted)" font-family="sans-serif">${t.label}</text>`).join('')}
+        <!-- Dots (on top, start at baseline) -->
+        ${pts.map((p,i)=>`
+          <circle class="graph-dot" id="gdot-${i}" data-index="${i}"
+            cx="${p.x}" cy="${PAD.top+iH}" r="4"
+            data-date="${fmtDate(p.date)}" data-val="${p.value}"
+            onmouseenter="showGraphTip(event,this)" onmouseleave="hideGraphTip()"/>`).join('')}
+      </svg>
+      <div id="graph-tip" class="graph-tip" style="display:none"></div>
+    </div>
+    <div style="margin-top:1rem">
+      ${renderMetricTable(data, def)}
+    </div>`;
+
+  // ── WAAPI-Animation: flat → real ─────────────
+  // Wir interpolieren die Pfad-d-Attribute manuell über requestAnimationFrame,
+  // weil SVG path `d` kein CSS-animierbares Property ist.
+  animateGraph({
+    linePath, linePathFlat, areaPath, areaPathFlat,
+    pts, ptsFlat, duration: 420,
+    easing: t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t   // ease-in-out quad
+  });
+}
+
+// ── Graph-Animation ───────────────────────────
+function animateGraph({ linePath, linePathFlat, areaPath, areaPathFlat, pts, ptsFlat, duration, easing }) {
+  const lineEl = document.getElementById('graph-line-path');
+  const areaEl = document.getElementById('graph-area-path');
+  if (!lineEl || !areaEl) return;
+
+  // Interpoliere zwei SVG-Pfad-Strings punktweise.
+  // Beide müssen die gleiche Anzahl numerischer Werte haben — das ist
+  // garantiert weil flat und real aus denselben pts-Arrays stammen.
+  function extractNumbers(pathStr) {
+    return pathStr.match(/-?[0-9]+\.?[0-9]*/g).map(Number);
+  }
+  function interpolatePath(fromStr, toStr, progress) {
+    const from = extractNumbers(fromStr);
+    const to   = extractNumbers(toStr);
+    // Ersetze alle Zahlen im from-String mit interpolierten Werten
+    let i = 0;
+    return fromStr.replace(/-?[0-9]+\.?[0-9]*/g, () => {
+      const val = from[i] + (to[i] - from[i]) * progress;
+      i++;
+      return val.toFixed(2);
+    });
+  }
+
+  const start = performance.now();
+
+  function frame(now) {
+    const raw      = Math.min((now - start) / duration, 1);
+    const progress = easing(raw);
+
+    lineEl.setAttribute('d', interpolatePath(linePathFlat, linePath, progress));
+    areaEl.setAttribute('d', interpolatePath(areaPathFlat, areaPath, progress));
+
+    // Animate each dot's cy
+    pts.forEach((p, i) => {
+      const dot = document.getElementById(`gdot-${i}`);
+      if (dot) {
+        const cy = ptsFlat[i].y + (p.y - ptsFlat[i].y) * progress;
+        dot.setAttribute('cy', cy.toFixed(2));
+      }
+    });
+
+    if (raw < 1) requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function showGraphTip(event, el) {
+  const tip = document.getElementById('graph-tip');
+  if (!tip) return;
+  tip.textContent = `${el.dataset.date}: ${el.dataset.val} ${metricDef(activeGraphKey)?.unit??''}`;
+  // Position before revealing so offsetWidth is correct
+  tip.style.visibility = 'hidden';
+  tip.style.opacity    = '0';
+  tip.style.display    = 'block';
+  const svgEl  = el.closest('svg');
+  const svgRect = svgEl.getBoundingClientRect();
+  const scaleX  = svgRect.width / 680;
+  const scaleY  = svgRect.height / 260;
+  const cx = parseFloat(el.getAttribute('cx')) * scaleX;
+  const cy = parseFloat(el.getAttribute('cy')) * scaleY;
+  tip.style.left = (cx - tip.offsetWidth / 2) + 'px';
+  tip.style.top  = (cy - 36) + 'px';
+  // Trigger fade-in after positioning
+  tip.style.visibility = '';
+  requestAnimationFrame(() => { tip.style.opacity = '1'; });
+
+  // Tabellen-Row mithervorheben
+  highlightRow(el.dataset.index);
+}
+
+function hideGraphTip() {
+  const t = document.getElementById('graph-tip');
+  if (!t) return;
+  t.style.opacity = '0';
+  // Hide after transition completes
+  t.addEventListener('transitionend', () => { t.style.display = 'none'; }, { once: true });
+
+  // Tabellen-Highlight entfernen
+  clearRowHighlight();
+}
+
+// ── Bidirektionales Cross-Highlight ──────────────
+// dotIndex: Position im chronologisch sortierten data-Array (0 = ältester Punkt).
+// Die Tabelle ist umgekehrt (data.reverse()), daher:
+//   row-data-index = data.length - 1 - dotIndex
+// Wir speichern den dot-Index direkt im Row-Attribut (siehe renderMetricTable),
+// sodass kein Umrechnen hier nötig ist.
+function highlightRow(dotIndex) {
+  clearRowHighlight();
+  const row = document.querySelector(`.metric-table tr[data-dot="${dotIndex}"]`);
+  if (row) row.classList.add('row--highlight');
+}
+
+function clearRowHighlight() {
+  document.querySelector('.metric-table tr.row--highlight')?.classList.remove('row--highlight');
+}
+
+function highlightDot(dotIndex) {
+  clearDotHighlight();
+  const dot = document.getElementById(`gdot-${dotIndex}`);
+  if (dot) dot.classList.add('graph-dot--highlight');
+}
+
+function clearDotHighlight() {
+  document.querySelector('.graph-dot--highlight')?.classList.remove('graph-dot--highlight');
+}
+
+// Monats-Navigator für Boolean-Kalender
+function shiftBoolCal(dir) {
+  _boolCalOffset += dir * 3;
+  // Vorwärts nicht über heute hinaus
+  if (_boolCalOffset > 0) _boolCalOffset = 0;
+  drawGraph(activeGraphKey);
+}
+
+// ── Boolean-Graph: Kalenderraster ──────────────
+function drawBooleanGraph(key, def, allData, area) {
+  // Anzeigebereich: 3 Monate ab Offset (0 = aktuelle 3 Monate)
+  const now = new Date();
+  // Startmonat berechnen
+  const startMonth = new Date(now.getFullYear(), now.getMonth() + _boolCalOffset - 2, 1);
+  const endMonth   = new Date(now.getFullYear(), now.getMonth() + _boolCalOffset, 1);
+
+  // Navigator-Label und Vorwärts-Button
+  const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const labelEl = document.getElementById('bcal-nav-label');
+  const fwdBtn  = document.getElementById('bcal-nav-fwd');
+  if (labelEl) {
+    const sLabel = `${monthNames[startMonth.getMonth()]} ${startMonth.getFullYear()}`;
+    const eLabel = `${monthNames[endMonth.getMonth()]} ${endMonth.getFullYear()}`;
+    labelEl.textContent = sLabel === eLabel ? sLabel : `${sLabel} – ${eLabel}`;
+  }
+  if (fwdBtn) fwdBtn.disabled = _boolCalOffset >= 0;
+
+  // Nur Daten im angezeigten Bereich
+  const endOfEndMonth = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
+  const isoStart = startMonth.toISOString().slice(0,10);
+  const isoEnd   = endOfEndMonth.toISOString().slice(0,10);
+  const data = allData.filter(d => d.date >= isoStart && d.date <= isoEnd);
+
+  // Aktive Tage: bei boolean = true, bei select = erster Optionswert ("ja")
+  const activeValue = def?.type === 'select'
+    ? (def.options?.[0] ?? 'ja')
+    : true;
+  const trueSet = new Set(
+    allData.filter(d => d.value === activeValue || d.value === true || d.value === 'true').map(d => d.date)
+  );
+  // Tage mit einem anderen Wert (erfasst, aber nicht aktiv) — z.B. "nein"
+  const trackedSet = new Set(allData.map(d => d.date));
+
+  // Monate rendern
+  const months = [];
+  const cur = new Date(startMonth);
+  while (cur <= endMonth) {
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth() + 1);
+  }
+
+  const DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const monthNamesLong = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+  const calendars = months.map(m => {
+    const year = m.getFullYear(), month = m.getMonth();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+    const cells = [];
+    for (let i = 0; i < firstDow; i++) cells.push('<span class="bcal-empty"></span>');
+    for (let d = 1; d <= daysInMonth; d++) {
+      const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const active  = trueSet.has(iso);
+      const tracked = !active && trackedSet.has(iso);
+      const cls = active ? ' bcal-day--active' : tracked ? ' bcal-day--tracked' : '';
+      cells.push(`<span class="bcal-day${cls}" title="${iso}">${d}</span>`);
+    }
+    return `<div class="bcal-month">
+      <div class="bcal-month-title">${monthNamesLong[month]} ${year}</div>
+      <div class="bcal-grid">
+        ${DAYS.map(d=>`<span class="bcal-hdr">${d}</span>`).join('')}
+        ${cells.join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  const noData = data.length === 0
+    ? '<p style="color:var(--text-muted);font-size:.875rem;margin-top:.5rem">Keine Einträge im angezeigten Zeitraum.</p>'
+    : '';
+
+  area.innerHTML = `<div class="bcal-wrap">${calendars}</div>${noData}`;
+}
+
+function renderMetricTable(data, def) {
+  if (!data.length) return '';
+  const sorted = [...data].reverse();
+  const norm = resolveNormalRange(def?.key ?? '', currentPersonId);
+  const rows = sorted.map((d, sortedIdx) => {
+    // sortedIdx 0 = neuester Eintrag = data[data.length-1] = letzter Dot
+    const dotIndex = data.length - 1 - sortedIdx;
+    let indicator = '';
+    if (norm) {
+      const effectiveMin = norm.min === 0 ? -Infinity : norm.min;
+      const effectiveMax = norm.max >= 900 ?  Infinity : norm.max;
+      if (d.value > effectiveMax)
+        indicator = ' <span class="range-arrow range-arrow-high" title="Über dem Normwert">↑</span>';
+      else if (d.value < effectiveMin)
+        indicator = ' <span class="range-arrow range-arrow-low"  title="Unter dem Normwert">↓</span>';
+    }
+    return `<tr data-dot="${dotIndex}"
+               onmouseenter="highlightDot(${dotIndex})"
+               onmouseleave="clearDotHighlight()">
+      <td>${fmtDate(d.date)}</td>
+      <td style="font-family:var(--font-mono);text-align:right">${indicator}${d.value}</td>
+      <td style="color:var(--text-muted)">${esc(def?.unit??'')}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="metric-table">
+    <thead><tr><th>Datum</th><th style="text-align:right">Wert</th><th>Einheit</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
