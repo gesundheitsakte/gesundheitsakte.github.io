@@ -442,7 +442,7 @@ small { font-size: .8125rem; color: var(--text-muted); }
   background: var(--accent-light); border-radius: var(--radius-sm);
   font-size: .875rem; color: var(--text-primary);
 }
-.badge-ok      { background: var(--success-light); color: #065f46; }
+.badge-ok      { background: var(--success-light); color: var(--success); }
 .badge-warning { background: var(--warning-light); color: #92400e; }
 .badge-overdue { background: var(--danger-light);  color: #9f1239; }
 .badge-na      { background: var(--bg-subtle);     color: var(--text-muted); }
