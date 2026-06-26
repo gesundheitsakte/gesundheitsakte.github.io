@@ -929,12 +929,13 @@ function renderOnboarding() {
       <div class="ob-encrypt-box">
         <label class="ob-encrypt-label">
           <input type="checkbox" id="ob-encrypt" class="boolean-check" onchange="toggleEncryptHint()">
-          <span>Datenbank verschlüsseln (empfohlen bei sensiblen Daten)</span>
+          <span>Datenbank verschlüsseln</span>
         </label>
         <p class="ob-encrypt-hint" id="ob-encrypt-hint" style="display:none">
           Beim Exportieren wird die Datei mit einem Passwort verschlüsselt (AES-256).
           <strong>Wichtig:</strong> Ohne dieses Passwort sind die Daten unwiderruflich verloren —
-          es gibt keine Wiederherstellung. Bewahre es sicher auf.
+          es gibt keine Wiederherstellung. Bewahre es sicher auf.<br><br>
+	  Die Datenbank sollte verschlüsselt werden, wenn sie in der Cloud gespeichert werden soll.
         </p>
       </div>
 
