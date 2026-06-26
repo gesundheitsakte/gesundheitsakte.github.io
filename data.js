@@ -252,23 +252,14 @@ function generateAndPrint() {
         const pt = pts.find(p => p.date === date);
         return pt ? `<td class="rpt-val">${pt.value}</td>` : `<td class="rpt-empty">—</td>`;
       }).join('');
-      const trend = (() => {
-        if (pts.length < 2) return '';
-        const prev = pts[pts.length-2].value;
-        const last = pts[pts.length-1].value;
-        if (prev === 0) return '';
-        const pct = (last-prev)/Math.abs(prev)*100;
-        return pct > 2 ? ' ↗' : pct < -2 ? ' ↘' : ' →';
-      })();
       const norm = normLabel(m);
       return `<tr>
         <td class="rpt-metric">${esc(m.label)}${norm ? '<span class="rpt-norm"> '+esc(norm)+'</span>' : ''}</td>
         <td class="rpt-unit">${esc(m.unit||'')}</td>
         ${cells}
-        <td class="rpt-trend">${trend}</td>
       </tr>`;
     }).join('');
-    return `<tr class="rpt-group-hdr"><td colspan="${3+allDates.length}">${esc(g)}</td></tr>${rows}`;
+    return `<tr class="rpt-group-hdr"><td colspan="${2+allDates.length}">${esc(g)}</td></tr>${rows}`;
   }).join('');
 
   const dateHeaders = allDates.map(d => {
@@ -337,8 +328,7 @@ function generateAndPrint() {
   .rpt-unit   { color: #777; font-size: 8.5pt; text-align: left; white-space: nowrap; }
   .rpt-val    { text-align: center; font-variant-numeric: tabular-nums; font-weight: 500; }
   .rpt-empty  { text-align: center; color: #bbb; }
-  .rpt-trend  { text-align: center; color: #555; width: .8cm; }
-  .rpt-norm   { font-size: 7.5pt; color: #999; font-weight: 400; }
+.rpt-norm   { font-size: 7.5pt; color: #999; font-weight: 400; }
   .rpt-group-hdr td {
     font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
     color: #0891b2; background: #f0faff; padding: .15cm .2cm;
@@ -397,7 +387,6 @@ function generateAndPrint() {
         <th style="text-align:left">Messwert</th>
         <th style="text-align:left">Einheit</th>
         ${dateHeaders}
-        <th>Trend</th>
       </tr>
     </thead>
     <tbody>${metricsRows}</tbody>
