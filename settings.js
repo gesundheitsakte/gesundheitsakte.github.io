@@ -46,7 +46,7 @@ function renderSettings() {
       ? `alle ${c.intervalMonths/12} J.`
       : `alle ${c.intervalMonths} M.`;
     const applies = [
-      c.appliesTo?.gender === 'male' ? '♂' : c.appliesTo?.gender === 'female' ? '♀' : null,
+      c.appliesTo?.gender === 'male' ? 'männl.' : c.appliesTo?.gender === 'female' ? 'weibl.' : null,
       c.appliesTo?.minAge != null ? `ab ${c.appliesTo.minAge}` : null,
       c.appliesTo?.maxAge != null ? `bis ${c.appliesTo.maxAge}` : null,
     ].filter(Boolean).join(', ') || 'Alle';
