@@ -282,6 +282,15 @@ function generateAndPrint() {
   const familyList = (person.familyHistory||[]).map(f =>
     `<li>${esc(f.condition)}${f.relation?' ('+esc(f.relation)+')':''}</li>`).join('');
 
+  const medicationsList = (person.medications||[]).map(m =>
+    `<li>${esc(m.name)}${m.dosage?' — '+esc(m.dosage):''}${m.since?' (seit '+esc(m.since)+')':''}</li>`).join('');
+
+  const vaccinationsList = (person.vaccinations||[]).map(v =>
+    `<li>${esc(v.name)}${v.date?' ('+fmtDate(v.date)+')':''}${v.nextDue?' — Auffrischung: '+esc(v.nextDue):''}</li>`).join('');
+
+  const allergiesList = (person.allergies||[]).map(a =>
+    `<li>${esc(a.name)}${a.severity?' — '+esc(a.severity):''}</li>`).join('');
+
   const visitsHTML = doctorVisits.length ? doctorVisits.map(e => `
     <tr>
       <td>${fmtDate(e.date)}</td>
@@ -290,9 +299,8 @@ function generateAndPrint() {
     </tr>`).join('') : '<tr><td colspan="3" style="color:#888">Keine Arztbesuche im Zeitraum</td></tr>';
 
   const checkupHTML = checkupAlerts.length ? checkupAlerts.map(s => {
-    const icon = s.status==='overdue' ? '⚠' : '⏰';
-    return `<li>${icon} <strong>${esc(s.c.name)}</strong> — ${esc(s.label)}</li>`;
-  }).join('') : '<li style="color:#666">Alle Checkups aktuell ✓</li>';
+    return `<li><strong>${esc(s.c.name)}</strong> — ${esc(s.label)}</li>`;
+  }).join('') : '<li style="color:#666">Alle Checkups aktuell</li>';
 
   const rangeLabel = rangeVal === 0 ? 'Gesamter Zeitraum'
     : rangeVal <= 12 ? 'Letzte 12 Monate'
@@ -326,7 +334,7 @@ function generateAndPrint() {
        background: #f4f4f4; border-bottom: 1.5px solid #bbb; }
   td { padding: .12cm .2cm; border-bottom: 1px solid #eee; vertical-align: middle; }
   .rpt-metric { font-weight: 500; min-width: 3.5cm; }
-  .rpt-unit   { color: #777; font-size: 8.5pt; text-align: center; white-space: nowrap; }
+  .rpt-unit   { color: #777; font-size: 8.5pt; text-align: left; white-space: nowrap; }
   .rpt-val    { text-align: center; font-variant-numeric: tabular-nums; font-weight: 500; }
   .rpt-empty  { text-align: center; color: #bbb; }
   .rpt-trend  { text-align: center; color: #555; width: .8cm; }
@@ -352,7 +360,6 @@ function generateAndPrint() {
     Geb. ${fmtDate(person.birthday)} &nbsp;·&nbsp; ${getAge(person.birthday)} Jahre
     ${person.bloodType ? ' &nbsp;·&nbsp; Blutgruppe '+esc(person.bloodType) : ''}
     &nbsp;·&nbsp; ${rangeLabel}
-    &nbsp;·&nbsp; Erstellt: ${fmtDate(new Date().toISOString().slice(0,10))}
   </p>
 
   ${(conditionsList || familyList) ? `
@@ -367,13 +374,28 @@ function generateAndPrint() {
     </div>` : '<div></div>'}
   </div>` : ''}
 
+  ${(medicationsList || vaccinationsList || allergiesList) ? `
+  <div class="two-col">
+    ${medicationsList ? `<div>
+      <h2>Medikamente</h2>
+      <ul>${medicationsList}</ul>
+    </div>` : '<div></div>'}
+    ${vaccinationsList ? `<div>
+      <h2>Impfungen</h2>
+      <ul>${vaccinationsList}</ul>
+    </div>` : '<div></div>'}
+  </div>
+  ${allergiesList ? `
+  <h2>Allergien</h2>
+  <ul>${allergiesList}</ul>` : ''}` : ''}
+
   <h2>Messwerte — Zeitverlauf</h2>
   ${measuredMetrics.length ? `
   <table>
     <thead>
       <tr>
         <th style="text-align:left">Messwert</th>
-        <th>Einheit</th>
+        <th style="text-align:left">Einheit</th>
         ${dateHeaders}
         <th>Trend</th>
       </tr>
