@@ -882,6 +882,7 @@ function startOnboarding() {
 
 function renderOnboarding() {
   const ob = document.getElementById('onboarding');
+  const encryptChecked = document.getElementById('ob-encrypt')?.checked ?? false;
   const list = onboardingPersons.map((p, i) => `
     <div class="ob-person-chip">
       <span class="ob-chip-avatar" style="background:${AVATAR_COLORS[i % AVATAR_COLORS.length]}">${esc(initials(p.name))}</span>
@@ -945,6 +946,11 @@ function renderOnboarding() {
         </button>
       </div>
     </div>`;
+  const encryptEl = document.getElementById('ob-encrypt');
+  if (encryptEl) {
+    encryptEl.checked = encryptChecked;
+    toggleEncryptHint();
+  }
   document.getElementById('ob-name')?.focus();
 }
 
