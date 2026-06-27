@@ -500,7 +500,7 @@ function openTargetDialog(metricKey) {
           <label for="target-input">Zielwert${def?.unit ? ' ('+esc(def.unit)+')' : ''}</label>
           <input type="number" step="any" id="target-input"
                  value="${current ?? ''}"
-                 placeholder="Wert eingeben oder leer lassen zum Entfernen">
+                 placeholder="Leer lassen zum Entfernen">
         </div>
       </div>
       <div class="modal-footer">
