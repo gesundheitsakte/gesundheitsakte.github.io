@@ -744,6 +744,22 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .drag-handle:active { cursor: grabbing; }
 
+/* ── Person color picker ─────────────────────── */
+.person-color-picker { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+.person-color-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: transform .1s, box-shadow .1s;
+}
+.person-color-swatch:hover  { transform: scale(1.15); }
+.person-color-swatch.selected {
+  border-color: var(--bg);
+  outline: 2px solid var(--text-primary);
+  outline-offset: 1px;
+}
+
 /* ── Attributions ────────────────────────────── */
 .attribution-list { display: flex; flex-direction: column; gap: 0; }
 .attribution-item {
