@@ -50,8 +50,8 @@ function renderDashboard() {
         <h2>${esc(person.name)}</h2>
         <div class="person-hero-meta">
           <span class="meta-item">${fmtDate(person.birthday)} (${age} Jahre)</span>
-          ${person.bloodType ? `<span class="meta-item">${esc(person.bloodType)}</span>` : ''}
-          ${person.socialSecurityNumber ? `<span class="meta-item">SV-Nr. ${esc(person.socialSecurityNumber)}</span>` : ''}
+          ${person.bloodType ? `<span class="meta-item">Blut: ${esc(person.bloodType)}</span>` : ''}
+          ${person.socialSecurityNumber ? `<span class="meta-item">SV-Nr.: ${esc(person.socialSecurityNumber)}</span>` : ''}
         </div>
       </div>
     </div>
