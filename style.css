@@ -742,7 +742,7 @@ textarea { resize: vertical; min-height: 80px; }
   transition: opacity .15s;
 }
 .settings-person-row:last-child { border-bottom: none; }
-.settings-person-row.drag-over  { border-top: 2px solid var(--accent); margin-top: -1px; }
+.settings-person-row.drag-over  { background: var(--accent-light); box-shadow: var(--shadow-md); border-radius: var(--radius-md); }
 .settings-person-row.dragging   { opacity: .4; }
 .drag-handle {
   color: var(--text-muted);
