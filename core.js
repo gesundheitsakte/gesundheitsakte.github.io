@@ -24,8 +24,7 @@ let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert wer
                               // (Passwort liegt in crypto.js _sessionPassword)
 
 const AVATAR_COLORS = [
-  '#2C6E8F','#2A9D8F','#E9A23B','#F2785C',
-  '#1B3A5B','#7c3aed','#db2777','#65a30d',
+  '#1B3A5B','#2C6E8F','#2A9D8F','#E9A23B','#F2785C','#FBE6CC',
 ];
 
 
