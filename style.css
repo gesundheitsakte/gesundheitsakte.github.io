@@ -574,6 +574,8 @@ textarea { resize: vertical; min-height: 80px; }
 .settings-warning { color: var(--warning); font-size: .875rem; margin-bottom: .875rem; }
 .settings-body    { color: var(--text-secondary); font-size: .9375rem; line-height: 1.6; margin-bottom: .875rem; }
 .settings-intro   { margin: .75rem 0 .25rem; }
+.settings-intro a { color: var(--accent); text-decoration: none; }
+.settings-intro a:hover { text-decoration: underline; }
 .field-hint       { font-size: .875rem; color: var(--text-muted); margin-top: .75rem; }
 
 /* ── Metric picker (Eintrag-Formular) ────────── */
