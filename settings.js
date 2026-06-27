@@ -563,6 +563,7 @@ function savePersonModal(id, isEdit) {
   buildPersonSelector();
   // Keep same selection if editing, else select new person
   if (!isEdit) selectPerson(id);
+  else if (id === currentPersonId) applyPersonAccent();
   closePersonModal();
   renderSettings();
   showToast(isEdit?'Person aktualisiert ✓':'Person hinzugefügt ✓','success');

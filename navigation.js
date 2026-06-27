@@ -189,6 +189,7 @@ function selectPerson(id) {
   const label = document.getElementById('pd-label');
   if (label && p) label.textContent = p.name;
   renderPersonDropdown();
+  applyPersonAccent();
 
   const active = document.querySelector('.panel.active');
   if (active) renderPanel(active.id.replace('panel-',''));
@@ -394,6 +395,31 @@ function applyDark(dark, save) {
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) btn.innerHTML = dark ? SVG_SUN : SVG_MOON;
   if (save) localStorage.setItem('theme', dark ? 'dark' : 'light');
+  applyPersonAccent();
+}
+
+function applyPersonAccent() {
+  const person = getPersonList().find(p => p.id === currentPersonId);
+  const hex    = person ? personColor(person) : null;
+  const root   = document.documentElement;
+  if (!hex || hex.length < 7) {
+    root.style.removeProperty('--accent');
+    root.style.removeProperty('--accent-light');
+    return;
+  }
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const isDark = root.classList.contains('dark');
+  let accent = hex;
+  if (isDark) {
+    // Lighten toward white so the color stays visible on dark backgrounds
+    const lift = c => Math.min(255, Math.round(c + (255 - c) * 0.45));
+    const toHex = c => c.toString(16).padStart(2, '0');
+    accent = `#${toHex(lift(r))}${toHex(lift(g))}${toHex(lift(b))}`;
+  }
+  root.style.setProperty('--accent', accent);
+  root.style.setProperty('--accent-light', `rgba(${r},${g},${b},.12)`);
 }
 
 // ═══════════════════════════════════════════════
