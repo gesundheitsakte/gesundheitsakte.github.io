@@ -179,7 +179,7 @@ function startMergeFromLanding() {
 // base !== null → nur Datei B wird gebraucht (laufender Betrieb).
 function openMergePicker(base) {
   document.getElementById('merge-picker')?.remove();
-  _mergePick = { a: base ? { db: base, name: '(aktuell geladen)' } : null, b: null };
+  _mergePick = { a: base ? { db: base, name: '(aktuell geladen)', encrypted: isEncrypted, password: getSessionPassword() } : null, b: null };
 
   const slotA = base
     ? `<div class="merge-pick-slot is-fixed">
