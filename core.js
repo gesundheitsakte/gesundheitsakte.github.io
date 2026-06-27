@@ -158,6 +158,9 @@ function avatarColor(pid) {
   const i = getPersonList().findIndex(p=>p.id===pid);
   return AVATAR_COLORS[i % AVATAR_COLORS.length];
 }
+function personColor(p) {
+  return p.color || avatarColor(p.id);
+}
 function genId() { return 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 
 function checkupApplies(c, person) {
