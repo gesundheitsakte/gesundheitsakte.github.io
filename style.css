@@ -425,7 +425,10 @@ small { font-size: .8125rem; color: var(--text-muted); }
 }
 @media (hover: hover) {
   .health-metric-row:hover { background: var(--bg-subtle); }
-  .entry-edit-btn:hover { background: var(--accent-light); color: var(--accent); }
+  .entry-edit-btn:hover  { background: var(--accent-light); color: var(--accent); }
+  .card-edit-btn:hover   { background: var(--accent-light); color: var(--accent); }
+  .card-edit-btn { opacity: 0; }
+  .card:hover .card-edit-btn { opacity: 1; }
   .entry-delete-btn:hover { background: var(--danger-light); color: var(--danger); }
   .metric-toggle-btn:hover { border-color: var(--accent-mid); color: var(--text-primary); }
   .metric-btn--no-data:hover { opacity: .75; }
@@ -475,6 +478,13 @@ small { font-size: .8125rem; color: var(--text-muted); }
   color: var(--text-muted); font-size: .875rem;
   padding: .25rem .375rem; border-radius: var(--radius-sm);
   transition: background .15s, color .15s; margin-left: auto;
+}
+.card-edit-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: .875rem;
+  padding: .25rem .375rem; border-radius: var(--radius-sm);
+  transition: background .15s, color .15s, opacity .15s;
+  flex-shrink: 0;
 }
 
 .entry-delete-btn {

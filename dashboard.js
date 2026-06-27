@@ -129,11 +129,22 @@ function renderAllMetrics() {
     `<div class="empty-state"><div class="empty-icon">📊</div><p>Noch keine Messwerte erfasst.</p></div>`;
 }
 
+function openPersonEdit(pid) {
+  activateTab('settings');
+  const p = getPersonList().find(p => p.id === pid);
+  if (p) openPersonModal(p);
+}
+
+function cardEditBtn(pid) {
+  return `<button class="card-edit-btn" onclick="openPersonEdit('${escAttr(pid)}')" title="Person bearbeiten">✎</button>`;
+}
+
 function renderConditionsCard(person) {
   const conds = person.conditions || [];
   return `<div class="card">
     <div class="card-header">
       <span class="card-title">Chronische Leiden</span>
+      ${cardEditBtn(person.id)}
     </div>
     ${conds.length===0
       ? '<p style="color:var(--text-muted);font-size:.875rem">Keine eingetragen.</p>'
@@ -153,6 +164,7 @@ function renderFamilyHistoryCard(person) {
   return `<div class="card">
     <div class="card-header">
       <span class="card-title">Familiengeschichte</span>
+      ${cardEditBtn(person.id)}
     </div>
     ${fh.length===0
       ? '<p style="color:var(--text-muted);font-size:.875rem">Keine eingetragen.</p>'
@@ -200,7 +212,7 @@ function renderMedicationsCard(person) {
   const items = (person.medications || []);
   if (!items.length) return '';
   return `<div class="card">
-    <div class="card-header"><span class="card-title">Medikamente</span></div>
+    <div class="card-header"><span class="card-title">Medikamente</span>${cardEditBtn(person.id)}</div>
     ${items.map(m=>`<div class="condition-item">
       <div class="condition-name">${esc(m.name)}${m.dosage?' — '+esc(m.dosage):''}</div>
       <div class="condition-meta">${m.since?'seit '+esc(m.since):''}${m.notes?' · '+esc(m.notes):''}</div>
@@ -211,7 +223,7 @@ function renderVaccinationsCard(person) {
   const items = (person.vaccinations || []);
   if (!items.length) return '';
   return `<div class="card">
-    <div class="card-header"><span class="card-title">Impfungen</span></div>
+    <div class="card-header"><span class="card-title">Impfungen</span>${cardEditBtn(person.id)}</div>
     ${items.map(v=>`<div class="condition-item">
       <div class="condition-name">${esc(v.name)}</div>
       <div class="condition-meta">${v.date?fmtDate(v.date):''}${v.nextDue?' · Auffrischung: '+esc(v.nextDue):''}${v.notes?' · '+esc(v.notes):''}</div>
@@ -222,7 +234,7 @@ function renderAllergiesCard(person) {
   const items = (person.allergies || []);
   if (!items.length) return '';
   return `<div class="card">
-    <div class="card-header"><span class="card-title">Allergien</span></div>
+    <div class="card-header"><span class="card-title">Allergien</span>${cardEditBtn(person.id)}</div>
     ${items.map(a=>`<div class="condition-item">
       <div class="condition-name">${esc(a.name)}</div>
       <div class="condition-meta">${a.severity?esc(a.severity):''}${a.notes?' · '+esc(a.notes):''}</div>
