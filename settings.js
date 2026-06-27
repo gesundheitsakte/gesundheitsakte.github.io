@@ -120,6 +120,7 @@ function renderSettings() {
 
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
+      <p style="margin:.75rem 1rem .25rem">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
       <div class="attribution-list">
         <div class="attribution-item">
           <span class="attribution-name">Heroicons</span>
