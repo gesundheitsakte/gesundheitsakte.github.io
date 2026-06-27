@@ -51,6 +51,7 @@
       "gender": "male",
       "bloodType": "A+",
       "socialSecurityNumber": "1234 140385",
+      "color": "#2C6E8F",
       "conditions": [
         {
           "name": "Bluthochdruck",
@@ -140,6 +141,7 @@
       "gender": "female",
       "bloodType": "0+",
       "socialSecurityNumber": "5678 220787",
+      "color": "#2A9D8F",
       "conditions": [
         {
           "name": "Hashimoto-Thyreoiditis",
