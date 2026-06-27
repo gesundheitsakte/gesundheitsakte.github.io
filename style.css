@@ -194,6 +194,10 @@ small { font-size: .8125rem; color: var(--text-muted); }
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 1.25rem;
   box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s;
+}
+@media (hover: hover) {
+  .card:hover { box-shadow: var(--shadow-md); }
 }
 .card-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -266,9 +270,12 @@ small { font-size: .8125rem; color: var(--text-muted); }
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 1rem 1.25rem;
   box-shadow: var(--shadow-sm);
-  /* Label oben, Value+Sub unten — auch bei zweizeiligem Titel gleichmäßig ausgerichtet */
   display: flex; flex-direction: column;
   min-height: 5.5rem;
+  transition: box-shadow .15s, border-color .15s;
+}
+@media (hover: hover) {
+  .stat-tile:hover { box-shadow: var(--shadow-md); }
 }
 .stat-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: auto; padding-bottom: .5rem; overflow-wrap: break-word; hyphens: auto; }
 .stat-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; color: var(--text-primary); font-family: var(--font-mono); }
@@ -991,15 +998,9 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 /* ── Clickable stat tile ─────────────────────── */
-.stat-tile--clickable {
-  cursor: pointer;
-  transition: border-color .15s, box-shadow .15s;
-}
+.stat-tile--clickable { cursor: pointer; }
 @media (hover: hover) {
-  .stat-tile--clickable:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(8,145,178,.1);
-  }
+  .stat-tile--clickable:hover { border-color: var(--accent); }
 }
 
 /* ── Custom person dropdown ──────────────────── */
