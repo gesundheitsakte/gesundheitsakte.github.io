@@ -73,7 +73,7 @@ function renderSettings() {
         <span class="card-title">Personen</span>
         <button class="btn btn-primary btn-sm" onclick="openAddPerson()">+ Person hinzufügen</button>
       </div>
-      <div id="persons-list">${personRows || '<p style="color:var(--text-muted);font-size:.875rem">Keine Personen vorhanden.</p>'}</div>
+      <div id="persons-list">${personRows || '<p class="settings-empty">Keine Personen vorhanden.</p>'}</div>
     </div>
 
     <div class="card" style="margin-top:1rem">
@@ -81,21 +81,19 @@ function renderSettings() {
         <span class="card-title">Vorsorge-Checkups</span>
         <button class="btn btn-primary btn-sm" onclick="openEditCheckup(null)">+ Checkup hinzufügen</button>
       </div>
-      ${checkupRows || '<p style="color:var(--text-muted);font-size:.875rem">Keine Checkups definiert.</p>'}
+      ${checkupRows || '<p class="settings-empty">Keine Checkups definiert.</p>'}
     </div>
 
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Datenbank</span></div>
       ${isDemoMode
-        ? `<p style="color:var(--warning);font-size:.875rem;margin-bottom:.875rem">
-             Du bist im Demo-Modus. Lege eine eigene Datenbank an, um Daten dauerhaft zu speichern.
-           </p>`
+        ? `<p class="settings-warning">Du bist im Demo-Modus. Lege eine eigene Datenbank an, um Daten dauerhaft zu speichern.</p>`
         : ''}
       <div class="settings-action-grid">
         <button class="btn btn-primary settings-action-btn" onclick="exportData()">Datenbank exportieren</button>
         <button class="btn btn-ghost settings-action-btn" onclick="backToLanding()">Andere Datenbank laden</button>
       </div>
-      <p class="field-hint" style="margin-top:.75rem">
+      <p class="field-hint">
         Der Export erzeugt eine JSON-Datei mit Zeitstempel (z.B. health-data-2026-06-22_14-30-45.json),
         die du beim nächsten Mal wieder laden kannst.
       </p>
@@ -104,14 +102,14 @@ function renderSettings() {
 
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Apple Health</span></div>
-      <p style="color:var(--text-secondary);font-size:.9375rem;line-height:1.6;margin-bottom:.875rem">
+      <p class="settings-body">
         Importiere Messwerte (Gewicht, Blutdruck, Puls u.a.) aus einem Apple-Health-Export.
         Pro Tag wird der erste Wert übernommen; bereits importierte Tage werden übersprungen.
       </p>
       <div class="settings-action-grid">
         <button class="btn btn-primary settings-action-btn" onclick="triggerHealthImport()">Aus Apple Health importieren</button>
       </div>
-      <p class="field-hint" style="margin-top:.75rem">
+      <p class="field-hint">
         In der Health-App: Profil → „Alle Gesundheitsdaten exportieren". Die erzeugte
         export.zip hier hochladen — sie wird lokal im Browser entpackt und verarbeitet,
         nichts wird hochgeladen.
@@ -120,7 +118,7 @@ function renderSettings() {
 
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
-      <p style="margin:.75rem 1rem .25rem">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
+      <p class="settings-intro">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
       <div class="attribution-list">
         <div class="attribution-item">
           <span class="attribution-name">Heroicons</span>
