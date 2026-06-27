@@ -25,7 +25,7 @@ function renderSettings() {
 
   const personRows = getPersonList().map(p => {
     const age = getAge(p.birthday);
-    const color = avatarColor(p.id);
+    const color = personColor(p);
     const entryCnt = DATA.entries.filter(e => e.personId === p.id).length;
     return `<div class="settings-person-row" id="srow-${p.id}" draggable="true" data-person-id="${p.id}">
       <span class="drag-handle" title="Reihenfolge ändern">⠿</span>
@@ -364,6 +364,16 @@ function openPersonModal(person) {
             <label for="pm-svnr">Sozialversicherungsnummer</label>
             <input type="text" id="pm-svnr" value="${escAttr(p.socialSecurityNumber||'')}" placeholder="z.B. 1234 010190" inputmode="numeric">
           </div>
+          <div class="field-group full">
+            <label>Farbe</label>
+            <div class="person-color-picker" id="pm-color-picker">
+              ${AVATAR_COLORS.map(c => `
+                <button type="button" class="person-color-swatch${(p.color||avatarColor(p.id))===c?' selected':''}"
+                  style="background:${c}" data-color="${c}"
+                  onclick="selectPersonColor('${c}')" title="${c}"></button>`).join('')}
+            </div>
+            <input type="hidden" id="pm-color" value="${escAttr(p.color||avatarColor(p.id))}">
+          </div>
         </div>
         <div style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
@@ -468,6 +478,13 @@ function allergyRow(i, a={}) {
 function syncConditionRow(){}
 function syncFamilyRow(){}
 
+function selectPersonColor(color) {
+  document.getElementById('pm-color').value = color;
+  document.querySelectorAll('#pm-color-picker .person-color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.color === color);
+  });
+}
+
 function readConditions() {
   return [...document.querySelectorAll('#pm-conditions .inline-row')].map(row => ({
     name:  row.querySelector('[data-field="name"]')?.value.trim()  || '',
@@ -510,6 +527,7 @@ function savePersonModal(id, isEdit) {
   const gender   = document.getElementById('pm-gender')?.value;
   const blood    = document.getElementById('pm-blood')?.value;
   const svnr     = document.getElementById('pm-svnr')?.value.trim();
+  const color    = document.getElementById('pm-color')?.value || null;
 
   if (!name)     { showToast('Bitte einen Namen eingeben','error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben','error'); return; }
@@ -521,6 +539,7 @@ function savePersonModal(id, isEdit) {
     id, name, birthday, gender,
     bloodType: blood || null,
     socialSecurityNumber: svnr || null,
+    color: color || null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),

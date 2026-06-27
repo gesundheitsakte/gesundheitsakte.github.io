@@ -19,7 +19,7 @@ function renderDashboard() {
   if (!person) return;
 
   const age   = getAge(person.birthday);
-  const color = avatarColor(person.id);
+  const color = personColor(person);
 
   const myCheckups = getCheckups().filter(c=>checkupApplies(c,person));
   const statuses   = myCheckups.map(c=>({checkup:c,...checkupStatus(c,currentPersonId)}));
