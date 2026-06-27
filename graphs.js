@@ -459,7 +459,7 @@ function animateGraph({ linePath, linePathFlat, areaPath, areaPathFlat, pts, pts
   // Beide müssen die gleiche Anzahl numerischer Werte haben — das ist
   // garantiert weil flat und real aus denselben pts-Arrays stammen.
   function extractNumbers(pathStr) {
-    return pathStr.match(/-?[0-9]+\.?[0-9]*/g).map(Number);
+    return (pathStr.match(/-?[0-9]+\.?[0-9]*/g) ?? []).map(Number);
   }
   function interpolatePath(fromStr, toStr, progress) {
     const from = extractNumbers(fromStr);
