@@ -40,7 +40,8 @@ function renderGraphs() {
   const graphableMetrics = allMetrics().filter(m => m.graphable);
 
   // activeGraphKey: ungültig → bevorzugt erste Metrik mit ≥2 Punkten, sonst einfach erste
-  const keyStillValid = activeGraphKey && graphableMetrics.find(m => m.key === activeGraphKey);
+  // Non-graphable metrics (e.g. cervical_mucus) are also valid keys — they show table-only view.
+  const keyStillValid = activeGraphKey && allMetrics().find(m => m.key === activeGraphKey);
   if (!keyStillValid) {
     const withData = graphableMetrics.find(m =>
       metricHistoryResolved(currentPersonId, m.key).length >= 2
@@ -111,11 +112,12 @@ function renderGraphs() {
 
   // Navigator vs. Range-Buttons für den initialen Key korrekt setzen,
   // da drawGraph() direkt aufgerufen wird (nicht über selectGraphMetric).
-  const initDef  = metricDef(activeGraphKey);
-  const initBool = isCalendarMetric(initDef);
+  const initDef       = metricDef(activeGraphKey);
+  const initBool      = isCalendarMetric(initDef);
+  const initTableOnly = initDef && !initDef.graphable;
   const rgEl  = document.getElementById('range-btn-group');
   const navEl = document.getElementById('bcal-nav');
-  if (rgEl)  rgEl.style.display  = initBool ? 'none' : '';
+  if (rgEl)  rgEl.style.display  = (initBool || initTableOnly) ? 'none' : '';
   if (navEl) navEl.style.display = initBool ? '' : 'none';
 
   drawGraph(activeGraphKey);
@@ -146,9 +148,10 @@ function selectGraphMetric(key) {
     b.classList.toggle('active', b.dataset.key===key);
   });
   const def = metricDef(key);
-  const isBool = isCalendarMetric(def);
+  const isBool      = isCalendarMetric(def);
+  const isTableOnly = def && !def.graphable;
   // Range-Buttons vs. Kalender-Navigator
-  document.getElementById('range-btn-group').style.display = isBool ? 'none' : '';
+  document.getElementById('range-btn-group').style.display = (isBool || isTableOnly) ? 'none' : '';
   const nav = document.getElementById('bcal-nav');
   if (nav) nav.style.display = isBool ? '' : 'none';
   if (isBool) _boolCalOffset = 0;  // beim Wechsel auf Boolean immer aktuelle Monate
@@ -218,6 +221,14 @@ function drawGraph(key) {
     normCardEl.style.display = 'none';
   }
 
+  // ── Nicht-graphbare Metriken (z. B. Zervixschleim): nur Datentabelle ──
+  if (def && !def.graphable) {
+    area.innerHTML = allData.length
+      ? renderMetricTable(allData, def)
+      : '<div class="empty-state"><div class="empty-icon">📋</div><p>Noch keine Messwerte erfasst.</p></div>';
+    return;
+  }
+
   if (data.length < 2) {
     const reason = allData.length === 0
       ? 'Noch keine Messwerte erfasst.'
@@ -230,9 +241,11 @@ function drawGraph(key) {
     return;
   }
 
-  // ── Kalender-Metriken (boolean oder select+graphable): Monatskalender-Ansicht ──
+  // ── Kalender-Metriken (boolean oder select+graphable): Monatskalender + Datentabelle ──
   if (isCalendarMetric(def)) {
     drawBooleanGraph(key, def, allData, area);
+    const tableHtml = renderMetricTable(allData, def);
+    if (tableHtml) area.innerHTML += tableHtml;
     return;
   }
   // Taller viewBox → chart grows vertically on mobile (SVG scales with width:100%)
@@ -630,11 +643,13 @@ function renderMetricTable(data, def) {
   if (!data.length) return '';
   const sorted = [...data].reverse();
   const norm = resolveNormalRange(def?.key ?? '', currentPersonId);
+  const isNumeric = def?.type !== 'boolean' && def?.type !== 'select';
+  const valStyle  = isNumeric ? ' style="font-family:var(--font-mono);text-align:right"' : '';
   const rows = sorted.map((d, sortedIdx) => {
     // sortedIdx 0 = neuester Eintrag = data[data.length-1] = letzter Dot
     const dotIndex = data.length - 1 - sortedIdx;
     let indicator = '';
-    if (norm) {
+    if (norm && isNumeric) {
       const effectiveMin = norm.min === 0 ? -Infinity : norm.min;
       const effectiveMax = norm.max >= 900 ?  Infinity : norm.max;
       if (d.value > effectiveMax)
@@ -646,12 +661,13 @@ function renderMetricTable(data, def) {
                onmouseenter="highlightDot(${dotIndex})"
                onmouseleave="clearDotHighlight()">
       <td>${fmtDate(d.date)}</td>
-      <td style="font-family:var(--font-mono);text-align:right">${indicator}${d.value}</td>
-      <td style="color:var(--text-muted)">${esc(def?.unit??'')}</td>
+      <td${valStyle}>${indicator}${esc(String(d.value))}</td>
+      ${isNumeric ? `<td style="color:var(--text-muted)">${esc(def?.unit??'')}</td>` : ''}
     </tr>`;
   }).join('');
+  const unitHead = isNumeric ? '<th>Einheit</th>' : '';
   return `<table class="metric-table">
-    <thead><tr><th>Datum</th><th style="text-align:right">Wert</th><th>Einheit</th></tr></thead>
+    <thead><tr><th>Datum</th><th${isNumeric ? ' style="text-align:right"' : ''}>Wert</th>${unitHead}</tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }

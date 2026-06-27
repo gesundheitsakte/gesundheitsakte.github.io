@@ -111,7 +111,7 @@ function renderAllMetrics() {
       const isCat = m.type === 'boolean' || m.type === 'select';
       const arrow = (last && !isCat) ? trendArrow(currentPersonId, m.key) : '';
       return last
-        ? statTile(m.label, formatMetricValue(m.key, last.value), isCat ? '' : m.unit, sub, m.graphable ? m.key : null, arrow)
+        ? statTile(m.label, formatMetricValue(m.key, last.value), isCat ? '' : m.unit, sub, m.key, arrow)
         : statTile(m.label, '—', m.unit, sub);
     }).join('');
 
