@@ -18,6 +18,7 @@
 function savePersons(persons) {
   DATA.persons = persons;
   markUnsaved();
+  if (!isDemoMode) updatePWAShortcuts();
 }
 
 function renderSettings() {
