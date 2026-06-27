@@ -182,10 +182,10 @@ small { font-size: .8125rem; color: var(--text-muted); }
 .panel { display: none; }
 .panel.active {
   display: block;
-  animation: panel-fadein .18s ease;
+  animation: panel-fadein .4s ease;
 }
 @keyframes panel-fadein {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
