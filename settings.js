@@ -27,7 +27,7 @@ function renderSettings() {
     const age = getAge(p.birthday);
     const color = personColor(p);
     const entryCnt = DATA.entries.filter(e => e.personId === p.id).length;
-    return `<div class="settings-person-row" id="srow-${p.id}" draggable="true" data-person-id="${p.id}">
+    return `<div class="settings-person-row" id="srow-${p.id}" data-person-id="${p.id}">
       <span class="drag-handle" title="Reihenfolge ändern">⠿</span>
       <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${esc(initials(p.name))}</div>
       <div style="flex:1;min-width:0">
@@ -156,12 +156,16 @@ function initPersonDragDrop() {
   let dragSrc = null;
 
   list.querySelectorAll('.settings-person-row').forEach(row => {
+    const handle = row.querySelector('.drag-handle');
+    handle?.addEventListener('pointerdown', () => { row.draggable = true; });
+
     row.addEventListener('dragstart', e => {
       dragSrc = row;
       row.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
     });
     row.addEventListener('dragend', () => {
+      row.draggable = false;
       row.classList.remove('dragging');
       list.querySelectorAll('.settings-person-row').forEach(r => r.classList.remove('drag-over'));
     });
