@@ -1,5 +1,7 @@
 # Familien-Gesundheitsakte
 
+<img src="icons/icon-180.png" width="90" alt="App Icon">
+
 Eine privacy-first Web-App zur Verwaltung von Gesundheitsdaten für die ganze Familie — komplett lokal, ohne Server, ohne Konto.
 
 ---
