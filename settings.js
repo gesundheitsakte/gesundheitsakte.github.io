@@ -26,11 +26,12 @@ function renderSettings() {
   const personRows = getPersonList().map(p => {
     const age = getAge(p.birthday);
     const color = avatarColor(p.id);
+    const entryCnt = DATA.entries.filter(e => e.personId === p.id).length;
     return `<div class="settings-person-row" id="srow-${p.id}">
       <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${esc(initials(p.name))}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:.9375rem">${esc(p.name)}</div>
-        <div style="font-size:.8125rem;color:var(--text-muted)">${fmtDate(p.birthday)} · ${age} Jahre · ${genderLabel(p.gender)}${p.bloodType?' · '+esc(p.bloodType):''}</div>
+        <div style="font-size:.8125rem;color:var(--text-muted)">${fmtDate(p.birthday)} · ${age} Jahre · ${genderLabel(p.gender)}${p.bloodType?' · '+esc(p.bloodType):''} · ${entryCnt} ${entryCnt===1?'Eintrag':'Einträge'}</div>
       </div>
       <div style="display:flex;gap:.5rem;flex-shrink:0">
         <button class="btn btn-ghost btn-sm" onclick="openEditPerson('${p.id}')">Bearbeiten</button>
@@ -313,6 +314,10 @@ function openPersonModal(person) {
               ).join('')}
             </select>
           </div>
+          <div class="field-group">
+            <label for="pm-svnr">Sozialversicherungsnummer</label>
+            <input type="text" id="pm-svnr" value="${escAttr(p.socialSecurityNumber||'')}" placeholder="z.B. 1234 010190" inputmode="numeric">
+          </div>
         </div>
         <div style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
@@ -458,6 +463,7 @@ function savePersonModal(id, isEdit) {
   const birthday = document.getElementById('pm-birthday')?.value;
   const gender   = document.getElementById('pm-gender')?.value;
   const blood    = document.getElementById('pm-blood')?.value;
+  const svnr     = document.getElementById('pm-svnr')?.value.trim();
 
   if (!name)     { showToast('Bitte einen Namen eingeben','error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben','error'); return; }
@@ -468,6 +474,7 @@ function savePersonModal(id, isEdit) {
   const updated = {
     id, name, birthday, gender,
     bloodType: blood || null,
+    socialSecurityNumber: svnr || null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),
