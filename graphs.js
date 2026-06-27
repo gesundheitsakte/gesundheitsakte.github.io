@@ -24,6 +24,9 @@ const GRAPH_RANGES = [
 // Für Boolean-Kalender: Startmonat-Offset (0 = aktuelle 3 Monate, -1 = 3 Monate zurück, …)
 let _boolCalOffset = 0;
 
+// Zweite Metrik für Vergleichs-Diagramm (null = Einzel-Modus)
+let activeGraphKey2 = null;
+
 // Metriken die als Kalender (statt Liniendiagramm) angezeigt werden:
 // boolean ODER select mit genau zwei Optionen (ja/nein-Charakter).
 function isCalendarMetric(def) {
@@ -49,6 +52,13 @@ function renderGraphs() {
     activeGraphKey = (withData ?? graphableMetrics[0])?.key ?? null;
   }
 
+  // Validate activeGraphKey2: must be a graphable non-calendar metric different from primary
+  if (activeGraphKey2) {
+    const d2 = metricDef(activeGraphKey2);
+    if (!d2 || !d2.graphable || isCalendarMetric(d2) || activeGraphKey2 === activeGraphKey)
+      activeGraphKey2 = null;
+  }
+
   if (graphableMetrics.length === 0) {
     panel.innerHTML = `<div class="empty-state" style="padding-top:4rem">
       <div class="empty-icon">📈</div>
@@ -66,11 +76,31 @@ function renderGraphs() {
         const pts    = metricHistoryResolved(currentPersonId, m.key).length;
         const minPts = m.graphable ? 2 : 1;
         const dim    = pts < minPts ? ' metric-btn--no-data' : '';
-        return `<button class="metric-btn${activeGraphKey===m.key?' active':''}${dim}"
+        const sec    = m.key === activeGraphKey2 ? ' metric-btn--secondary' : '';
+        return `<button class="metric-btn${activeGraphKey===m.key?' active':''}${sec}${dim}"
                 data-key="${m.key}"
                 onclick="selectGraphMetric('${m.key}')">${esc(m.label)}</button>`;
       }).join('')}
     </div>`).join('');
+
+  // Compare section — only line-chart-capable metrics are eligible as second metric
+  const eligibleForCompare = allM.filter(m =>
+    m.graphable && !isCalendarMetric(m) && m.key !== activeGraphKey
+  );
+  const compareColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim() || '#E9A23B';
+  const compareSection = `<div class="compare-section">
+    ${activeGraphKey2
+      ? `<div class="compare-active">
+          <span class="compare-dot" style="background:${compareColor}"></span>
+          <span>${esc(metricDef(activeGraphKey2)?.label ?? activeGraphKey2)}</span>
+          <button class="compare-remove" onclick="setSecondMetric(null)" title="Vergleich entfernen">×</button>
+        </div>`
+      : `<select class="compare-select" onchange="if(this.value){setSecondMetric(this.value);this.value=''}">
+          <option value="">＋ Vergleich hinzufügen</option>
+          ${eligibleForCompare.map(m=>`<option value="${escAttr(m.key)}">${esc(m.label)}</option>`).join('')}
+        </select>`
+    }
+  </div>`;
 
   const rangeBtns = GRAPH_RANGES.map(r=>`
     <button class="range-btn${activeGraphRange===r.key?' active':''}"
@@ -85,7 +115,7 @@ function renderGraphs() {
           <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </button>
-      <div id="metric-selector" class="collapsible-body" hidden onclick="event.stopPropagation()">${metricButtons}</div>
+      <div id="metric-selector" class="collapsible-body" hidden onclick="event.stopPropagation()">${metricButtons}${compareSection}</div>
     </div>
     <div id="norm-range-card" style="display:none;margin-top:1rem"></div>
     <div class="card" style="margin-top:1rem">
@@ -96,7 +126,8 @@ function renderGraphs() {
         <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
           <button class="btn btn-ghost btn-sm" id="graph-target-btn"
                   onclick="openTargetDialog(activeGraphKey)"
-                  title="Zielwert setzen / ändern">◎ Zielwert</button>
+                  title="Zielwert setzen / ändern"
+                  ${activeGraphKey2 ? 'style="display:none"' : ''}>◎ Zielwert</button>
           <div class="range-btn-group" id="range-btn-group">${rangeBtns}</div>
           <div class="bcal-nav" id="bcal-nav" style="display:none">
             <button class="btn btn-ghost btn-sm bcal-nav-btn" onclick="shiftBoolCal(-1)" aria-label="Zurück">
@@ -144,20 +175,46 @@ function selectGraphRange(range) {
   drawGraph(activeGraphKey);
 }
 
+function setSecondMetric(key) {
+  activeGraphKey2 = (key && key !== activeGraphKey) ? key : null;
+  renderGraphs(); // full re-render: updates selector, compare section, target btn
+}
+
 function selectGraphMetric(key) {
+  const prevKey2 = activeGraphKey2;
+  // Clicking the secondary metric button makes it primary-only (remove it as secondary)
+  if (activeGraphKey2 === key) activeGraphKey2 = null;
   activeGraphKey = key;
   document.querySelectorAll('.metric-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.key===key);
+    b.classList.toggle('active',    b.dataset.key === key);
+    b.classList.toggle('metric-btn--secondary', b.dataset.key === activeGraphKey2);
   });
   const def = metricDef(key);
   const isBool      = isCalendarMetric(def);
   const isTableOnly = def && !def.graphable;
+  // Calendar/table-only views are incompatible with dual mode
+  if (isBool || isTableOnly) activeGraphKey2 = null;
   // Range-Buttons vs. Kalender-Navigator
   document.getElementById('range-btn-group').style.display = (isBool || isTableOnly) ? 'none' : '';
   const nav = document.getElementById('bcal-nav');
   if (nav) nav.style.display = isBool ? '' : 'none';
-  if (isBool) _boolCalOffset = 0;  // beim Wechsel auf Boolean immer aktuelle Monate
+  if (isBool) _boolCalOffset = 0;
+  // Keep target button hidden/shown in sync with dual mode
+  const targetBtn = document.getElementById('graph-target-btn');
+  if (targetBtn) targetBtn.style.display = activeGraphKey2 ? 'none' : '';
+  // If key2 was cleared, update compare section to show the select dropdown again
+  if (prevKey2 && !activeGraphKey2) _refreshCompareSection(key);
   drawGraph(key);
+}
+
+function _refreshCompareSection(primaryKey) {
+  const sec = document.querySelector('.compare-section');
+  if (!sec) return;
+  const eligible = allMetrics().filter(m => m.graphable && !isCalendarMetric(m) && m.key !== primaryKey);
+  sec.innerHTML = `<select class="compare-select" onchange="if(this.value){setSecondMetric(this.value);this.value=''}">
+    <option value="">＋ Vergleich hinzufügen</option>
+    ${eligible.map(m=>`<option value="${escAttr(m.key)}">${esc(m.label)}</option>`).join('')}
+  </select>`;
 }
 
 // ── Filter data by selected time range ───────
@@ -221,6 +278,15 @@ function drawGraph(key) {
       </div>`;
   } else if (normCardEl) {
     normCardEl.style.display = 'none';
+  }
+
+  // ── Dual-Modus: zwei Linien im selben Diagramm ──
+  if (activeGraphKey2) {
+    const normCardEl = document.getElementById('norm-range-card');
+    if (normCardEl) normCardEl.style.display = 'none';
+    document.getElementById('graph-target-btn')?.style.setProperty('display', 'none');
+    drawDualGraph(key, activeGraphKey2, area);
+    return;
   }
 
   // ── Nicht-graphbare Metriken (z. B. Zervixschleim): nur Datentabelle ──
@@ -430,7 +496,7 @@ function drawGraph(key) {
         ${pts.map((p,i)=>`
           <circle class="graph-dot" id="gdot-${i}" data-index="${i}"
             cx="${p.x}" cy="${PAD.top+iH}" r="4"
-            data-date="${fmtDate(p.date)}" data-val="${p.value}"
+            data-date="${fmtDate(p.date)}" data-val="${p.value}" data-key="${key}"
             onmouseenter="showGraphTip(event,this)" onmouseleave="hideGraphTip()"/>`).join('')}
       </svg>
       <div id="graph-tip" class="graph-tip" style="display:none"></div>
@@ -497,10 +563,142 @@ function animateGraph({ linePath, linePathFlat, areaPath, areaPathFlat, pts, pts
   requestAnimationFrame(frame);
 }
 
+// ── Dual-Metrik-Graph ─────────────────────────
+function drawDualGraph(key1, key2, area) {
+  const def1  = metricDef(key1);
+  const def2  = metricDef(key2);
+  const data1 = filterByRange(metricHistoryResolved(currentPersonId, key1));
+  const data2 = filterByRange(metricHistoryResolved(currentPersonId, key2));
+
+  if (data1.length < 2 || data2.length < 2) {
+    const which = data1.length < 2 ? (def1?.label ?? key1) : (def2?.label ?? key2);
+    area.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📈</div>
+      <p>Nicht genug Messwerte für „${esc(which)}" (mind. 2 Punkte nötig).</p>
+    </div>`;
+    return;
+  }
+
+  const style = getComputedStyle(document.documentElement);
+  const color1 = style.getPropertyValue('--accent').trim()   || '#2C6E8F';
+  const color2 = style.getPropertyValue('--accent-2').trim() || '#E9A23B';
+
+  const W = 680, H = 260, PAD = { top: 20, right: 56, bottom: 48, left: 52 };
+  const iW = W - PAD.left - PAD.right;
+  const iH = H - PAD.top  - PAD.bottom;
+
+  // Shared X-axis spans both datasets
+  const allTs  = [...data1, ...data2].map(d => new Date(d.date + 'T00:00:00').getTime());
+  const minT   = Math.min(...allTs);
+  const maxT   = Math.max(...allTs);
+  const rangeT = maxT - minT || 1;
+  function xPos(t) { return PAD.left + ((t - minT) / rangeT) * iW; }
+
+  // Independent Y-scale with 8 % padding
+  function makeYScale(data) {
+    const vals = data.map(d => d.value);
+    let lo = Math.min(...vals);
+    let hi = Math.max(...vals);
+    const pad = (hi - lo || 1) * 0.08;
+    lo -= pad; hi += pad;
+    const range = hi - lo;
+    return { lo, hi, range, pos: v => PAD.top + (1 - (v - lo) / range) * iH };
+  }
+
+  const sc1 = makeYScale(data1);
+  const sc2 = makeYScale(data2);
+
+  function niceTicks(sc) {
+    const rawStep   = sc.range / 4;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+    const norm      = rawStep / magnitude;
+    const step      = norm <= 1 ? magnitude : norm <= 2 ? 2*magnitude : norm <= 5 ? 5*magnitude : 10*magnitude;
+    const first     = Math.ceil(sc.lo / step) * step;
+    const decimals  = step < 1 ? Math.max(0, -Math.floor(Math.log10(step))) : 0;
+    const ticks = [];
+    for (let v = first; v <= sc.hi + step * 0.01; v = Math.round((v + step) * 1e9) / 1e9) {
+      const y = sc.pos(v);
+      if (y >= PAD.top - 2 && y <= PAD.top + iH + 2) ticks.push({ v: v.toFixed(decimals), y });
+      if (ticks.length >= 6) break;
+    }
+    return ticks;
+  }
+
+  const ticks1 = niceTicks(sc1);
+  const ticks2 = niceTicks(sc2);
+
+  // X-ticks from union of both date sets
+  const uniqDates = [...new Set([...data1, ...data2].map(d => d.date))].sort();
+  const n = uniqDates.length;
+  const xIdxSet = new Set([0, n - 1]);
+  if (n >= 4) { const slots = Math.min(4, n - 2); for (let s = 1; s <= slots; s++) xIdxSet.add(Math.round(s*(n-1)/(slots+1))); }
+  const MIN_TICK_PX = 48;
+  const xTicks = (() => {
+    const all  = [...xIdxSet].sort((a,b)=>a-b).map(i => ({ label: fmtShort(uniqDates[i]), x: xPos(new Date(uniqDates[i]+'T00:00:00').getTime()) }));
+    const kept = [all[0]];
+    for (let i = 1; i < all.length - 1; i++) { if (all[i].x - kept[kept.length-1].x >= MIN_TICK_PX) kept.push(all[i]); }
+    if (all.length > 1) { const last = all[all.length-1]; if (last.x - kept[kept.length-1].x >= MIN_TICK_PX/2) kept.push(last); }
+    return kept;
+  })();
+
+  function linearPath(pts) {
+    if (pts.length < 2) return '';
+    return `M${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}` + pts.slice(1).map(p => ` L${p.x.toFixed(2)},${p.y.toFixed(2)}`).join('');
+  }
+
+  const pts1 = data1.map((d,i) => ({ x: xPos(new Date(d.date+'T00:00:00').getTime()), y: sc1.pos(d.value), date: d.date, value: d.value, i }));
+  const pts2 = data2.map((d,i) => ({ x: xPos(new Date(d.date+'T00:00:00').getTime()), y: sc2.pos(d.value), date: d.date, value: d.value, i }));
+
+  const hdr = document.getElementById('graph-header');
+  if (hdr) {
+    hdr.innerHTML = `<span class="card-title">${esc(def1?.label ?? key1)}</span>
+      <span style="color:var(--text-muted);margin:0 .35rem;font-weight:400">vs.</span>
+      <span class="card-title">${esc(def2?.label ?? key2)}</span>`;
+  }
+
+  area.innerHTML = `
+    <div style="position:relative;overflow:visible">
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+        ${ticks1.map(t=>`<line x1="${PAD.left}" y1="${t.y.toFixed(2)}" x2="${PAD.left+iW}" y2="${t.y.toFixed(2)}" stroke="var(--border)" stroke-width="1"/>`).join('')}
+        <path d="${linearPath(pts1)}" fill="none" stroke="${color1}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="${linearPath(pts2)}" fill="none" stroke="${color2}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        ${ticks1.map(t=>`<text x="${PAD.left-8}" y="${t.y.toFixed(2)}" dy="4" text-anchor="end"
+          class="graph-label graph-label-y" fill="${color1}" font-family="JetBrains Mono,monospace">${t.v}</text>`).join('')}
+        ${ticks2.map(t=>`<text x="${PAD.left+iW+8}" y="${t.y.toFixed(2)}" dy="4" text-anchor="start"
+          class="graph-label graph-label-y" fill="${color2}" font-family="JetBrains Mono,monospace">${t.v}</text>`).join('')}
+        ${def1?.unit?`<text x="${PAD.left}" y="${PAD.top-6}" text-anchor="start" class="graph-label" fill="${color1}" font-family="sans-serif" font-size="10">${esc(def1.unit)}</text>`:''}
+        ${def2?.unit?`<text x="${PAD.left+iW}" y="${PAD.top-6}" text-anchor="end" class="graph-label" fill="${color2}" font-family="sans-serif" font-size="10">${esc(def2.unit)}</text>`:''}
+        ${xTicks.map(t=>`<text x="${t.x.toFixed(2)}" y="${H-10}" text-anchor="middle"
+          class="graph-label xtick-edge" fill="var(--text-muted)" font-family="sans-serif">${t.label}</text>`).join('')}
+        ${pts1.map((p,i)=>`<circle class="graph-dot" id="gdot1-${i}" data-index="${i}"
+          cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="4" style="fill:${color1}"
+          data-date="${fmtDate(p.date)}" data-val="${p.value}" data-key="${key1}"
+          onmouseenter="showGraphTip(event,this)" onmouseleave="hideGraphTip()"/>`).join('')}
+        ${pts2.map((p,i)=>`<circle class="graph-dot" id="gdot2-${i}" data-index="${i}"
+          cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="4" style="fill:${color2}"
+          data-date="${fmtDate(p.date)}" data-val="${p.value}" data-key="${key2}"
+          onmouseenter="showGraphTip(event,this)" onmouseleave="hideGraphTip()"/>`).join('')}
+      </svg>
+      <div id="graph-tip" class="graph-tip" style="display:none"></div>
+    </div>
+    <div class="dual-legend">
+      <div class="legend-item">
+        <svg width="24" height="4" viewBox="0 0 24 4"><line x1="0" y1="2" x2="24" y2="2" stroke="${color1}" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span>${esc(def1?.label ?? key1)}</span>
+      </div>
+      <div class="legend-item">
+        <svg width="24" height="4" viewBox="0 0 24 4"><line x1="0" y1="2" x2="24" y2="2" stroke="${color2}" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span>${esc(def2?.label ?? key2)}</span>
+      </div>
+    </div>`;
+}
+
 function showGraphTip(event, el) {
   const tip = document.getElementById('graph-tip');
   if (!tip) return;
-  tip.textContent = `${el.dataset.date}: ${el.dataset.val} ${metricDef(activeGraphKey)?.unit??''}`;
+  const tipKey = el.dataset.key || activeGraphKey;
+  const tipUnit = metricDef(tipKey)?.unit ?? '';
+  tip.textContent = `${el.dataset.date}: ${el.dataset.val}${tipUnit ? ' '+tipUnit : ''}`;
   // Position before revealing so offsetWidth is correct
   tip.style.visibility = 'hidden';
   tip.style.opacity    = '0';

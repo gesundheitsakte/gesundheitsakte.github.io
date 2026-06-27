@@ -161,6 +161,24 @@ function avatarColor(pid) {
 function personColor(p) {
   return p.color || avatarColor(p.id);
 }
+// Returns the AVATAR_COLORS entry with the maximum RGB distance from hex — used
+// to pick a second graph line colour that contrasts well with the accent.
+function pickContrastColor(hex) {
+  if (!hex || hex.length < 7) return AVATAR_COLORS[AVATAR_COLORS.length - 1];
+  const ar = parseInt(hex.slice(1,3), 16);
+  const ag = parseInt(hex.slice(3,5), 16);
+  const ab = parseInt(hex.slice(5,7), 16);
+  let best = null, bestDist = -1;
+  for (const c of AVATAR_COLORS) {
+    if (c.toLowerCase() === hex.toLowerCase()) continue;
+    const r = parseInt(c.slice(1,3), 16);
+    const g = parseInt(c.slice(3,5), 16);
+    const b = parseInt(c.slice(5,7), 16);
+    const dist = (r-ar)**2 + (g-ag)**2 + (b-ab)**2;
+    if (dist > bestDist) { bestDist = dist; best = c; }
+  }
+  return best ?? AVATAR_COLORS[0];
+}
 function genId() { return 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 
 function checkupApplies(c, person) {

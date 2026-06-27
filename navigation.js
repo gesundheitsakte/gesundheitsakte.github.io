@@ -430,21 +430,22 @@ function applyPersonAccent() {
   if (!hex || hex.length < 7) {
     root.style.removeProperty('--accent');
     root.style.removeProperty('--accent-light');
+    root.style.removeProperty('--accent-2');
     return;
   }
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   const isDark = root.classList.contains('dark');
-  let accent = hex;
-  if (isDark) {
-    // Lighten toward white so the color stays visible on dark backgrounds
-    const lift = c => Math.min(255, Math.round(c + (255 - c) * 0.45));
-    const toHex = c => c.toString(16).padStart(2, '0');
-    accent = `#${toHex(lift(r))}${toHex(lift(g))}${toHex(lift(b))}`;
-  }
-  root.style.setProperty('--accent', accent);
+  const lift  = c => Math.min(255, Math.round(c + (255 - c) * 0.45));
+  const toHex = c => c.toString(16).padStart(2, '0');
+  const darkAdj = h => {
+    const rr=parseInt(h.slice(1,3),16), gg=parseInt(h.slice(3,5),16), bb=parseInt(h.slice(5,7),16);
+    return `#${toHex(lift(rr))}${toHex(lift(gg))}${toHex(lift(bb))}`;
+  };
+  root.style.setProperty('--accent',       isDark ? darkAdj(hex) : hex);
   root.style.setProperty('--accent-light', `rgba(${r},${g},${b},.12)`);
+  root.style.setProperty('--accent-2',     isDark ? darkAdj(pickContrastColor(hex)) : pickContrastColor(hex));
 }
 
 // ═══════════════════════════════════════════════

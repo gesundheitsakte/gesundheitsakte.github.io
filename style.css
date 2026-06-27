@@ -5,6 +5,7 @@
 /* ── Tokens ──────────────────────────────────── */
 :root {
   --accent:        #2C6E8F;
+  --accent-2:      #E9A23B;
   --accent-light:  #dbeef5;
   --accent-mid:    #5b98bb;
   --danger:        #F2785C;
@@ -637,6 +638,50 @@ textarea { resize: vertical; min-height: 80px; }
 .metric-btn--no-data {
   opacity: .5;
   border-style: dashed;
+}
+.metric-btn--secondary {
+  background: var(--accent-2); border-color: var(--accent-2); color: #fff;
+}
+
+/* ── Compare section (dual metric) ── */
+.compare-section {
+  margin-top: .75rem; padding-top: .625rem;
+  border-top: 1px solid var(--border);
+}
+.compare-select {
+  width: 100%; padding: .35rem .5rem; font-size: .8125rem;
+  background: var(--bg); border: 1px dashed var(--border);
+  border-radius: var(--radius-md); color: var(--text-secondary);
+  cursor: pointer; font-family: var(--font-sans);
+  transition: border-color .15s;
+}
+@media (hover: hover) {
+  .compare-select:hover { border-color: var(--accent-2); color: var(--text-primary); }
+}
+.compare-active {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8125rem; color: var(--text-secondary);
+}
+.compare-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.compare-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: .1rem .35rem; border-radius: var(--radius-sm);
+  font-size: 1rem; line-height: 1; margin-left: auto;
+  transition: background .15s, color .15s;
+}
+@media (hover: hover) {
+  .compare-remove:hover { background: var(--danger-light); color: var(--danger); }
+}
+
+/* ── Dual graph legend ── */
+.dual-legend {
+  display: flex; gap: 1.5rem; margin-top: .875rem; flex-wrap: wrap;
+}
+.legend-item {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8125rem; color: var(--text-secondary);
 }
 
 .graph-dot {
@@ -1716,6 +1761,7 @@ input.hf-search {
    ═══════════════════════════════════════════════ */
 :root.dark {
   --accent:        #5b9ebf;
+  --accent-2:      #f0c46a;
   --accent-light:  #163347;
   --accent-mid:    #7dbbdb;
   --danger:        #f5a08c;
