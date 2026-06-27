@@ -104,8 +104,8 @@ function renderEntryForm(editEntry = null) {
           <div class="field-group">
             <label for="entry-date">Datum</label>
             <input type="date" id="entry-date"
-                   max="${new Date().toISOString().slice(0,10)}"
-                   value="${isEdit ? editEntry.date : new Date().toISOString().slice(0,10)}">
+                   max="${todayISO()}"
+                   value="${isEdit ? editEntry.date : todayISO()}">
           </div>
         </div>
       </div>
@@ -363,7 +363,7 @@ function rebuildActiveFields() {
 function saveEntry() {
   const date = document.getElementById('entry-date')?.value;
   if (!date) { showToast('Bitte ein Datum angeben', 'error'); return; }
-  if (date > new Date().toISOString().slice(0, 10)) {
+  if (date > todayISO()) {
     showToast('Das Datum darf nicht in der Zukunft liegen', 'error');
     document.getElementById('entry-date')?.focus();
     return;

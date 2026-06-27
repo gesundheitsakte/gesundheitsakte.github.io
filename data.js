@@ -979,7 +979,7 @@ function addOnboardingPerson() {
   const gender   = document.getElementById('ob-gender')?.value;
   if (!name)     { showToast('Bitte einen Namen eingeben', 'error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben', 'error'); return; }
-  if (birthday > new Date().toISOString().slice(0,10)) {
+  if (birthday > todayISO()) {
     showToast('Das Geburtsdatum darf nicht in der Zukunft liegen', 'error'); return;
   }
 
