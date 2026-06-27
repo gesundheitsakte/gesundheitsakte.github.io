@@ -57,13 +57,15 @@ function renderGraphs() {
     return;
   }
 
-  const groups = [...new Set(graphableMetrics.map(m=>m.group))];
+  const allM   = allMetrics();
+  const groups = [...new Set(allM.map(m=>m.group))];
   const metricButtons = groups.map(g=>`
     <div class="metric-group-label">${esc(g)}</div>
     <div class="metric-btn-row">
-      ${graphableMetrics.filter(m=>m.group===g).map(m=>{
-        const pts = metricHistoryResolved(currentPersonId, m.key).length;
-        const dim  = pts < 2 ? ' metric-btn--no-data' : '';
+      ${allM.filter(m=>m.group===g).map(m=>{
+        const pts    = metricHistoryResolved(currentPersonId, m.key).length;
+        const minPts = m.graphable ? 2 : 1;
+        const dim    = pts < minPts ? ' metric-btn--no-data' : '';
         return `<button class="metric-btn${activeGraphKey===m.key?' active':''}${dim}"
                 data-key="${m.key}"
                 onclick="selectGraphMetric('${m.key}')">${esc(m.label)}</button>`;
@@ -245,7 +247,7 @@ function drawGraph(key) {
   if (isCalendarMetric(def)) {
     drawBooleanGraph(key, def, allData, area);
     const tableHtml = renderMetricTable(allData, def);
-    if (tableHtml) area.innerHTML += tableHtml;
+    if (tableHtml) area.innerHTML += `<div style="margin-top:1.5rem">${tableHtml}</div>`;
     return;
   }
   // Taller viewBox → chart grows vertically on mobile (SVG scales with width:100%)
