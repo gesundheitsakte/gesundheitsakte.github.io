@@ -23,6 +23,10 @@ function init() {
   setupGlobalDropzone();
   initTheme();
 
+  document.querySelector('.topbar-brand')?.addEventListener('click', () => {
+    if (appMode === 'app') activateTab('dashboard');
+  });
+
   // Keyboard navigation
   document.addEventListener('keydown', e => {
     const modals = document.querySelectorAll('.modal-overlay');
