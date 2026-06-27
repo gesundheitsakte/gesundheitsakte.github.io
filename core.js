@@ -154,8 +154,9 @@ function fmtShort(s) {
 }
 function initials(name) { return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 function avatarColor(pid) {
-  const i = getPersonList().findIndex(p=>p.id===pid);
-  return AVATAR_COLORS[i % AVATAR_COLORS.length];
+  let h = 0;
+  for (let i = 0; i < pid.length; i++) h = (h * 31 + pid.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 function personColor(p) {
   return p.color || avatarColor(p.id);
