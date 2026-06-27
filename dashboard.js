@@ -20,7 +20,6 @@ function renderDashboard() {
 
   const age   = getAge(person.birthday);
   const color = avatarColor(person.id);
-  const cnt   = DATA.entries.filter(e=>e.personId===currentPersonId).length;
 
   const myCheckups = getCheckups().filter(c=>checkupApplies(c,person));
   const statuses   = myCheckups.map(c=>({checkup:c,...checkupStatus(c,currentPersonId)}));
@@ -52,7 +51,7 @@ function renderDashboard() {
         <div class="person-hero-meta">
           <span class="meta-item">${fmtDate(person.birthday)} (${age} Jahre)</span>
           ${person.bloodType ? `<span class="meta-item">${esc(person.bloodType)}</span>` : ''}
-          <span class="meta-item">${cnt} ${cnt===1?'Eintrag':'Einträge'}</span>
+          ${person.socialSecurityNumber ? `<span class="meta-item">SV-Nr. ${esc(person.socialSecurityNumber)}</span>` : ''}
         </div>
       </div>
     </div>
