@@ -1,9 +1,11 @@
-<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1024" height="1024">
-	<style>
-		.s0 { fill: #0891b2 } 
-		.s1 { fill: #ffffff } 
-	</style>
-	<path id="Background" fill-rule="evenodd" class="s0" d="m1000 0v1000h-1000v-1000z"/>
-	<path id="Form 1" fill-rule="evenodd" class="s1" d="m560 250v500h-120v-500z"/>
-	<path id="Form 1 copy" fill-rule="evenodd" class="s1" d="m750 440v120h-500v-120z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <rect width="1000" height="1000" fill="#1B3A5B"/>
+  <path fill="#FBE6CC" d="
+    M 500 762
+    C 500 762 188 539 188 363
+    C 188 273 258 215 342 215
+    C 410 215 469 258 500 313
+    C 531 258 590 215 658 215
+    C 742 215 813 273 813 363
+    C 813 539 500 762 500 762 Z"/>
 </svg>
