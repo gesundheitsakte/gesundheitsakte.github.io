@@ -50,6 +50,7 @@
       "birthday": "1985-03-14",
       "gender": "male",
       "bloodType": "A+",
+      "socialSecurityNumber": "1234 140385",
       "conditions": [
         {
           "name": "Bluthochdruck",
@@ -138,6 +139,7 @@
       "birthday": "1987-07-22",
       "gender": "female",
       "bloodType": "0+",
+      "socialSecurityNumber": "5678 220787",
       "conditions": [
         {
           "name": "Hashimoto-Thyreoiditis",
