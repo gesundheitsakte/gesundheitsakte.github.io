@@ -62,7 +62,7 @@ small { font-size: .8125rem; color: var(--text-muted); }
   background: var(--bg);
   z-index: 100;
 }
-.topbar-brand { display: flex; align-items: center; gap: .625rem; flex-shrink: 0; }
+.topbar-brand { display: flex; align-items: center; gap: .625rem; flex-shrink: 0; cursor: pointer; }
 .logo-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
 .logo-img {
   width: 30px; height: 30px;
