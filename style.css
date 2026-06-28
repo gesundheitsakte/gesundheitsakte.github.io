@@ -797,17 +797,29 @@ textarea { resize: vertical; min-height: 80px; }
   transition: opacity .15s;
 }
 .settings-person-row:last-child { border-bottom: none; }
-.settings-person-row.drag-over  { background: var(--accent-light); box-shadow: var(--shadow-md); border-radius: var(--radius-md); }
-.settings-person-row.dragging   { opacity: .4; }
-.drag-handle {
-  color: var(--text-muted);
-  cursor: grab;
+.person-order-btns {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
   flex-shrink: 0;
-  line-height: 1;
-  padding: .25rem;
-  touch-action: none;
 }
-.drag-handle:active { cursor: grabbing; }
+.person-order-btn {
+  background: none;
+  border: none;
+  padding: .1rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+.person-order-btn:hover { color: var(--text); }
+.person-order-btn svg { width: 1.1rem; height: 1.1rem; }
+.person-order-btn-placeholder {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+}
 
 /* ── Person color picker ─────────────────────── */
 .person-color-picker { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }

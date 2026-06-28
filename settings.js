@@ -24,12 +24,21 @@ function savePersons(persons) {
 function renderSettings() {
   const panel = document.getElementById('panel-settings');
 
-  const personRows = getPersonList().map(p => {
+  const persons = getPersonList();
+  const personRows = persons.map((p, idx) => {
     const age = getAge(p.birthday);
     const color = personColor(p);
     const entryCnt = DATA.entries.filter(e => e.personId === p.id).length;
+    const svgUp = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>`;
+    const svgDown = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>`;
+    const upBtn = idx > 0
+      ? `<button class="person-order-btn" title="Nach oben" onclick="movePersonUp('${p.id}')">${svgUp}</button>`
+      : `<span class="person-order-btn-placeholder"></span>`;
+    const downBtn = idx < persons.length - 1
+      ? `<button class="person-order-btn" title="Nach unten" onclick="movePersonDown('${p.id}')">${svgDown}</button>`
+      : `<span class="person-order-btn-placeholder"></span>`;
     return `<div class="settings-person-row" id="srow-${p.id}" data-person-id="${p.id}">
-      <span class="drag-handle" title="Reihenfolge ändern">⠿</span>
+      <div class="person-order-btns">${upBtn}${downBtn}</div>
       <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${esc(initials(p.name))}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:.9375rem">${esc(p.name)}</div>
@@ -146,54 +155,26 @@ function renderSettings() {
       </div>
     </div>`;
 
-  initPersonDragDrop();
 }
 
-// ── Drag-and-Drop Personen-Reihenfolge ────────
-function initPersonDragDrop() {
-  const list = document.getElementById('persons-list');
-  if (!list) return;
+function movePersonUp(id) {
+  const persons = getPersonList();
+  const idx = persons.findIndex(p => p.id === id);
+  if (idx <= 0) return;
+  persons.splice(idx - 1, 0, persons.splice(idx, 1)[0]);
+  savePersons(persons);
+  buildPersonSelector();
+  renderSettings();
+}
 
-  let dragSrc = null;
-
-  list.querySelectorAll('.settings-person-row').forEach(row => {
-    const handle = row.querySelector('.drag-handle');
-    handle?.addEventListener('pointerdown', () => { row.draggable = true; });
-
-    row.addEventListener('dragstart', e => {
-      dragSrc = row;
-      row.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    row.addEventListener('dragend', () => {
-      row.draggable = false;
-      row.classList.remove('dragging');
-      list.querySelectorAll('.settings-person-row').forEach(r => r.classList.remove('drag-over'));
-    });
-    row.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      list.querySelectorAll('.settings-person-row').forEach(r => r.classList.remove('drag-over'));
-      if (row !== dragSrc) row.classList.add('drag-over');
-    });
-    row.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!dragSrc || dragSrc === row) return;
-      row.classList.remove('drag-over');
-
-      // Reorder DATA.persons to match DOM order after drop
-      const srcId = dragSrc.dataset.personId;
-      const tgtId = row.dataset.personId;
-      const persons = getPersonList();
-      const srcIdx = persons.findIndex(p => p.id === srcId);
-      const tgtIdx = persons.findIndex(p => p.id === tgtId);
-      persons.splice(tgtIdx, 0, persons.splice(srcIdx, 1)[0]);
-      savePersons(persons);
-
-      buildPersonSelector();
-      renderSettings();
-    });
-  });
+function movePersonDown(id) {
+  const persons = getPersonList();
+  const idx = persons.findIndex(p => p.id === id);
+  if (idx < 0 || idx >= persons.length - 1) return;
+  persons.splice(idx + 1, 0, persons.splice(idx, 1)[0]);
+  savePersons(persons);
+  buildPersonSelector();
+  renderSettings();
 }
 
 // ── Checkup-Modal ─────────────────────────────
