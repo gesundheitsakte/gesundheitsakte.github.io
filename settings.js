@@ -21,6 +21,9 @@ function savePersons(persons) {
   if (!isDemoMode) updatePWAShortcuts();
 }
 
+const _SVG_UP   = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>`;
+const _SVG_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>`;
+
 function renderSettings() {
   const panel = document.getElementById('panel-settings');
 
@@ -29,13 +32,11 @@ function renderSettings() {
     const age = getAge(p.birthday);
     const color = personColor(p);
     const entryCnt = DATA.entries.filter(e => e.personId === p.id).length;
-    const svgUp = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>`;
-    const svgDown = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>`;
     const upBtn = idx > 0
-      ? `<button class="person-order-btn" title="Nach oben" onclick="movePersonUp('${p.id}')">${svgUp}</button>`
+      ? `<button class="person-order-btn" title="Nach oben" onclick="movePersonUp('${p.id}')">${_SVG_UP}</button>`
       : `<span class="person-order-btn-placeholder"></span>`;
     const downBtn = idx < persons.length - 1
-      ? `<button class="person-order-btn" title="Nach unten" onclick="movePersonDown('${p.id}')">${svgDown}</button>`
+      ? `<button class="person-order-btn" title="Nach unten" onclick="movePersonDown('${p.id}')">${_SVG_DOWN}</button>`
       : `<span class="person-order-btn-placeholder"></span>`;
     return `<div class="settings-person-row" id="srow-${p.id}" data-person-id="${p.id}">
       <div class="person-order-btns">${upBtn}${downBtn}</div>
@@ -157,24 +158,74 @@ function renderSettings() {
 
 }
 
-function movePersonUp(id) {
-  const persons = getPersonList();
-  const idx = persons.findIndex(p => p.id === id);
-  if (idx <= 0) return;
-  persons.splice(idx - 1, 0, persons.splice(idx, 1)[0]);
-  savePersons(persons);
-  buildPersonSelector();
-  renderSettings();
-}
+function movePersonUp(id)   { _swapPersonRows(id, -1); }
+function movePersonDown(id) { _swapPersonRows(id,  1); }
 
-function movePersonDown(id) {
+function _swapPersonRows(id, delta) {
   const persons = getPersonList();
   const idx = persons.findIndex(p => p.id === id);
-  if (idx < 0 || idx >= persons.length - 1) return;
-  persons.splice(idx + 1, 0, persons.splice(idx, 1)[0]);
+  const newIdx = idx + delta;
+  if (idx < 0 || newIdx < 0 || newIdx >= persons.length) return;
+
+  const rowA = document.getElementById(`srow-${id}`);
+  const rowB = document.getElementById(`srow-${persons[newIdx].id}`);
+  const container = document.getElementById('persons-list');
+
+  if (!rowA || !rowB || !container) {
+    persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
+    savePersons(persons);
+    buildPersonSelector();
+    renderSettings();
+    return;
+  }
+
+  // Persist new order
+  persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
   savePersons(persons);
   buildPersonSelector();
-  renderSettings();
+
+  // FLIP — record positions before DOM change
+  const rectA = rowA.getBoundingClientRect();
+  const rectB = rowB.getBoundingClientRect();
+
+  // Swap DOM nodes
+  if (delta < 0) container.insertBefore(rowA, rowB);
+  else           container.insertBefore(rowB, rowA);
+
+  // Rebuild order buttons only on the two affected rows
+  const rows  = [...container.querySelectorAll('.settings-person-row')];
+  const total = rows.length;
+  [rowA, rowB].forEach(row => {
+    const i   = rows.indexOf(row);
+    const pid = row.dataset.personId;
+    const b   = row.querySelector('.person-order-btns');
+    if (!b) return;
+    const up   = i > 0         ? `<button class="person-order-btn" title="Nach oben"   onclick="movePersonUp('${pid}')"  >${_SVG_UP}  </button>` : `<span class="person-order-btn-placeholder"></span>`;
+    const down = i < total - 1 ? `<button class="person-order-btn" title="Nach unten"  onclick="movePersonDown('${pid}')">${_SVG_DOWN}</button>` : `<span class="person-order-btn-placeholder"></span>`;
+    b.innerHTML = up + down;
+  });
+
+  // FLIP — invert: push elements back to their visual starting positions
+  const newRectA = rowA.getBoundingClientRect();
+  const newRectB = rowB.getBoundingClientRect();
+  rowA.style.transition = 'none';
+  rowB.style.transition = 'none';
+  rowA.style.transform  = `translateY(${rectA.top - newRectA.top}px)`;
+  rowB.style.transform  = `translateY(${rectB.top - newRectB.top}px)`;
+
+  // Force reflow so the browser sees the starting state before playing
+  rowA.getBoundingClientRect();
+
+  // Play: animate to natural (post-swap) positions
+  rowA.style.transition = 'transform .22s ease';
+  rowB.style.transition = 'transform .22s ease';
+  rowA.style.transform  = '';
+  rowB.style.transform  = '';
+
+  rowA.addEventListener('transitionend', () => {
+    rowA.style.transition = '';
+    rowB.style.transition = '';
+  }, { once: true });
 }
 
 // ── Checkup-Modal ─────────────────────────────
