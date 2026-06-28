@@ -601,7 +601,6 @@ textarea { resize: vertical; min-height: 80px; }
   letter-spacing: .06em; color: var(--text-muted);
   margin: .875rem 0 .375rem;
 }
-.metric-group-label:first-child { margin-top: 0; }
 
 .metric-btn-row { display: flex; flex-wrap: wrap; gap: .375rem; }
 
