@@ -42,7 +42,7 @@ function renderSettings() {
       <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${esc(initials(p.name))}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:.9375rem">${esc(p.name)}</div>
-        <div style="font-size:.8125rem;color:var(--text-muted)">${fmtDate(p.birthday)} · ${age} Jahre · ${genderLabel(p.gender)}${p.bloodType?' · '+esc(p.bloodType):''} · ${entryCnt} ${entryCnt===1?'Eintrag':'Einträge'}</div>
+        <div style="font-size:.8125rem;color:var(--text-muted)">${fmtDate(p.birthday)} · ${age}&nbsp;Jahre · ${genderLabel(p.gender)}${p.bloodType?' · '+esc(p.bloodType):''} · ${entryCnt}&nbsp;${entryCnt===1?'Eintrag':'Einträge'}</div>
       </div>
       <div style="display:flex;gap:.5rem;flex-shrink:0">
         <button class="btn btn-ghost btn-sm" onclick="openEditPerson('${p.id}')">Bearbeiten</button>
@@ -55,12 +55,12 @@ function renderSettings() {
   // Checkup rows
   const checkupRows = getCheckups().map(c => {
     const every = c.intervalMonths >= 12
-      ? `alle ${c.intervalMonths/12} J.`
-      : `alle ${c.intervalMonths} M.`;
+      ? `alle ${c.intervalMonths/12} J.`
+      : `alle ${c.intervalMonths} M.`;
     const applies = [
       c.appliesTo?.gender === 'male' ? 'männl.' : c.appliesTo?.gender === 'female' ? 'weibl.' : null,
-      c.appliesTo?.minAge != null ? `ab ${c.appliesTo.minAge}` : null,
-      c.appliesTo?.maxAge != null ? `bis ${c.appliesTo.maxAge}` : null,
+      c.appliesTo?.minAge != null ? `ab&nbsp;${c.appliesTo.minAge}` : null,
+      c.appliesTo?.maxAge != null ? `bis&nbsp;${c.appliesTo.maxAge}` : null,
     ].filter(Boolean).join(', ') || 'Alle';
     const contactBits = [
       c.phone ? esc(c.phone) : null,

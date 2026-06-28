@@ -49,7 +49,7 @@ function renderDashboard() {
       <div class="person-hero-info">
         <h2>${esc(person.name)}</h2>
         <div class="person-hero-meta">
-          <span class="meta-item">${fmtDate(person.birthday)} (${age} Jahre)</span>
+          <span class="meta-item">${fmtDate(person.birthday)} (${age}&nbsp;Jahre)</span>
           ${person.bloodType ? `<span class="meta-item">Blut: ${esc(person.bloodType)}</span>` : ''}
           ${person.socialSecurityNumber ? `<span class="meta-item">SV-Nr.: ${esc(person.socialSecurityNumber)}</span>` : ''}
         </div>
@@ -314,8 +314,8 @@ function renderCheckupItem({checkup,status,label,lastDate}) {
   const dc = {ok:'dot-ok',warning:'dot-warning',overdue:'dot-overdue'}[status]??'dot-na';
   const bc = {ok:'badge-ok',warning:'badge-warning',overdue:'badge-overdue'}[status]??'badge-na';
   const every = checkup.intervalMonths>=12
-    ? `alle ${checkup.intervalMonths/12} Jahr${checkup.intervalMonths/12>1?'e':''}`
-    : `alle ${checkup.intervalMonths} Monate`;
+    ? `alle&nbsp;${checkup.intervalMonths/12}&nbsp;Jahr${checkup.intervalMonths/12>1?'e':''}`
+    : `alle&nbsp;${checkup.intervalMonths}&nbsp;Monate`;
   const contact = [
     checkup.phone
       ? `<a class="checkup-contact" href="tel:${escAttr(checkup.phone.replace(/\s+/g,''))}" title="Anrufen: ${escAttr(checkup.phone)}" onclick="event.stopPropagation()" aria-label="Anrufen">

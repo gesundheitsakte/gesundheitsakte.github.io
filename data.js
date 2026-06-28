@@ -347,7 +347,7 @@ function generateAndPrint() {
 
   <h1>${esc(person.name)}</h1>
   <p class="meta">
-    Geb. ${fmtDate(person.birthday)} &nbsp;·&nbsp; ${getAge(person.birthday)} Jahre
+    Geb. ${fmtDate(person.birthday)} &nbsp;·&nbsp; ${getAge(person.birthday)}&nbsp;Jahre
     ${person.bloodType ? ' &nbsp;·&nbsp; Blutgruppe '+esc(person.bloodType) : ''}
     ${person.socialSecurityNumber ? ' &nbsp;·&nbsp; SV-Nr.: '+esc(person.socialSecurityNumber) : ''}
     &nbsp;·&nbsp; ${rangeLabel}

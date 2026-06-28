@@ -382,7 +382,7 @@ function fieldLabel(path) {
 function fmtVal(v) {
   if (v === undefined || v === null || v === '') return '— leer —';
   if (typeof v === 'object') {
-    if (Array.isArray(v)) return v.length ? `${v.length} Einträge` : '— leer —';
+    if (Array.isArray(v)) return v.length ? `${v.length} Einträge` : '— leer —';
     const keys = Object.keys(v);
     return keys.length ? keys.map(k => `${fieldLabel(k)}: ${fmtValShort(v[k])}`).join(', ') : '— leer —';
   }
