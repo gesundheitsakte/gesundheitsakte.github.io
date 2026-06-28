@@ -156,7 +156,7 @@ function renderPersonDropdown() {
   menu.innerHTML = getPersonList().map(p => `
     <div class="pd-item${p.id === currentPersonId ? ' active' : ''}"
          onclick="selectPerson('${p.id}');closePersonDropdown()">
-      <span class="pd-item-initials" style="background:${personColor(p)}">${esc(initials(p.name))}</span>
+      <span class="pd-item-initials" style="background:${personColor(p)}">${personAvatarContent(p)}</span>
       <span class="pd-item-name">${esc(p.name)}</span>
       ${p.id === currentPersonId ? '<span class="pd-item-check">✓</span>' : ''}
     </div>`).join('');

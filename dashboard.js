@@ -45,7 +45,7 @@ function renderDashboard() {
 
   panel.innerHTML = `
     <div class="person-hero">
-      <div class="person-hero-avatar" style="background:${color}">${esc(initials(person.name))}</div>
+      <div class="person-hero-avatar" style="background:${color}">${personAvatarContent(person)}</div>
       <div class="person-hero-info">
         <h2>${esc(person.name)}</h2>
         <div class="person-hero-meta">

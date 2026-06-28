@@ -39,7 +39,7 @@ function renderSettings() {
       : `<span class="person-order-btn-placeholder"></span>`;
     return `<div class="settings-person-row" id="srow-${p.id}" data-person-id="${p.id}">
       <div class="person-order-btns">${upBtn}${downBtn}</div>
-      <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${esc(initials(p.name))}</div>
+      <div class="person-avatar" style="background:${color};width:36px;height:36px;font-size:.875rem;flex-shrink:0">${personAvatarContent(p)}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:.9375rem">${esc(p.name)}</div>
         <div style="font-size:.8125rem;color:var(--text-muted)">${fmtDate(p.birthday)} · ${age}&nbsp;Jahre · ${genderLabel(p.gender)}${p.bloodType?' · '+esc(p.bloodType):''} · ${entryCnt}&nbsp;${entryCnt===1?'Eintrag':'Einträge'}</div>
@@ -302,6 +302,7 @@ function openPersonModal(person) {
 
   const isEdit = !!person;
   const p = person || { id:'person_'+Date.now(), name:'', birthday:'', gender:'male', bloodType:'' };
+  const avatarType = p.avatarType || 'icon';
 
   // Initialize counters above existing row count so new IDs never collide with rendered ones
   _condCount = (p.conditions    || []).length;
@@ -349,6 +350,22 @@ function openPersonModal(person) {
           <div class="field-group">
             <label for="pm-svnr">Sozialversicherungsnummer</label>
             <input type="text" id="pm-svnr" value="${escAttr(p.socialSecurityNumber||'')}" placeholder="z.B. 1234 010190" inputmode="numeric">
+          </div>
+          <div class="field-group full">
+            <label>Profilbild</label>
+            <div class="avatar-type-picker">
+              <button type="button" class="avatar-type-option${avatarType!=='initials'?' selected':''}"
+                      onclick="selectAvatarType('icon')" data-type="icon">
+                <div class="avatar-type-preview" style="background:${personColor(p)}">${PERSON_ICON_SVG}</div>
+                <span>Symbol</span>
+              </button>
+              <button type="button" class="avatar-type-option${avatarType==='initials'?' selected':''}"
+                      onclick="selectAvatarType('initials')" data-type="initials">
+                <div class="avatar-type-preview" style="background:${personColor(p)}">${esc(initials(p.name||'?'))}</div>
+                <span>Initialen</span>
+              </button>
+            </div>
+            <input type="hidden" id="pm-avatar-type" value="${escAttr(avatarType)}">
           </div>
           <div class="field-group full">
             <label>Farbe</label>
@@ -464,6 +481,13 @@ function allergyRow(i, a={}) {
 function syncConditionRow(){}
 function syncFamilyRow(){}
 
+function selectAvatarType(type) {
+  document.getElementById('pm-avatar-type').value = type;
+  document.querySelectorAll('.avatar-type-option').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.type === type);
+  });
+}
+
 function selectPersonColor(color) {
   document.getElementById('pm-color').value = color;
   document.querySelectorAll('#pm-color-picker .person-color-swatch').forEach(s => {
@@ -513,7 +537,8 @@ function savePersonModal(id, isEdit) {
   const gender   = document.getElementById('pm-gender')?.value;
   const blood    = document.getElementById('pm-blood')?.value;
   const svnr     = document.getElementById('pm-svnr')?.value.trim();
-  const color    = document.getElementById('pm-color')?.value || null;
+  const color      = document.getElementById('pm-color')?.value || null;
+  const avatarType = document.getElementById('pm-avatar-type')?.value || 'icon';
 
   if (!name)     { showToast('Bitte einen Namen eingeben','error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben','error'); return; }
@@ -526,6 +551,7 @@ function savePersonModal(id, isEdit) {
     bloodType: blood || null,
     socialSecurityNumber: svnr || null,
     color: color || null,
+    avatarType: avatarType === 'initials' ? 'initials' : null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),

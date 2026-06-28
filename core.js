@@ -161,6 +161,10 @@ function avatarColor(pid) {
 function personColor(p) {
   return p.color || avatarColor(p.id);
 }
+const PERSON_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:100%;height:100%;display:block;fill:var(--bg)"><path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd"/></svg>`;
+function personAvatarContent(p) {
+  return p.avatarType === 'initials' ? esc(initials(p.name)) : PERSON_ICON_SVG;
+}
 // Returns the AVATAR_COLORS entry with the maximum RGB distance from hex — used
 // to pick a second graph line colour that contrasts well with the accent.
 function pickContrastColor(hex) {
