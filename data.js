@@ -337,13 +337,40 @@ function generateAndPrint() {
   .visit-doc  { font-weight: 500; width: 4cm; }
   .footer     { margin-top: .6cm; font-size: 8pt; color: #aaa; border-top: 1px solid #eee;
                 padding-top: .25cm; display: flex; justify-content: space-between; }
+  .back-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: .5rem 1rem;
+    background: #f0f4f8;
+    border-bottom: 1px solid #d0d7de;
+    z-index: 999;
+  }
+  .back-bar button {
+    background: #2C6E8F;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .45rem .9rem;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  @media screen {
+    body { padding-top: calc(1.5cm + 2.5rem); }
+  }
   @media print {
+    .back-bar { display: none; }
     body { padding: 0; }
     @page { margin: 1.5cm 1.8cm; size: A4 portrait; }
   }
 </style>
 </head>
 <body>
+
+<div class="back-bar">
+  <button onclick="window.close()">✕&nbsp;Schließen</button>
+</div>
 
   <h1>${esc(person.name)}</h1>
   <p class="meta">
