@@ -490,7 +490,11 @@ function openPersonModal(person, scrollTo) {
       const scrollBox = modal.querySelector('.modal');
       const target = document.getElementById(targetId);
       const header = scrollBox?.querySelector('.modal-header');
-      if (scrollBox && target) scrollBox.scrollTop = target.offsetTop - (header?.offsetHeight ?? 0);
+      if (scrollBox && target) {
+        scrollBox.scrollTop = target.offsetTop - (header?.offsetHeight ?? 0);
+        target.classList.add('section-glow');
+        target.addEventListener('animationend', () => target.classList.remove('section-glow'), { once: true });
+      }
     });
   }
   // Close on backdrop click
