@@ -501,7 +501,7 @@ async function exportData() {
   const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`
               + `_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
   a.href = u;
-  a.download = `health-data-${stamp}.${extension}`;
+  a.download = `gesundheitsakte-${stamp}.${extension}`;
   a.click();
   URL.revokeObjectURL(u);
 

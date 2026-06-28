@@ -106,7 +106,7 @@ function renderSettings() {
         <button class="btn btn-ghost settings-action-btn" onclick="backToLanding()">Andere Datenbank laden</button>
       </div>
       <p class="field-hint">
-        Der Export erzeugt eine JSON-Datei mit Zeitstempel (z.B. health-data-2026-06-22_14-30-45.json),
+        Der Export erzeugt eine JSON-Datei mit Zeitstempel (z.B. gesundheitsakte-2026-06-22_14-30-45.json),
         die du beim nächsten Mal wieder laden kannst.
       </p>
       ${renderDatabaseStats()}
