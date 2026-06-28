@@ -5,8 +5,8 @@
 
    Ablauf:
      1. Nutzer wählt das von Apple Health erzeugte export.zip
-     2. fflate entpackt browserseitig nur die export.xml
-     3. DOMParser liest die <Record>-Elemente
+     2. fflate entpackt browserseitig asynchron nur die export.xml
+     3. Regex-Scanner liest <Record>-Elemente ohne DOMParser
      4. Mapping (APPLE_HEALTH_MAP in config.js) filtert relevante Typen
      5. Pro Tag + Metrik wird nur der ERSTE Wert übernommen
      6. Bereits importierte Tage (Marker) und Tage mit bestehendem Wert
@@ -44,7 +44,7 @@ async function handleHealthFile(inputEl) {
   showToast('Apple-Health-Export wird verarbeitet…');
   try {
     const buf = new Uint8Array(await file.arrayBuffer());
-    const xml = extractHealthXml(buf);
+    const xml = await extractHealthXml(buf);
     if (!xml) { showToast('Keine export.xml im ZIP gefunden', 'error'); return; }
     _healthParsed = parseHealthXml(xml);
     if (_healthParsed.total === 0) {
@@ -58,44 +58,60 @@ async function handleHealthFile(inputEl) {
   }
 }
 
-// Entpackt nur die export.xml aus dem ZIP (per Filter — spart Speicher).
+// Entpackt nur die export.xml aus dem ZIP — asynchron via fflate.unzip,
+// damit der Haupt-Thread während der Dekompression nicht blockiert.
 function extractHealthXml(buf) {
-  const out = fflate.unzipSync(buf, {
-    filter: f => /(^|\/)export\.xml$/i.test(f.name),
+  return new Promise((resolve, reject) => {
+    try {
+      fflate.unzip(buf, {
+        filter: f => /(^|\/)export\.xml$/i.test(f.name),
+      }, (err, out) => {
+        if (err) { reject(err); return; }
+        const name = Object.keys(out).find(n => /export\.xml$/i.test(n));
+        if (!name) { resolve(null); return; }
+        try { resolve(new TextDecoder().decode(out[name])); }
+        catch (e) { reject(e); }
+      });
+    } catch (e) { reject(e); }
   });
-  const name = Object.keys(out).find(n => /export\.xml$/i.test(n));
-  return name ? fflate.strFromU8(out[name]) : null;
 }
 
 // ── XML parsen ────────────────────────────────────
 // Liefert { byMetric: { metricKey: [{date:'YYYY-MM-DD', value:Number}] (sortiert) },
 //           total, range:{from,to} }
+// Verwendet Regex statt DOMParser, um keinen großen DOM-Baum im Speicher aufzubauen.
 // "Erster Wert pro Tag": pro Metrik+Tag wird der früheste startDate-Eintrag genommen.
-function parseHealthXml(xmlText) {
-  const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
-  const records = doc.getElementsByTagName('Record');
 
-  // pro Metrik: Map<date, {value, ts}>  (ts = Zeitstempel zum "erster Wert"-Vergleich)
+// Vorcompilierte Attribute-Regex für Record-Elemente
+const _HX_RECORD = /<Record\b([^>]*)/g;
+const _HX_TYPE   = /\btype="([^"]*)"/;
+const _HX_START  = /\bstartDate="([^"]*)"/;
+const _HX_VAL    = /\bvalue="([^"]*)"/;
+const _HX_UNIT   = /\bunit="([^"]*)"/;
+
+function parseHealthXml(xmlText) {
   const acc = {};
 
-  for (let i = 0; i < records.length; i++) {
-    const r = records[i];
-    const type = r.getAttribute('type');
-    const map = APPLE_HEALTH_MAP[type];
+  _HX_RECORD.lastIndex = 0;
+  let m;
+  while ((m = _HX_RECORD.exec(xmlText)) !== null) {
+    const attrs = m[1];
+    const type  = _HX_TYPE.exec(attrs)?.[1];
+    const map   = APPLE_HEALTH_MAP[type];
     if (!map) continue;
 
-    const rawStart = r.getAttribute('startDate'); // z.B. "2025-01-10 08:00:00 +0100"
-    const rawVal   = r.getAttribute('value');
-    const unit     = r.getAttribute('unit') || '';
+    const rawStart = _HX_START.exec(attrs)?.[1];
+    const rawVal   = _HX_VAL.exec(attrs)?.[1];
+    const unit     = _HX_UNIT.exec(attrs)?.[1] || '';
     if (!rawStart || rawVal == null) continue;
 
-    const value = parseFloat(String(rawVal).replace(',', '.'));
+    const value = parseFloat(rawVal.replace(',', '.'));
     if (!isFinite(value)) continue;
 
-    const date = rawStart.slice(0, 10);          // YYYY-MM-DD
-    const ts   = appleDateToTs(rawStart);
-    const conv = appleHealthConvert(map.metric, value, unit);
-    const rounded = Math.round(conv * 100) / 100; // 2 Nachkommastellen
+    const date    = rawStart.slice(0, 10);          // YYYY-MM-DD
+    const ts      = appleDateToTs(rawStart);
+    const conv    = appleHealthConvert(map.metric, value, unit);
+    const rounded = Math.round(conv * 100) / 100;
 
     if (!acc[map.metric]) acc[map.metric] = new Map();
     const cur = acc[map.metric].get(date);
