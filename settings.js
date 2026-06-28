@@ -354,10 +354,15 @@ function openPersonModal(person) {
           <div class="field-group full">
             <label>Profilbild</label>
             <div class="avatar-type-picker">
-              <button type="button" class="avatar-type-option${avatarType!=='initials'?' selected':''}"
+              <button type="button" class="avatar-type-option${avatarType==='icon'||!avatarType?' selected':''}"
                       onclick="selectAvatarType('icon')" data-type="icon">
                 <div class="avatar-type-preview" style="background:${personColor(p)}">${PERSON_ICON_SVG}</div>
                 <span>Symbol</span>
+              </button>
+              <button type="button" class="avatar-type-option${avatarType==='smile'?' selected':''}"
+                      onclick="selectAvatarType('smile')" data-type="smile">
+                <div class="avatar-type-preview" style="background:${personColor(p)}">${PERSON_SMILE_SVG}</div>
+                <span>Smiley</span>
               </button>
               <button type="button" class="avatar-type-option${avatarType==='initials'?' selected':''}"
                       onclick="selectAvatarType('initials')" data-type="initials">
@@ -551,7 +556,7 @@ function savePersonModal(id, isEdit) {
     bloodType: blood || null,
     socialSecurityNumber: svnr || null,
     color: color || null,
-    avatarType: avatarType === 'initials' ? 'initials' : null,
+    avatarType: ['initials', 'smile'].includes(avatarType) ? avatarType : null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),
