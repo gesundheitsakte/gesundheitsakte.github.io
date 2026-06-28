@@ -46,9 +46,10 @@ function renderDashboard() {
   while (tileData.length < 4) tileData.push(null);
   const tiles = tileData.map(item => {
     if (!item) return statTile('—', '—', '', 'Noch kein Wert');
-    if (!item.last) return statTile(item.m.label, '—', '', 'Noch kein Wert', item.m.key);
+    const pinned = favKeys.includes(item.m.key);
+    if (!item.last) return statTile(item.m.label, '—', '', 'Noch kein Wert', item.m.key, '', pinned);
     const isCat = item.m.type === 'boolean' || item.m.type === 'select';
-    return statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), isCat ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key);
+    return statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), isCat ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key, '', pinned);
   }).join('');
 
   panel.innerHTML = `
@@ -264,12 +265,20 @@ function formatMetricValue(key, value) {
   return value;
 }
 
-function statTile(label, value, unit, sub, metricKey, arrow) {
+const _PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>`;
+
+function statTile(label, value, unit, sub, metricKey, arrow, pinned) {
   const clickable = metricKey && value !== '—';
   const empty     = value === '—';
+  const cls = ['stat-tile'];
+  if (clickable)  cls.push('stat-tile--clickable');
+  if (empty)      cls.push('stat-tile--empty');
+  if (pinned)     cls.push('stat-tile--pinned');
+  const emptyAttrs = empty ? 'onclick="nudgeEmptyTile(this)" role="button" tabindex="0"' : '';
   const attrs = clickable
-    ? `onclick="openMetricDiagram('${metricKey}')" class="stat-tile stat-tile--clickable"`
-    : `class="stat-tile${empty ? ' stat-tile--empty' : ''}" ${empty ? 'onclick="nudgeEmptyTile(this)" role="button" tabindex="0"' : ''}`;  const targetVal = getTarget(currentPersonId, metricKey || '');
+    ? `onclick="openMetricDiagram('${metricKey}')" class="${cls.join(' ')}"`
+    : `class="${cls.join(' ')}" ${emptyAttrs}`;
+  const targetVal = getTarget(currentPersonId, metricKey || '');
   const tUnit = metricDef(metricKey)?.unit ? ' '+metricDef(metricKey).unit : '';
   const def = metricDef(metricKey);
   const noTarget = def?.type === 'boolean' || def?.type === 'select';
@@ -278,8 +287,9 @@ function statTile(label, value, unit, sub, metricKey, arrow) {
               onclick="event.stopPropagation();openTargetDialog('${metricKey}')"
               title="${targetVal !== null ? esc('Ziel: '+targetVal+tUnit) : 'Zielwert setzen'}">${targetVal !== null ? '◉' : '◎'}</button>`
     : '';
+  const pinEl = pinned ? `<span class="pin-indicator" title="Favorit">${_PIN_SVG}</span>` : '';
   return `<div ${attrs} style="position:relative">
-    ${targetBtn}
+    ${pinEl}${targetBtn}
     <div class="stat-label">${esc(label)}</div>
     <div class="stat-value">${esc(value)}${unit?`<span class="stat-unit">${esc(unit)}</span>`:''}${arrow||''}</div>
     <div class="stat-sub">${esc(sub)}</div>

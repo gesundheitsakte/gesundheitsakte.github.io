@@ -1757,6 +1757,19 @@ input.hf-search {
 }
 
 /* ── Target button on stat tile ─────────────── */
+.pin-indicator {
+  position: absolute;
+  top: .6rem;
+  right: .4rem;
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  opacity: .65;
+  pointer-events: none;
+}
+.pin-indicator svg { width: 100%; height: 100%; display: block; }
+.stat-tile--pinned .target-btn { right: 1.5rem; }
+
 .target-btn {
   position: absolute;
   top: .5rem;
