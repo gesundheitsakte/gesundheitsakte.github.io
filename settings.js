@@ -433,6 +433,23 @@ function openPersonModal(person, scrollTo) {
             </div>
             <input type="hidden" id="pm-color" value="${escAttr(p.color||avatarColor(p.id))}">
           </div>
+          <div class="field-group full">
+            <label>Favoriten <span class="fav-metric-label-hint">(bis zu 4 Messwerte immer oben im Dashboard)</span></label>
+            <div class="fav-metric-picker" id="pm-fav-picker">
+              ${(()=>{
+                const favs = p.favoriteMetrics || [];
+                const groups = [...new Set(allMetrics().map(m => m.group))];
+                return groups.map(g => {
+                  const chips = allMetrics().filter(m => m.group === g).map(m =>
+                    `<button type="button" class="fav-metric-chip${favs.includes(m.key)?' selected':''}"
+                             onclick="toggleFavMetric('${escAttr(m.key)}')" data-key="${escAttr(m.key)}">${esc(m.label)}</button>`
+                  ).join('');
+                  return `<div class="fav-metric-group"><span class="fav-metric-group-label">${esc(g)}</span><div class="fav-metric-chips">${chips}</div></div>`;
+                }).join('');
+              })()}
+            </div>
+            <input type="hidden" id="pm-fav-metrics" value="${escAttr(JSON.stringify(p.favoriteMetrics || []))}">
+          </div>
         </div>
         <div id="pm-section-conditions" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
@@ -564,6 +581,21 @@ function selectAvatarType(type) {
   });
 }
 
+function toggleFavMetric(key) {
+  const input = document.getElementById('pm-fav-metrics');
+  let favs = JSON.parse(input.value || '[]');
+  if (favs.includes(key)) {
+    favs = favs.filter(k => k !== key);
+  } else {
+    if (favs.length >= 4) { showToast('Maximal 4 Favoriten möglich', 'info'); return; }
+    favs.push(key);
+  }
+  input.value = JSON.stringify(favs);
+  document.querySelectorAll('#pm-fav-picker .fav-metric-chip').forEach(btn => {
+    btn.classList.toggle('selected', favs.includes(btn.dataset.key));
+  });
+}
+
 function selectPersonColor(color) {
   document.getElementById('pm-color').value = color;
   document.querySelectorAll('#pm-color-picker .person-color-swatch').forEach(s => {
@@ -615,6 +647,7 @@ function savePersonModal(id, isEdit) {
   const svnr     = document.getElementById('pm-svnr')?.value.trim();
   const color      = document.getElementById('pm-color')?.value || null;
   const avatarType = document.getElementById('pm-avatar-type')?.value || 'icon';
+  const favMetrics = JSON.parse(document.getElementById('pm-fav-metrics')?.value || '[]');
 
   if (!name)     { showToast('Bitte einen Namen eingeben','error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben','error'); return; }
@@ -628,6 +661,7 @@ function savePersonModal(id, isEdit) {
     socialSecurityNumber: svnr || null,
     color: color || null,
     avatarType: ['initials', 'smile'].includes(avatarType) ? avatarType : null,
+    favoriteMetrics: favMetrics.length ? favMetrics : null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),

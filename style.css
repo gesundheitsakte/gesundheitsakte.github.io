@@ -104,6 +104,15 @@ small { font-size: .8125rem; color: var(--text-muted); }
   font-size: .875rem; font-weight: 700; color: #fff;
 }
 
+/* ── Favoriten-Picker ───────────────────────── */
+.fav-metric-label-hint { font-weight: 400; font-size: .8rem; color: var(--text-muted); }
+.fav-metric-picker { display: flex; flex-direction: column; gap: .5rem; }
+.fav-metric-group { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.fav-metric-group-label { font-size: .7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; min-width: 5.5rem; flex-shrink: 0; }
+.fav-metric-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.fav-metric-chip { padding: .2rem .6rem; border: 1.5px solid var(--border); border-radius: 999px; background: none; cursor: pointer; font-size: .75rem; color: var(--text-muted); transition: border-color .12s, color .12s, background .12s; }
+.fav-metric-chip.selected { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 600; }
+
 /* ── Subnav ──────────────────────────────────── */
 .subnav-wrapper {
   position: sticky;

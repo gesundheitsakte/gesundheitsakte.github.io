@@ -25,23 +25,31 @@ function renderDashboard() {
   const statuses   = myCheckups.map(c=>({checkup:c,...checkupStatus(c,currentPersonId)}));
   const alerts     = statuses.filter(s=>s.status!=='ok');
 
-  // Quick-stat tiles: die 4 zuletzt aktualisierten Messwerte
+  // Quick-stat tiles: Favoriten zuerst, danach zuletzt aktualisierte (ohne Duplikate)
+  const favKeys = person.favoriteMetrics || [];
+  const favTiles = favKeys.map(key => {
+    const m = metricDef(key);
+    if (!m) return null;
+    return { m, last: lastMetricValue(currentPersonId, key) };
+  }).filter(Boolean);
+
   const recentlyUpdated = allMetrics()
+    .filter(m => !favKeys.includes(m.key))
     .map(m => ({ m, last: lastMetricValue(currentPersonId, m.key) }))
     .filter(({ last }) => last !== null)
-    .sort((a, b) => new Date(b.last.date) - new Date(a.last.date))
-    .slice(0, 4);
+    .sort((a, b) => new Date(b.last.date) - new Date(a.last.date));
 
   const hasAnyEntries = DATA.entries.some(e => e.personId === currentPersonId);
 
   // Immer genau 4 Tiles — fehlende mit Platzhaltern auffüllen
-  const tileData = [...recentlyUpdated];
+  const tileData = [...favTiles, ...recentlyUpdated].slice(0, 4);
   while (tileData.length < 4) tileData.push(null);
-  const tiles = tileData.map(item =>
-    item
-      ? statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), item.m.type === 'boolean' || item.m.type === 'select' ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key)
-      : statTile('—', '—', '', 'Noch kein Wert')
-  ).join('');
+  const tiles = tileData.map(item => {
+    if (!item) return statTile('—', '—', '', 'Noch kein Wert');
+    if (!item.last) return statTile(item.m.label, '—', '', 'Noch kein Wert', item.m.key);
+    const isCat = item.m.type === 'boolean' || item.m.type === 'select';
+    return statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), isCat ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key);
+  }).join('');
 
   panel.innerHTML = `
     <div class="person-hero">
