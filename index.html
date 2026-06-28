@@ -44,7 +44,10 @@
   <header class="topbar">
     <div class="topbar-brand">
       <div class="logo-wrap">
-        <img src="icons/icon-192.png" class="logo-img" alt="Gesundheitsakte">
+        <svg id="logo-svg" class="logo-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" aria-label="Gesundheitsakte">
+          <rect id="logo-bg" width="1000" height="1000" fill="#1B3A5B"/>
+          <path fill="#ffffff" d="M 500 762 C 500 762 188 539 188 363 C 188 273 258 215 342 215 C 410 215 469 258 500 313 C 531 258 590 215 658 215 C 742 215 813 273 813 363 C 813 539 500 762 500 762 Z"/>
+        </svg>
         <span class="unsaved-dot" id="unsaved-dot" style="display:none"
               title="Nicht exportierte Änderungen vorhanden"></span>
       </div>
@@ -133,6 +136,6 @@
 <script src="data.js?v=5"></script>
 <script src="merge.js?v=3"></script>
 <script src="health-import.js?v=2"></script>
-<script src="navigation.js?v=6"></script>
+<script src="navigation.js?v=7"></script>
 </body>
 </html>

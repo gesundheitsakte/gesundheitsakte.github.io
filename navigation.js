@@ -433,12 +433,15 @@ function applyPersonAccent() {
   const person = getPersonList().find(p => p.id === currentPersonId);
   const hex    = person ? personColor(person) : null;
   const root   = document.documentElement;
+  const logoBg = document.getElementById('logo-bg');
   if (!hex || hex.length < 7) {
     root.style.removeProperty('--accent');
     root.style.removeProperty('--accent-light');
     root.style.removeProperty('--accent-2');
+    if (logoBg) logoBg.setAttribute('fill', '#1B3A5B');
     return;
   }
+  if (logoBg) logoBg.setAttribute('fill', hex);
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
