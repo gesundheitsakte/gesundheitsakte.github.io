@@ -347,7 +347,7 @@ function openEditPerson(id) {
   if (p) openPersonModal(p);
 }
 
-function openPersonModal(person) {
+function openPersonModal(person, scrollTo) {
   // Remove any existing modal
   document.getElementById('person-modal')?.remove();
 
@@ -434,35 +434,35 @@ function openPersonModal(person) {
             <input type="hidden" id="pm-color" value="${escAttr(p.color||avatarColor(p.id))}">
           </div>
         </div>
-        <div style="margin-top:1rem">
+        <div id="pm-section-conditions" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
           <div id="pm-conditions">
             ${(p.conditions||[]).map((c,i)=>conditionRow(i,c)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addConditionRow()">+ Leiden hinzufügen</button>
         </div>
-        <div style="margin-top:1rem">
+        <div id="pm-section-family" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Familiengeschichte</div>
           <div id="pm-family">
             ${(p.familyHistory||[]).map((f,i)=>familyRow(i,f)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addFamilyRow()">+ Eintrag hinzufügen</button>
         </div>
-        <div style="margin-top:1rem">
+        <div id="pm-section-medications" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Medikamente</div>
           <div id="pm-medications">
             ${(p.medications||[]).map((m,i)=>medicationRow(i,m)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addMedicationRow()">+ Medikament hinzufügen</button>
         </div>
-        <div style="margin-top:1rem">
+        <div id="pm-section-vaccinations" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Impfungen</div>
           <div id="pm-vaccinations">
             ${(p.vaccinations||[]).map((v,i)=>vaccinationRow(i,v)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addVaccinationRow()">+ Impfung hinzufügen</button>
         </div>
-        <div style="margin-top:1rem">
+        <div id="pm-section-allergies" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Allergien</div>
           <div id="pm-allergies">
             ${(p.allergies||[]).map((a,i)=>allergyRow(i,a)).join('')}
@@ -477,6 +477,22 @@ function openPersonModal(person) {
     </div>`;
 
   document.body.appendChild(modal);
+  if (scrollTo) {
+    const sectionMap = {
+      conditions:  'pm-section-conditions',
+      family:      'pm-section-family',
+      medications: 'pm-section-medications',
+      vaccinations:'pm-section-vaccinations',
+      allergies:   'pm-section-allergies',
+    };
+    const targetId = sectionMap[scrollTo];
+    if (targetId) requestAnimationFrame(() => {
+      const scrollBox = modal.querySelector('.modal');
+      const target = document.getElementById(targetId);
+      const header = scrollBox?.querySelector('.modal-header');
+      if (scrollBox && target) scrollBox.scrollTop = target.offsetTop - (header?.offsetHeight ?? 0);
+    });
+  }
   // Close on backdrop click
   modal.addEventListener('click', e => { if (e.target===modal) closePersonModal(); });
 }
