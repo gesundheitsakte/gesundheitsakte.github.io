@@ -845,6 +845,16 @@ function renderMetricTable(data, def) {
   const norm = resolveNormalRange(def?.key ?? '', currentPersonId);
   const isNumeric = def?.type !== 'boolean' && def?.type !== 'select';
   const valStyle  = isNumeric ? ' style="font-family:var(--font-mono);text-align:right"' : '';
+
+  // Global min/max for (min)/(max) labels — only meaningful with 2+ distinct values
+  let globalMin = null, globalMax = null;
+  if (isNumeric && data.length > 1) {
+    const vals = data.map(d => d.value);
+    globalMin = Math.min(...vals);
+    globalMax = Math.max(...vals);
+    if (globalMin === globalMax) { globalMin = null; globalMax = null; }
+  }
+
   const rows = sorted.map((d, sortedIdx) => {
     // sortedIdx 0 = neuester Eintrag = data[data.length-1] = letzter Dot
     const dotIndex = data.length - 1 - sortedIdx;
@@ -853,19 +863,24 @@ function renderMetricTable(data, def) {
       const effectiveMin = norm.min === 0 ? -Infinity : norm.min;
       const effectiveMax = norm.max >= 900 ?  Infinity : norm.max;
       if (d.value > effectiveMax)
-        indicator = ' <span class="range-arrow range-arrow-high" title="Über dem Normwert">↑</span>';
+        indicator = '<span class="range-arrow range-arrow-high" title="Über dem Normwert">↑</span> ';
       else if (d.value < effectiveMin)
-        indicator = ' <span class="range-arrow range-arrow-low"  title="Unter dem Normwert">↓</span>';
+        indicator = '<span class="range-arrow range-arrow-low"  title="Unter dem Normwert">↓</span> ';
     }
+    const extremeTag = isNumeric
+      ? (d.value === globalMax ? '<span class="extreme-tag extreme-tag-max">(max)</span> '
+       : d.value === globalMin ? '<span class="extreme-tag extreme-tag-min">(min)</span> '
+       : '')
+      : '';
     return `<tr data-dot="${dotIndex}"
                onmouseenter="highlightDot(${dotIndex})"
                onmouseleave="clearDotHighlight()">
       <td>${fmtDate(d.date)}</td>
-      <td${valStyle}>${indicator}${esc(String(d.value))}</td>
-      ${isNumeric ? `<td style="color:var(--text-muted)">${esc(def?.unit??'')}</td>` : ''}
+      <td${valStyle}>${extremeTag}${indicator}${esc(String(d.value))}</td>
+      ${isNumeric ? `<td class="metric-table-unit">${esc(def?.unit??'')}</td>` : ''}
     </tr>`;
   }).join('');
-  const unitHead = isNumeric ? '<th>Einheit</th>' : '';
+  const unitHead = isNumeric ? '<th class="metric-table-unit">Einheit</th>' : '';
   return `<table class="metric-table">
     <thead><tr><th>Datum</th><th${isNumeric ? ' style="text-align:right"' : ''}>Wert</th>${unitHead}</tr></thead>
     <tbody>${rows}</tbody>

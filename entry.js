@@ -17,6 +17,18 @@ let activeFormMetrics = new Set();  // keys of selected predefined metrics
 let customMetrics     = [];         // [{key, label, unit}] user-defined this session
 let entryMode         = 'doctor';   // 'doctor' | 'self'
 let editingEntryId    = null;       // gesetzt wenn ein Eintrag bearbeitet wird
+let _entryAbort       = null;       // AbortController for the panel keyboard listener
+
+function _entryKeyHandler(e) {
+  if (document.querySelector('.tab-btn.active')?.id !== 'tab-entry') return;
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    saveEntry();
+  } else if (e.key === 'Escape' && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (editingEntryId) cancelEditEntry(); else renderEntryForm();
+  }
+}
 
 function renderEntryForm(editEntry = null) {
   const panel   = document.getElementById('panel-entry');
@@ -117,7 +129,10 @@ function renderEntryForm(editEntry = null) {
           <div class="form-grid">
             <div class="field-group">
               <label for="entry-doctor">Arzt / Facharzt</label>
-              <input type="text" id="entry-doctor" autocomplete="off" placeholder="z.B. Dr. Huber, Hausarzt" value="${isEdit?escAttr(editEntry.doctor||''):''}">
+              <input type="text" id="entry-doctor" list="doctor-suggestions" autocomplete="off" placeholder="z.B. Dr. Huber, Hausarzt" value="${isEdit?escAttr(editEntry.doctor||''):''}">
+              <datalist id="doctor-suggestions">
+                ${[...new Set(DATA.entries.filter(e=>e.doctor?.trim()).map(e=>e.doctor.trim()))].map(d=>`<option value="${escAttr(d)}">`).join('')}
+              </datalist>
             </div>
             <div class="field-group">
               <label for="entry-reason">Grund des Besuchs</label>
@@ -170,6 +185,14 @@ function renderEntryForm(editEntry = null) {
         <button class="btn btn-primary" onclick="saveEntry()">${isEdit?'Änderungen speichern':'Speichern'}</button>
       </div>
     </div>`;
+
+  // Keyboard shortcuts: Ctrl+Enter saves, Escape resets/cancels
+  if (_entryAbort) _entryAbort.abort();
+  _entryAbort = new AbortController();
+  document.addEventListener('keydown', _entryKeyHandler, { signal: _entryAbort.signal });
+
+  // Auto-focus first field
+  requestAnimationFrame(() => document.getElementById('entry-date')?.focus());
 
   // Nach dem Rendern: beim Bearbeiten die Felder befüllen
   if (isEdit) {
@@ -421,6 +444,28 @@ function saveEntry() {
       };
     }
   });
+
+  // Warn if any of these metrics already exist for this person on this date
+  if (!editingEntryId) {
+    const filledKeys = Object.keys(metrics).filter(k =>
+      metrics[k] !== '' && metrics[k] !== null && metrics[k] !== undefined
+    );
+    if (filledKeys.length > 0) {
+      const conflicts = filledKeys.filter(k =>
+        DATA.entries.some(e =>
+          e.personId === currentPersonId &&
+          e.date === date &&
+          e.metrics?.[k] !== undefined && e.metrics?.[k] !== null && e.metrics?.[k] !== ''
+        )
+      );
+      if (conflicts.length > 0) {
+        const names = conflicts.map(k => metricDef(k)?.label ?? k).join(', ');
+        if (!confirm(`Für den ${fmtDate(date)} gibt es bereits Werte für: ${names}.\nTrotzdem speichern?`)) {
+          return;
+        }
+      }
+    }
+  }
 
   const isDoctor = entryMode === 'doctor';
 

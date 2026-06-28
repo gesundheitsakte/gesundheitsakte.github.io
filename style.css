@@ -1841,6 +1841,20 @@ input.hf-search {
 }
 .range-arrow-high { color: var(--danger); }
 .range-arrow-low  { color: var(--danger); }
+.extreme-tag {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  margin-right: .3rem;
+  white-space: nowrap;
+}
+.extreme-tag-max { color: var(--danger); }
+.extreme-tag-min { color: var(--accent); }
+.metric-table-unit {
+  width: 1%;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
 
 /* ── Header icon buttons (fixed size, SVG inside) ── */
 .icon-btn {
