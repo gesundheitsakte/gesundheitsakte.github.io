@@ -243,8 +243,14 @@ function buildTabs() {
   };
   nav.addEventListener('scroll', updateScrollFade, { passive: true });
   window.addEventListener('resize', updateScrollFade, { passive: true });
+
+  const updateStickyOffset = () => {
+    const wrapper = document.getElementById('subnav-wrapper');
+    if (wrapper) document.documentElement.style.setProperty('--subnav-bottom', (60 + wrapper.offsetHeight) + 'px');
+  };
+  window.addEventListener('resize', updateStickyOffset, { passive: true });
   // Initial check after DOM settles
-  requestAnimationFrame(updateScrollFade);
+  requestAnimationFrame(() => { updateScrollFade(); updateStickyOffset(); });
 }
 
 function moveIndicator(tabId) {
