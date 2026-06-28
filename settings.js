@@ -433,23 +433,23 @@ function openPersonModal(person, scrollTo) {
             </div>
             <input type="hidden" id="pm-color" value="${escAttr(p.color||avatarColor(p.id))}">
           </div>
-          <div class="field-group full">
-            <label>Favoriten <span class="fav-metric-label-hint">(bis zu 4 Messwerte immer oben im Dashboard)</span></label>
-            <div class="fav-metric-picker" id="pm-fav-picker">
-              ${(()=>{
-                const favs = p.favoriteMetrics || [];
-                const groups = [...new Set(allMetrics().map(m => m.group))];
-                return groups.map(g => {
-                  const chips = allMetrics().filter(m => m.group === g).map(m =>
-                    `<button type="button" class="fav-metric-chip${favs.includes(m.key)?' selected':''}"
-                             onclick="toggleFavMetric('${escAttr(m.key)}')" data-key="${escAttr(m.key)}">${esc(m.label)}</button>`
-                  ).join('');
-                  return `<div class="fav-metric-group"><span class="fav-metric-group-label">${esc(g)}</span><div class="fav-metric-chips">${chips}</div></div>`;
-                }).join('');
-              })()}
-            </div>
-            <input type="hidden" id="pm-fav-metrics" value="${escAttr(JSON.stringify(p.favoriteMetrics || []))}">
+        </div>
+        <div id="pm-section-favorites" style="margin-top:1rem">
+          <div class="form-section-title" style="margin-bottom:.75rem">Favoriten <span class="fav-metric-label-hint">(bis zu 4 Messwerte immer oben im Dashboard)</span></div>
+          <div class="fav-metric-picker" id="pm-fav-picker">
+            ${(()=>{
+              const favs = p.favoriteMetrics || [];
+              const groups = [...new Set(allMetrics().map(m => m.group))];
+              return groups.map(g => {
+                const chips = allMetrics().filter(m => m.group === g).map(m =>
+                  `<button type="button" class="fav-metric-chip${favs.includes(m.key)?' selected':''}"
+                           onclick="toggleFavMetric('${escAttr(m.key)}')" data-key="${escAttr(m.key)}">${esc(m.label)}</button>`
+                ).join('');
+                return `<div class="fav-metric-group"><span class="fav-metric-group-label">${esc(g)}</span><div class="fav-metric-chips">${chips}</div></div>`;
+              }).join('');
+            })()}
           </div>
+          <input type="hidden" id="pm-fav-metrics" value="${escAttr(JSON.stringify(p.favoriteMetrics || []))}">
         </div>
         <div id="pm-section-conditions" style="margin-top:1rem">
           <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
