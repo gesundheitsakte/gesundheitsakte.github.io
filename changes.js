@@ -51,7 +51,7 @@ function _renderDiffHtml(diff) {
   if (!diff.length) return '<span class="diff-ctx">(keine Unterschiede)</span>';
   if (diff[0].type === 'info') return `<span class="diff-info">${esc(diff[0].line)}</span>`;
 
-  const CONTEXT = 3;
+  const CONTEXT = 2;
   const changed = new Set();
   diff.forEach((l, i) => { if (l.type !== 'ctx') changed.add(i); });
 
