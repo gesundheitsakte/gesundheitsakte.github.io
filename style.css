@@ -890,7 +890,11 @@ textarea { resize: vertical; min-height: 80px; }
   display: flex;
   gap: .5rem;
   align-items: center;
-  margin-bottom: .5rem;
+  padding: .5rem .625rem;
+  margin-bottom: .375rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 .inline-row input {
   flex: 1;
@@ -962,8 +966,7 @@ textarea { resize: vertical; min-height: 80px; }
 @media (max-width: 640px) {
   .settings-person-row { flex-wrap: wrap; }
   .settings-person-row > div:last-child { width: 100%; }
-  .inline-row { flex-wrap: wrap; }
-  .inline-row input { min-width: 100px; }
+  .inline-row { overflow-x: auto; }
 }
 
 /* ── Entry mode toggle ───────────────────────── */
