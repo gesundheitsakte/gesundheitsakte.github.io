@@ -2007,7 +2007,7 @@ input.hf-search {
   overflow-x: auto;
   font-family: 'JetBrains Mono', 'Fira Mono', monospace;
   font-size: .75rem;
-  line-height: 1.5;
+  line-height: 1.;
   white-space: pre;
 }
 .diff-block code { display: block; }
