@@ -331,7 +331,8 @@ function renderAlerts(alerts) {
 function renderCheckupItem({checkup,status,label,lastDate}) {
   const dc = {ok:'dot-ok',warning:'dot-warning',overdue:'dot-overdue'}[status]??'dot-na';
   const bc = {ok:'badge-ok',warning:'badge-warning',overdue:'badge-overdue'}[status]??'badge-na';
-  const every = checkup.intervalMonths>=12
+  const everyYears = checkup.intervalMonths % 12 === 0 && checkup.intervalMonths > 12;
+  const every = everyYears
     ? `alle&nbsp;${checkup.intervalMonths/12}&nbsp;Jahr${checkup.intervalMonths/12>1?'e':''}`
     : `alle&nbsp;${checkup.intervalMonths}&nbsp;Monate`;
   const contact = [
