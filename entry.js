@@ -215,9 +215,6 @@ function renderEntryForm(editEntry = null) {
   _entryAbort = new AbortController();
   document.addEventListener('keydown', _entryKeyHandler, { signal: _entryAbort.signal });
 
-  // Auto-focus first field
-  requestAnimationFrame(() => document.getElementById('entry-date')?.focus());
-
   // Nach dem Rendern: beim Bearbeiten die Felder befüllen
   if (isEdit) {
     // Pills aktivieren + Felder bauen
