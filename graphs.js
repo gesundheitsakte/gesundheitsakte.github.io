@@ -137,6 +137,7 @@ function renderGraphs() {
             <button class="btn btn-ghost btn-sm bcal-nav-btn" id="bcal-nav-fwd" onclick="shiftBoolCal(1)" aria-label="Vor">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
             </button>
+            <button class="btn btn-ghost btn-sm" id="bcal-nav-today" onclick="jumpBoolCalToday()" style="display:none">Heute</button>
           </div>
         </div>
       </div>
@@ -759,8 +760,12 @@ function clearDotHighlight() {
 // Monats-Navigator für Boolean-Kalender
 function shiftBoolCal(dir) {
   _boolCalOffset += dir * 3;
-  // Vorwärts nicht über heute hinaus
   if (_boolCalOffset > 0) _boolCalOffset = 0;
+  drawGraph(activeGraphKey);
+}
+
+function jumpBoolCalToday() {
+  _boolCalOffset = 0;
   drawGraph(activeGraphKey);
 }
 
@@ -782,6 +787,8 @@ function drawBooleanGraph(key, def, allData, area) {
     labelEl.textContent = sLabel === eLabel ? sLabel : `${sLabel} – ${eLabel}`;
   }
   if (fwdBtn) fwdBtn.disabled = _boolCalOffset >= 0;
+  const todayBtn = document.getElementById('bcal-nav-today');
+  if (todayBtn) todayBtn.style.display = _boolCalOffset !== 0 ? '' : 'none';
 
   // Nur Daten im angezeigten Bereich
   const endOfEndMonth = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
