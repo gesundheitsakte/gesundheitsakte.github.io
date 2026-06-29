@@ -325,8 +325,8 @@ function saveCheckupModal(id, isEdit) {
   const updated = { id, name, intervalMonths: interval, description: desc||'', appliesTo };
   if (phone) updated.phone = phone;
   if (url)   updated.url   = url;
-  const desc = isEdit ? `Checkup "${name}" aktualisiert` : `Checkup "${name}" hinzugefügt`;
-  trackChange(desc, () => {
+  const changeDesc = isEdit ? `Checkup "${name}" aktualisiert` : `Checkup "${name}" hinzugefügt`;
+  trackChange(changeDesc, () => {
     let checkups = [...getCheckups()];
     if (isEdit) {
       const idx = checkups.findIndex(c => c.id === id);
