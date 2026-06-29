@@ -282,6 +282,9 @@ function generateAndPrint() {
   const allergiesList = (person.allergies||[]).map(a =>
     `<li>${esc(a.name)}${a.severity?' — '+esc(a.severity):''}</li>`).join('');
 
+  const operationsList = (person.operations||[]).map(o =>
+    `<li>${esc(o.name)}${o.date?' ('+esc(o.date)+')':''}${o.hospital?' — '+esc(o.hospital):''}</li>`).join('');
+
   const visitsHTML = doctorVisits.length ? doctorVisits.map(e => `
     <tr>
       <td>${fmtDate(e.date)}</td>
@@ -406,6 +409,10 @@ function generateAndPrint() {
   ${allergiesList ? `
   <h2>Allergien</h2>
   <ul>${allergiesList}</ul>` : ''}` : ''}
+
+  ${operationsList ? `
+  <h2>Operationen &amp; Eingriffe</h2>
+  <ul>${operationsList}</ul>` : ''}
 
   <h2>Messwerte — Zeitverlauf</h2>
   ${measuredMetrics.length ? `
