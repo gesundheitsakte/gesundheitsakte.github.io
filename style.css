@@ -588,7 +588,7 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-ghost { background: none; color: var(--text-secondary); border-color: var(--border); }
 @media (hover: hover) {
-  .btn-primary:hover:not(:disabled) { background: #1f5a7a; }
+  .btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 82%, black); }
   .btn-ghost:hover:not(:disabled) { background: var(--bg-subtle); }
 }
 .btn-sm { padding: .375rem .75rem; font-size: .8125rem; }
