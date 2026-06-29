@@ -248,7 +248,7 @@ function openEditCheckup(id) {
             <label for="chk-desc">Beschreibung (optional)</label>
             <input type="text" id="chk-desc" value="${escAttr(c.description||'')}" placeholder="Kurzbeschreibung">
           </div>
-          <div class="field-group">
+          <div class="field-group full">
             <label for="chk-phone">Telefon (optional)</label>
             <input type="tel" id="chk-phone" value="${escAttr(c.phone||'')}" placeholder="z.B. +43 1 234567" inputmode="tel">
           </div>
@@ -431,7 +431,8 @@ function openPersonModal(person, scrollTo) {
           </div>
         </div>
         <div id="pm-section-favorites" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Favoriten <span class="fav-metric-label-hint">(bis zu 4 Messwerte immer oben im Dashboard)</span></div>
+          <div class="form-section-title" style="margin-bottom:.25rem">Favoriten</div>
+          <p class="fav-metric-label-hint" style="margin:0 0 .75rem">Bis zu 4 Messwerte werden immer oben im Dashboard angezeigt.</p>
           <div class="fav-metric-picker" id="pm-fav-picker">
             ${(()=>{
               const favs = p.favoriteMetrics || [];
