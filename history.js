@@ -202,7 +202,14 @@ function applyHistoryFilter(allEntries) {
   }
   if (empty) empty.style.display = 'none';
 
-  list.innerHTML = filtered.map(e => {
+  let _lastYear = null;
+  const _parts = [];
+  for (const e of filtered) {
+    const _year = (e.date || '').slice(0, 4);
+    if (_year && _year !== _lastYear) {
+      _lastYear = _year;
+      _parts.push(`<li class="timeline-year-header">${esc(_year)}</li>`);
+    }
     const isHealth = _isAppleHealth(e);
     const isSelf   = e.entryType === 'self' && !isHealth;
     const icon = isHealth
@@ -228,7 +235,7 @@ function applyHistoryFilter(allEntries) {
 
     const pdfBadge = '';
 
-    return `<li class="timeline-item">
+    _parts.push(`<li class="timeline-item">
       <div class="timeline-date">${fmtShort(e.date)}</div>
       <div class="timeline-body">
         <div class="timeline-header">
@@ -244,8 +251,9 @@ function applyHistoryFilter(allEntries) {
         ${e.checkupId?(()=>{const c=getCheckups().find(c=>c.id===e.checkupId);return c?`<span class="checkup-badge badge-ok" style="margin-top:.4rem;display:inline-block">✓ ${esc(c.name)}</span>`:'';})():''}
         ${e.notes?`<div class="timeline-notes">${esc(e.notes)}</div>`:''}
       </div>
-    </li>`;
-  }).join('');
+    </li>`);
+  }
+  list.innerHTML = _parts.join('');
 }
 
 function deleteEntry(id) {
