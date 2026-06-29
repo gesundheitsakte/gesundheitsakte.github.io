@@ -130,6 +130,7 @@ function renderGraphs() {
                   ${activeGraphKey2 ? 'style="display:none"' : ''}>◎ Zielwert</button>
           <div class="range-btn-group" id="range-btn-group">${rangeBtns}</div>
           <div class="bcal-nav" id="bcal-nav" style="display:none">
+            <button class="btn btn-ghost btn-sm" id="bcal-nav-today" onclick="jumpBoolCalToday()" style="display:none">Heute</button>
             <button class="btn btn-ghost btn-sm bcal-nav-btn" onclick="shiftBoolCal(-1)" aria-label="Zurück">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
             </button>
@@ -137,7 +138,6 @@ function renderGraphs() {
             <button class="btn btn-ghost btn-sm bcal-nav-btn" id="bcal-nav-fwd" onclick="shiftBoolCal(1)" aria-label="Vor">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
             </button>
-            <button class="btn btn-ghost btn-sm" id="bcal-nav-today" onclick="jumpBoolCalToday()" style="display:none">Heute</button>
           </div>
         </div>
       </div>
