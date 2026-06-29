@@ -630,7 +630,7 @@ textarea { resize: vertical; min-height: 80px; }
 .metric-btn-row { display: flex; flex-wrap: wrap; gap: .375rem; }
 
 .metric-toggle-btn {
-  padding: .375rem .75rem;
+  padding: .375rem .75rem; line-height: 1;
   font-family: var(--font-sans); font-size: .8125rem; font-weight: 600;
   color: var(--text-secondary); background: var(--bg);
   border: 1px solid var(--border); border-radius: 999px;
@@ -644,7 +644,7 @@ textarea { resize: vertical; min-height: 80px; }
 
 /* ── Graph tab ───────────────────────────────── */
 .metric-btn {
-  padding: .375rem .75rem;
+  padding: .375rem .75rem; line-height: 1;
   font-family: var(--font-sans); font-size: .8125rem; font-weight: 600;
   color: var(--text-secondary); background: var(--bg);
   border: 1px solid var(--border); border-radius: 999px;
