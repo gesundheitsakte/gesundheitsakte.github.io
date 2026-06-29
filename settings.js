@@ -514,7 +514,8 @@ function openPersonModal(person, scrollTo) {
       const target = document.getElementById(targetId);
       const header = scrollBox?.querySelector('.modal-header');
       if (scrollBox && target) {
-        scrollBox.scrollTop = target.offsetTop - (header?.offsetHeight ?? 0);
+        const targetTop = target.getBoundingClientRect().top - scrollBox.getBoundingClientRect().top + scrollBox.scrollTop;
+        scrollBox.scrollTop = targetTop - (header?.offsetHeight ?? 0) - 8;
         target.classList.add('section-glow');
         target.addEventListener('animationend', () => target.classList.remove('section-glow'), { once: true });
       }
