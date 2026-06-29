@@ -11,39 +11,27 @@
 'use strict';
 
 // ── Diff-Berechnung ─────────────────────────────
-// Einfacher LCS-basierter Zeilendiff zweier JSON-Strings.
+// Zwei-Zeiger-Ansatz: O(m+n) statt O(m*n). Funktioniert perfekt für
+// typische Einzel-Feld-Änderungen (Name, Farbe, Zielwert …), da diese
+// genau einen zusammenhängenden geänderten Block erzeugen.
 function _computeLineDiff(beforeJson, afterJson) {
-  const fmt  = j => JSON.stringify(JSON.parse(j), null, 2);
-  const aLines = fmt(beforeJson).split('\n');
-  const bLines = fmt(afterJson).split('\n');
-  const m = aLines.length, n = bLines.length;
+  const fmt = j => JSON.stringify(JSON.parse(j), null, 2);
+  const a = fmt(beforeJson).split('\n');
+  const b = fmt(afterJson).split('\n');
 
-  // Größenbeschränkung (O(m*n))
-  if (m * n > 600000) return [{ type: 'info', line: '(Diff zu groß für Inline-Anzeige)' }];
+  // Gemeinsames Präfix
+  let start = 0;
+  while (start < a.length && start < b.length && a[start] === b[start]) start++;
 
-  const dp = Array.from({ length: m + 1 }, () => new Uint32Array(n + 1));
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] = aLines[i-1] === bLines[j-1]
-        ? dp[i-1][j-1] + 1
-        : Math.max(dp[i-1][j], dp[i][j-1]);
-    }
-  }
+  // Gemeinsames Suffix (rückwärts, nicht ins Präfix laufen)
+  let endA = a.length - 1, endB = b.length - 1;
+  while (endA >= start && endB >= start && a[endA] === b[endB]) { endA--; endB--; }
 
   const result = [];
-  let i = m, j = n;
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && aLines[i-1] === bLines[j-1]) {
-      result.unshift({ type: 'ctx', line: aLines[i-1] });
-      i--; j--;
-    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
-      result.unshift({ type: 'add', line: bLines[j-1] });
-      j--;
-    } else {
-      result.unshift({ type: 'del', line: aLines[i-1] });
-      i--;
-    }
-  }
+  for (let i = 0; i < start; i++)          result.push({ type: 'ctx', line: a[i] });
+  for (let i = start; i <= endA; i++)       result.push({ type: 'del', line: a[i] });
+  for (let i = start; i <= endB; i++)       result.push({ type: 'add', line: b[i] });
+  for (let i = endA + 1; i < a.length; i++) result.push({ type: 'ctx', line: a[i] });
   return result;
 }
 
