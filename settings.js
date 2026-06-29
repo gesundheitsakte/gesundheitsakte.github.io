@@ -357,6 +357,7 @@ function openPersonModal(person, scrollTo) {
   _medCount  = (p.medications   || []).length;
   _vacCount  = (p.vaccinations  || []).length;
   _algCount  = (p.allergies     || []).length;
+  _opCount   = (p.operations    || []).length;
 
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
@@ -483,6 +484,13 @@ function openPersonModal(person, scrollTo) {
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addAllergyRow()">+ Allergie hinzufügen</button>
         </div>
+        <div id="pm-section-operations" style="margin-top:1rem">
+          <div class="form-section-title" style="margin-bottom:.75rem">Operationen &amp; Eingriffe</div>
+          <div id="pm-operations">
+            ${(p.operations||[]).map((o,i)=>operationRow(i,o)).join('')}
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addOperationRow()">+ Operation hinzufügen</button>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closePersonModal()">Abbrechen</button>
@@ -498,6 +506,7 @@ function openPersonModal(person, scrollTo) {
       medications: 'pm-section-medications',
       vaccinations:'pm-section-vaccinations',
       allergies:   'pm-section-allergies',
+      operations:  'pm-section-operations',
     };
     const targetId = sectionMap[scrollTo];
     if (targetId) requestAnimationFrame(() => {
@@ -532,12 +541,13 @@ function familyRow(i, f={}) {
   </div>`;
 }
 
-let _condCount=0,_famCount=0,_medCount=0,_vacCount=0,_algCount=0;
-function addConditionRow() { const c=document.getElementById('pm-conditions'); c.insertAdjacentHTML('beforeend',conditionRow(_condCount++)); }
-function addFamilyRow()    { const c=document.getElementById('pm-family');     c.insertAdjacentHTML('beforeend',familyRow(_famCount++)); }
-function addMedicationRow(){ const c=document.getElementById('pm-medications');c.insertAdjacentHTML('beforeend',medicationRow(_medCount++)); }
+let _condCount=0,_famCount=0,_medCount=0,_vacCount=0,_algCount=0,_opCount=0;
+function addConditionRow()  { const c=document.getElementById('pm-conditions');  c.insertAdjacentHTML('beforeend',conditionRow(_condCount++)); }
+function addFamilyRow()     { const c=document.getElementById('pm-family');      c.insertAdjacentHTML('beforeend',familyRow(_famCount++)); }
+function addMedicationRow() { const c=document.getElementById('pm-medications'); c.insertAdjacentHTML('beforeend',medicationRow(_medCount++)); }
 function addVaccinationRow(){ const c=document.getElementById('pm-vaccinations');c.insertAdjacentHTML('beforeend',vaccinationRow(_vacCount++)); }
-function addAllergyRow()   { const c=document.getElementById('pm-allergies');  c.insertAdjacentHTML('beforeend',allergyRow(_algCount++)); }
+function addAllergyRow()    { const c=document.getElementById('pm-allergies');   c.insertAdjacentHTML('beforeend',allergyRow(_algCount++)); }
+function addOperationRow()  { const c=document.getElementById('pm-operations');  c.insertAdjacentHTML('beforeend',operationRow(_opCount++)); }
 function removeRow(id) { document.getElementById(id)?.remove(); }
 
 function medicationRow(i, m={}) {
@@ -564,6 +574,16 @@ function allergyRow(i, a={}) {
     <input type="text" placeholder="Schweregrad" style="max-width:120px" value="${escAttr(a.severity||'')}">
     <input type="text" placeholder="Notizen" value="${escAttr(a.notes||'')}">
     <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('arow-${i}')">✕</button>
+  </div>`;
+}
+
+function operationRow(i, o={}) {
+  return `<div class="inline-row" id="oprow-${i}">
+    <input type="text" placeholder="Eingriff / Operation" value="${escAttr(o.name||'')}">
+    <input type="text" placeholder="Jahr / Datum" style="max-width:110px" value="${escAttr(o.date||'')}">
+    <input type="text" placeholder="Krankenhaus / Arzt" value="${escAttr(o.hospital||'')}">
+    <input type="text" placeholder="Notizen" value="${escAttr(o.notes||'')}">
+    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('oprow-${i}')">✕</button>
   </div>`;
 }
 
@@ -635,6 +655,13 @@ function readAllergies() {
              notes: inputs[2]?.value.trim()||'' };
   }).filter(a=>a.name);
 }
+function readOperations() {
+  return [...document.querySelectorAll('#pm-operations .inline-row')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { name: inputs[0]?.value.trim()||'', date: inputs[1]?.value.trim()||'',
+             hospital: inputs[2]?.value.trim()||'', notes: inputs[3]?.value.trim()||'' };
+  }).filter(o=>o.name);
+}
 
 function savePersonModal(id, isEdit) {
   const name     = document.getElementById('pm-name')?.value.trim();
@@ -664,6 +691,7 @@ function savePersonModal(id, isEdit) {
     medications:   readMedications(),
     vaccinations:  readVaccinations(),
     allergies:     readAllergies(),
+    operations:    readOperations(),
   };
 
   const desc = isEdit ? `Person "${name}" aktualisiert` : `Person "${name}" hinzugefügt`;
@@ -688,7 +716,7 @@ function savePersonModal(id, isEdit) {
 
 function closePersonModal() {
   document.getElementById('person-modal')?.remove();
-  _condCount=0; _famCount=0; _medCount=0; _vacCount=0; _algCount=0;
+  _condCount=0; _famCount=0; _medCount=0; _vacCount=0; _algCount=0; _opCount=0;
 }
 
 function deletePerson(id) {

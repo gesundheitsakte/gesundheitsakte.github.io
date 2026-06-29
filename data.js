@@ -771,7 +771,7 @@ function normalizeDatabase(obj) {
       : [],
     persons:       obj.persons.map(p => ({
       conditions: [], familyHistory: [], medications: [], vaccinations: [],
-      allergies: [], bloodType: null, ...p
+      allergies: [], operations: [], bloodType: null, ...p
     })),
     entries:       obj.entries.map(e => ({
       entryType: e.entryType || 'doctor',
