@@ -132,6 +132,20 @@
           "severity": "Leicht",
           "notes": "Gelegentliches Niesen"
         }
+      ],
+      "operations": [
+        {
+          "name": "Appendektomie",
+          "date": "2008",
+          "hospital": "Krankenhaus Hietzing",
+          "notes": "Laparoskopisch, komplikationsloser Verlauf"
+        },
+        {
+          "name": "Leistenbruchoperation",
+          "date": "2022-03",
+          "hospital": "Privatklinik Döbling",
+          "notes": "Rechts, Lichtenstein-Technik, ambulant"
+        }
       ]
     },
     {
@@ -212,6 +226,20 @@
           "severity": "Schwer",
           "notes": "Urtikaria in der Vorgeschichte, Alternativen verwenden"
         }
+      ],
+      "operations": [
+        {
+          "name": "Kaiserschnitt",
+          "date": "2015-11-05",
+          "hospital": "AKH Wien",
+          "notes": "Sekundäre Sectio, unkomplizierter Verlauf"
+        },
+        {
+          "name": "Weisheitszahn-Extraktion (alle 4)",
+          "date": "2010",
+          "hospital": "Ordination Dr. Novak",
+          "notes": "In Vollnarkose, komplikationslos"
+        }
       ]
     },
     {
@@ -266,6 +294,14 @@
           "name": "Baumnüsse",
           "severity": "Moderat",
           "notes": "Kreuzallergie zu Erdnüssen, Vorsicht geboten"
+        }
+      ],
+      "operations": [
+        {
+          "name": "Paukenröhrchen (Tympanostomie)",
+          "date": "2020",
+          "hospital": "St. Anna Kinderspital",
+          "notes": "Beidseits, wegen rezidivierender Mittelohrentzündungen"
         }
       ]
     },
