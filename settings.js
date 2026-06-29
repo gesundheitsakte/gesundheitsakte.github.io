@@ -113,6 +113,8 @@ function renderSettings() {
       ${renderDatabaseStats()}
     </div>
 
+    ${renderEncryptionCard()}
+
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
       <p class="settings-intro">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
@@ -810,4 +812,86 @@ function renderDatabaseStats() {
         <span class="db-stats-value">${fmtBytes(lsBytes)}</span>
       </div>` : ''}
     </div>`;
+}
+
+// ── Verschlüsselung ───────────────────────────
+const _SVG_LOCK = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.125rem;height:1.125rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>`;
+const _SVG_LOCK_OPEN = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.125rem;height:1.125rem;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>`;
+
+function renderEncryptionCard() {
+  if (isDemoMode) return '';
+
+  if (isEncrypted) {
+    return `
+    <div class="card" style="margin-top:1rem" id="encryption-card">
+      <div class="card-header"><span class="card-title">Verschlüsselung</span></div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.625rem;color:var(--success)">
+        ${_SVG_LOCK}
+        <span style="font-weight:600">Verschlüsselt (AES-256-GCM)</span>
+      </div>
+      <p class="field-hint">Alle Exporte werden mit deinem Passwort verschlüsselt. Ohne Passwort sind die Daten nicht lesbar.</p>
+      <div class="field-group" style="margin-top:.875rem">
+        <label for="enc-pw-current">Aktuelles Passwort bestätigen</label>
+        <input type="password" id="enc-pw-current" autocomplete="current-password" placeholder="Passwort eingeben">
+      </div>
+      <p id="enc-error" style="color:var(--danger);font-size:.8125rem;margin:.375rem 0 0;display:none"></p>
+      <div style="margin-top:.875rem">
+        <button class="btn btn-ghost settings-action-btn" style="color:var(--danger)" onclick="disableEncryption()">Verschlüsselung deaktivieren</button>
+      </div>
+    </div>`;
+  }
+
+  return `
+    <div class="card" style="margin-top:1rem" id="encryption-card">
+      <div class="card-header"><span class="card-title">Verschlüsselung</span></div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.625rem;color:var(--text-muted)">
+        ${_SVG_LOCK_OPEN}
+        <span style="font-weight:600">Nicht verschlüsselt</span>
+      </div>
+      <p class="field-hint">Exporte werden als lesbares JSON gespeichert. Mit einem Passwort kannst du Exporte mit AES-256-GCM verschlüsseln.</p>
+      <div class="field-group" style="margin-top:.875rem">
+        <label for="enc-pw-new">Neues Passwort</label>
+        <input type="password" id="enc-pw-new" autocomplete="new-password" placeholder="Mindestens 8 Zeichen">
+      </div>
+      <div class="field-group" style="margin-top:.625rem">
+        <label for="enc-pw-confirm">Passwort bestätigen</label>
+        <input type="password" id="enc-pw-confirm" autocomplete="new-password" placeholder="Passwort wiederholen">
+      </div>
+      <p id="enc-error" style="color:var(--danger);font-size:.8125rem;margin:.375rem 0 0;display:none"></p>
+      <div style="margin-top:.875rem">
+        <button class="btn btn-primary settings-action-btn" onclick="enableEncryption()">Verschlüsselung aktivieren</button>
+      </div>
+    </div>`;
+}
+
+function enableEncryption() {
+  const pw1   = document.getElementById('enc-pw-new')?.value || '';
+  const pw2   = document.getElementById('enc-pw-confirm')?.value || '';
+  const errEl = document.getElementById('enc-error');
+  const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = ''; } };
+
+  if (!pw1)            return showErr('Bitte ein Passwort eingeben.');
+  if (pw1.length < 8)  return showErr('Das Passwort muss mindestens 8 Zeichen lang sein.');
+  if (pw1 !== pw2)     return showErr('Die Passwörter stimmen nicht überein.');
+
+  isEncrypted = true;
+  setSessionPassword(pw1);
+  showToast('Verschlüsselung aktiviert — nächster Export wird verschlüsselt ✓', 'success');
+  renderSettings();
+}
+
+function disableEncryption() {
+  const pw    = document.getElementById('enc-pw-current')?.value || '';
+  const errEl = document.getElementById('enc-error');
+  const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = ''; } };
+
+  if (!pw) return showErr('Bitte das aktuelle Passwort eingeben.');
+
+  const sessionPw = getSessionPassword();
+  if (sessionPw && pw !== sessionPw) return showErr('Das Passwort ist nicht korrekt.');
+
+  isEncrypted = false;
+  clearSessionPassword();
+  showToast('Verschlüsselung deaktiviert — Exporte werden als Klartext gespeichert', 'success');
+  renderSettings();
 }
