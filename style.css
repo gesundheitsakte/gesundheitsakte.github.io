@@ -2092,4 +2092,4 @@ input.hf-search {
 .db-stats-row:last-child { border-bottom: none; }
 .db-stats-row--divider { margin-top: .375rem; padding-top: .75rem; border-top: 1px solid var(--border); }
 .db-stats-label { color: var(--text-muted); }
-.db-stats-value { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.db-stats-value { color: var(--text-primary); font-family: var(--font-mono); font-size: .875rem; }
