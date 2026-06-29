@@ -144,7 +144,8 @@ const APPLE_HEALTH_MAP = {
   "HKQuantityTypeIdentifierBodyTemperature":       { metric: "temperature",        appleUnit: "°C" },
   "HKQuantityTypeIdentifierOxygenSaturation":      { metric: "oxygen_saturation",  appleUnit: "%" },
   "HKQuantityTypeIdentifierBloodGlucose":          { metric: "glucose",            appleUnit: "mg/dL" },
-  "HKQuantityTypeIdentifierBodyMassIndex":         { metric: "bmi",                appleUnit: "" }
+  "HKQuantityTypeIdentifierBodyMassIndex":         { metric: "bmi",                appleUnit: "" },
+  "HKQuantityTypeIdentifierBodyFatPercentage":     { metric: "body_fat",           appleUnit: "%" }
 };
 
 /* Einheiten-Konvertierung. Liefert den Wert in der von der App erwarteten
@@ -165,6 +166,8 @@ function appleHealthConvert(metric, value, sourceUnit) {
   }
   // Sauerstoffsättigung: Apple speichert oft als Anteil (0–1) statt Prozent
   if (metric === "oxygen_saturation" && value <= 1) return value * 100;
+  // Körperfettanteil: Apple speichert als Anteil (0–1), App erwartet Prozent
+  if (metric === "body_fat" && value <= 1) return value * 100;
   // Blutzucker: mmol/L → mg/dL
   if (metric === "glucose" && (u === "mmol/l" || u === "mmol<l")) return value * 18.0182;
 
