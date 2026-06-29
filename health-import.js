@@ -303,9 +303,9 @@ function confirmHealthImport() {
         ex.metrics = { ...ex.metrics, ...byDate[date] };
       } else {
         DATA.entries.push({
-          id: genId(), personId, entryType: 'self', date,
+          id: genId(), personId, entryType: 'apple-health', date,
           doctor: '', reason: '', diagnosis: '', checkupId: '',
-          notes: 'Importiert aus Apple Health',
+          notes: '',
           metrics: byDate[date], customMetrics: {}, attachment: null,
         });
       }

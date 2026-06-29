@@ -30,14 +30,17 @@ function renderHistory() {
   // Collect unique doctors for filter pills
   const doctors = [...new Set(
     allEntries
-      .filter(e => e.entryType !== 'self' && e.doctor?.trim())
+      .filter(e => e.entryType === 'doctor' && e.doctor?.trim())
       .map(e => e.doctor.trim())
   )].sort();
 
+  const hasHealth = allEntries.some(_isAppleHealth);
+
   const typeBtns = [
-    { key: 'all',    label: 'Alle'            },
-    { key: 'doctor', label: 'Arztbesuch'   },
-    { key: 'self',   label: 'Eigene Messung'},
+    { key: 'all',    label: 'Alle'             },
+    { key: 'doctor', label: 'Arztbesuch'        },
+    { key: 'self',   label: 'Eigene Messung'    },
+    ...(hasHealth ? [{ key: 'health', label: 'Apple Health' }] : []),
   ].map(t => `
     <button class="hf-type-btn${historyFilter.type===t.key?' active':''}"
             onclick="setHistoryType('${t.key}')">${t.label}</button>`).join('');
@@ -150,14 +153,20 @@ function clearHistoryDates() {
   renderHistory();
 }
 
+function _isAppleHealth(e) {
+  return e.entryType === 'apple-health'
+    || (e.entryType === 'self' && e.notes === 'Importiert aus Apple Health');
+}
+
 function applyHistoryFilter(allEntries) {
   const { text, type, doctor } = historyFilter;
   const q = text.trim().toLowerCase();
 
   const filtered = allEntries.filter(e => {
     // Type filter
-    if (type === 'doctor' && e.entryType === 'self') return false;
-    if (type === 'self'   && e.entryType !== 'self') return false;
+    if (type === 'doctor' && e.entryType !== 'doctor') return false;
+    if (type === 'self'   && (e.entryType !== 'self' || _isAppleHealth(e))) return false;
+    if (type === 'health' && !_isAppleHealth(e)) return false;
     // Doctor filter
     if (doctor && e.doctor?.trim() !== doctor) return false;
     // Date range filter
@@ -194,11 +203,14 @@ function applyHistoryFilter(allEntries) {
   if (empty) empty.style.display = 'none';
 
   list.innerHTML = filtered.map(e => {
-    const isSelf = e.entryType === 'self';
-    const icon = isSelf
-      ? `<svg class="timeline-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
-      : `<svg class="timeline-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
-    const title  = isSelf ? 'Eigene Messung' : (e.doctor || 'Arztbesuch');
+    const isHealth = _isAppleHealth(e);
+    const isSelf   = e.entryType === 'self' && !isHealth;
+    const icon = isHealth
+      ? `<svg class="timeline-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
+      : isSelf
+        ? `<svg class="timeline-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+        : `<svg class="timeline-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+    const title = isHealth ? 'Apple Health' : isSelf ? 'Eigene Messung' : (e.doctor || 'Arztbesuch');
 
     const metricEntries = Object.entries(e.metrics||{})
       .filter(([,v])=>v!==''&&v!==null&&v!==undefined)
