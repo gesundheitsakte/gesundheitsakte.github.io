@@ -14,8 +14,16 @@
 // Zwei-Zeiger-Ansatz: O(m+n) statt O(m*n). Funktioniert perfekt für
 // typische Einzel-Feld-Änderungen (Name, Farbe, Zielwert …), da diese
 // genau einen zusammenhängenden geänderten Block erzeugen.
+function _sortedJson(obj) {
+  if (Array.isArray(obj)) return obj.map(_sortedJson);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(Object.keys(obj).sort().map(k => [k, _sortedJson(obj[k])]));
+  }
+  return obj;
+}
+
 function _computeLineDiff(beforeJson, afterJson) {
-  const fmt = j => JSON.stringify(JSON.parse(j), null, 2);
+  const fmt = j => JSON.stringify(_sortedJson(JSON.parse(j)), null, 2);
   const a = fmt(beforeJson).split('\n');
   const b = fmt(afterJson).split('\n');
 
