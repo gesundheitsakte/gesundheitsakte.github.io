@@ -29,7 +29,7 @@ function init() {
   initTheme();
 
   document.querySelector('.topbar-brand')?.addEventListener('click', () => {
-    if (appMode === 'app') activateTab('dashboard');
+    if (appMode === 'app') activateTab(hasUnsavedChanges ? 'changes' : 'dashboard');
   });
 
   // Keyboard navigation
