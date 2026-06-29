@@ -994,6 +994,37 @@ textarea { resize: vertical; min-height: 80px; }
   box-shadow: var(--shadow-sm);
 }
 
+/* ── Apple Health info screen ────────────────── */
+.health-import-info {
+  color: var(--text-secondary);
+  font-size: .9375rem;
+  line-height: 1.6;
+}
+.health-import-heading {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 .5rem;
+}
+.health-import-heading + .health-import-heading,
+.health-import-list + .health-import-heading {
+  margin-top: 1.25rem;
+}
+.health-import-list {
+  margin: 0 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+.health-import-list code {
+  font-family: var(--font-mono);
+  font-size: .85em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: .1em .35em;
+}
+
 /* ── Custom metric row ───────────────────────── */
 .custom-metric-row {
   display: flex;

@@ -106,14 +106,14 @@ function renderEntryForm(editEntry = null) {
           <button class="mode-btn${entryMode==='self'?' active':''}" id="mode-btn-self" onclick="setEntryMode('self')">
             Eigene Messung
           </button>
-          <button class="mode-btn" id="mode-btn-health" onclick="triggerHealthImport()">
+          <button class="mode-btn${entryMode==='apple-health'?' active':''}" id="mode-btn-health" onclick="setEntryMode('apple-health')">
             Apple Health
           </button>
         </div>
       </div>
 
       <!-- ── Datum (immer sichtbar) ── -->
-      <div class="form-section">
+      <div class="form-section" id="entry-date-section" style="display:${entryMode==='apple-health'?'none':''}">
         <div class="form-section-title">Datum</div>
         <div class="form-grid">
           <div class="field-group">
@@ -181,7 +181,28 @@ function renderEntryForm(editEntry = null) {
         </div>
       </div>
 
-      <div style="margin-top:1.25rem;display:flex;gap:.75rem;justify-content:flex-end">
+      <!-- ── Apple Health Infoscreen ── -->
+      <div id="health-import-section" style="display:${entryMode==='apple-health'?'':'none'}">
+        <div class="form-section health-import-info">
+          <p class="health-import-heading">Export aus der Gesundheit-App</p>
+          <ol class="health-import-list">
+            <li>Öffne die <strong>Gesundheit</strong>-App auf dem iPhone</li>
+            <li>Tippe oben rechts auf dein <strong>Profilbild</strong></li>
+            <li>Wähle <strong>„Alle Gesundheitsdaten exportieren"</strong></li>
+            <li>Übertrage die erzeugte <code>export.zip</code> auf dieses Gerät (z.B. per AirDrop oder iCloud Drive)</li>
+          </ol>
+          <p class="health-import-heading">Was wird importiert</p>
+          <ul class="health-import-list">
+            <li>Gewicht, Blutdruck, Puls, Blutsauerstoff u.a. unterstützte Metriken</li>
+            <li>Pro Tag und Metrik wird nur der <strong>erste Wert</strong> übernommen</li>
+            <li>Bereits importierte Tage werden <strong>übersprungen</strong> — keine Duplikate</li>
+            <li>Verarbeitung läuft vollständig <strong>lokal im Browser</strong> — nichts wird hochgeladen</li>
+          </ul>
+          <button class="btn btn-primary" style="margin-top:1.5rem;width:100%" onclick="triggerHealthImport()">ZIP-Datei wählen …</button>
+        </div>
+      </div>
+
+      <div id="entry-form-footer" style="margin-top:1.25rem;display:${entryMode==='apple-health'?'none':'flex'};gap:.75rem;justify-content:flex-end">
         ${isEdit
           ? `<button class="btn btn-ghost" onclick="cancelEditEntry()">Abbrechen</button>`
           : `<button class="btn btn-ghost" onclick="renderEntryForm()">Zurücksetzen</button>`}
@@ -218,16 +239,25 @@ function setEntryMode(mode) {
   entryMode = mode;
   document.getElementById('mode-btn-doctor')?.classList.toggle('active', mode==='doctor');
   document.getElementById('mode-btn-self')?.classList.toggle('active',   mode==='self');
-  // Doctor-Felder (Arzt, Grund, Diagnose…)
-  const df = document.getElementById('doctor-fields');
-  if (df) df.style.display = mode==='doctor' ? '' : 'none';
-  // Messwert-Picker: Arztbesuch = Pill-Auswahl, Eigene Messung = alle Felder direkt
-  const ms_doc  = document.getElementById('metric-section-doctor');
-  const ms_self = document.getElementById('metric-section-self');
-  const amf     = document.getElementById('active-metric-fields');
-  if (ms_doc)  ms_doc.style.display  = mode==='doctor' ? '' : 'none';
-  if (ms_self) ms_self.style.display = mode==='self'   ? '' : 'none';
-  if (amf)     amf.style.display     = mode==='doctor' ? '' : 'none';
+  document.getElementById('mode-btn-health')?.classList.toggle('active', mode==='apple-health');
+
+  const isHealth = mode === 'apple-health';
+
+  const dateSection   = document.getElementById('entry-date-section');
+  const df            = document.getElementById('doctor-fields');
+  const ms_doc        = document.getElementById('metric-section-doctor');
+  const ms_self       = document.getElementById('metric-section-self');
+  const amf           = document.getElementById('active-metric-fields');
+  const healthSection = document.getElementById('health-import-section');
+  const footer        = document.getElementById('entry-form-footer');
+
+  if (dateSection)   dateSection.style.display   = isHealth ? 'none' : '';
+  if (df)            df.style.display            = mode==='doctor' && !isHealth ? '' : 'none';
+  if (ms_doc)        ms_doc.style.display        = mode==='doctor' ? '' : 'none';
+  if (ms_self)       ms_self.style.display       = mode==='self'   ? '' : 'none';
+  if (amf)           amf.style.display           = mode==='doctor' ? '' : 'none';
+  if (healthSection) healthSection.style.display = isHealth ? '' : 'none';
+  if (footer)        footer.style.display        = isHealth ? 'none' : 'flex';
 }
 
 // ── Predefined metric toggle ──────────────────
