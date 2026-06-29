@@ -543,10 +543,9 @@ function openTargetDialog(metricKey) {
       <div class="modal-body">
         <div class="field-group">
           <label for="target-input">Zielwert${def?.unit ? ' ('+esc(def.unit)+')' : ''}</label>
-          <input type="text" inputmode="decimal" id="target-input"
+          <input type="number" step="any" id="target-input"
                  value="${current ?? ''}"
-                 placeholder="Leer lassen zum Entfernen"
-                 oninput="this.value=this.value.replace(/[^0-9.,]/g,'').replace(/([.,].*)[.,]/g,'$1')">
+                 placeholder="Leer lassen zum Entfernen">
         </div>
       </div>
       <div class="modal-footer">
