@@ -16,6 +16,12 @@
 let historyFilter = { text: '', type: 'all', doctor: '', dateFrom: '', dateTo: '' };
 
 function renderHistory() {
+  // Measure exact subnav bottom so sticky year headers sit flush beneath it
+  const subnav = document.getElementById('subnav-wrapper');
+  if (subnav) {
+    document.documentElement.style.setProperty('--timeline-year-top', (60 + subnav.offsetHeight) + 'px');
+  }
+
   const panel   = document.getElementById('panel-history');
   const allEntries = DATA.entries
     .filter(e => e.personId === currentPersonId)
