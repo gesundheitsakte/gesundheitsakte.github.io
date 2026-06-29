@@ -182,6 +182,7 @@ function openHealthImportModal() {
           <label for="health-person">Zuweisen an Person</label>
           <select id="health-person" onchange="updateHealthImportSummary()">${personOpts}</select>
         </div>
+        <div class="alert alert-warning" id="health-age-warning" style="display:none;margin:.5rem 0 0;font-size:.875rem"></div>
         <p class="field-hint" style="margin:.75rem 0 .25rem">
           Gefundener Zeitraum: <strong>${rangeTxt}</strong>.
           Pro Tag wird der erste Messwert übernommen.
@@ -232,6 +233,19 @@ function existingMetricDates(personId, metric) {
 function updateHealthImportSummary() {
   const personId = document.getElementById('health-person')?.value;
   if (!personId) return;
+
+  const warnEl  = document.getElementById('health-age-warning');
+  const person  = getPersonList().find(p => p.id === personId);
+  const oldest  = _healthParsed?.range?.from;
+  if (warnEl && person?.birthday && oldest && oldest < person.birthday) {
+    warnEl.textContent = `Der älteste Eintrag (${fmtDate(oldest)}) liegt vor dem Geburtstag`
+      + ` von ${person.name} (${fmtDate(person.birthday)}).`
+      + ` Diese Daten gehören möglicherweise zu einer anderen Person.`;
+    warnEl.style.display = '';
+  } else if (warnEl) {
+    warnEl.style.display = 'none';
+  }
+
   let totalNew = 0, totalSkip = 0;
   document.querySelectorAll('.health-metric-cb').forEach(cb => {
     const { neu, skipped } = computeHealthImportCounts(personId, cb.value);
