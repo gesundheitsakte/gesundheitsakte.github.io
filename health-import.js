@@ -255,52 +255,49 @@ function confirmHealthImport() {
   const metrics = [...document.querySelectorAll('.health-metric-cb:checked')].map(cb => cb.value);
   if (!metrics.length) return;
 
-  if (!DATA.healthImports) DATA.healthImports = {};
-  if (!DATA.healthImports[personId]) DATA.healthImports[personId] = {};
-  const marker = DATA.healthImports[personId];
-
-  // Werte pro Datum bündeln → ein self-Eintrag pro Tag (mehrere Metriken zusammen)
-  const byDate = {};   // date → { metricKey: value }
+  // Vorschau: Werte pro Datum bündeln (noch kein DATA-Zugriff)
+  const byDate = {};
   let imported = 0;
+  const importMarkers = {};  // key → true (wird nach Snapshot gesetzt)
 
   for (const metric of metrics) {
     const existing = existingMetricDates(personId, metric);
     for (const { date, value } of (_healthParsed.byMetric[metric] || [])) {
       const key = `${metric}:${date}`;
-      if (marker[key] || existing.has(date)) continue;
+      const alreadyMarked = DATA.healthImports?.[personId]?.[key];
+      if (alreadyMarked || existing.has(date)) continue;
       if (!byDate[date]) byDate[date] = {};
       byDate[date][metric] = value;
-      marker[key] = true;
+      importMarkers[key] = true;
       imported++;
     }
   }
 
-  // Bestehende self-Einträge dieses Tages wiederverwenden, sonst neuen anlegen
-  const selfByDate = {};
-  for (const e of DATA.entries) {
-    if (e.personId === personId && e.entryType === 'self') selfByDate[e.date] = e;
-  }
+  trackChange(`Apple Health-Daten importiert (${imported} Messwerte)`, () => {
+    if (!DATA.healthImports) DATA.healthImports = {};
+    if (!DATA.healthImports[personId]) DATA.healthImports[personId] = {};
+    const marker = DATA.healthImports[personId];
+    Object.assign(marker, importMarkers);
 
-  for (const date of Object.keys(byDate)) {
-    const existing = selfByDate[date];
-    if (existing) {
-      existing.metrics = { ...existing.metrics, ...byDate[date] };
-    } else {
-      DATA.entries.push({
-        id: genId(),
-        personId,
-        entryType: 'self',
-        date,
-        doctor: '', reason: '', diagnosis: '', checkupId: '',
-        notes: 'Importiert aus Apple Health',
-        metrics: byDate[date],
-        customMetrics: {},
-        attachment: null,
-      });
+    const selfByDate = {};
+    for (const e of DATA.entries) {
+      if (e.personId === personId && e.entryType === 'self') selfByDate[e.date] = e;
     }
-  }
-
-  saveData();
+    for (const date of Object.keys(byDate)) {
+      const ex = selfByDate[date];
+      if (ex) {
+        ex.metrics = { ...ex.metrics, ...byDate[date] };
+      } else {
+        DATA.entries.push({
+          id: genId(), personId, entryType: 'self', date,
+          doctor: '', reason: '', diagnosis: '', checkupId: '',
+          notes: 'Importiert aus Apple Health',
+          metrics: byDate[date], customMetrics: {}, attachment: null,
+        });
+      }
+    }
+    saveData();
+  });
   closeHealthImport();
   _healthParsed = null;
   // Falls die importierte Person die aktuelle ist, Ansicht aktualisieren

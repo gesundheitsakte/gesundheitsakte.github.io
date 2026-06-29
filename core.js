@@ -22,6 +22,7 @@ let isDemoMode       = false; // true wenn Demo-Daten geladen
 let hasUnsavedChanges = false; // für roten Punkt am Logo
 let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert werden soll
                               // (Passwort liegt in crypto.js _sessionPassword)
+let CHANGE_LOG       = [];    // [{ id, ts, description, before, after }] — nicht gespeicherte Änderungen
 
 const AVATAR_COLORS = [
   '#1B3A5B','#2C6E8F','#2A9D8F','#E9A23B','#F2785C',
@@ -62,15 +63,39 @@ function saveData() {
 function markUnsaved() {
   if (isDemoMode) return;
   hasUnsavedChanges = true;
-  updateUnsavedIndicator();
   schedulePersist();
 }
 function markSaved() {
   // "Gespeichert" = als Datei exportiert. Der lokale Stand bleibt in
   // localStorage erhalten; nur der "ungesichert"-Indikator wird gelöscht.
+  CHANGE_LOG = [];
   hasUnsavedChanges = false;
   updateUnsavedIndicator();
-  persistNow();   // aktuellen Stand sofort sichern
+  if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
+  persistNow();
+}
+
+// ── Änderungs-Tracking ────────────────────────────
+// Snapshot des DATA-Objekts ohne lastModified (ändert sich bei jeder saveData-Runde)
+function _dataSnapshot() {
+  if (!DATA) return '';
+  const { lastModified, ...rest } = DATA;
+  return JSON.stringify(rest);
+}
+
+// Führt eine Datenmutation durch und erfasst sie in CHANGE_LOG, wenn sie
+// den JSON-Inhalt tatsächlich verändert. So werden rein formale Aufrufe
+// (Zielwert auf gleichen Wert setzen etc.) nicht geloggt.
+function trackChange(description, mutate) {
+  const before = _dataSnapshot();
+  mutate();
+  const after = _dataSnapshot();
+  if (before === after) return;
+  CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, before, after });
+  hasUnsavedChanges = true;
+  updateUnsavedIndicator();
+  if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
+  schedulePersist();
 }
 
 // ── localStorage-Persistenz ───────────────────────
@@ -98,6 +123,7 @@ function persistNow() {
       savedAt: new Date().toISOString(),
       isEncrypted,
       hasUnsavedChanges,
+      changeLog: CHANGE_LOG,
       data: DATA,
     }));
   } catch (e) {
@@ -345,12 +371,16 @@ function saveCheckups(checkups) {
 function getTargets() { return DATA.targets || {}; }
 function getTarget(pid, key) { return getTargets()[`${pid}__${key}`] ?? null; }
 function setTarget(pid, key, value) {
-  if (!DATA.targets) DATA.targets = {};
   const normalized = typeof value === 'string' ? value.replace(',', '.') : value;
-  if (normalized === null || normalized === '' || isNaN(normalized)) {
-    delete DATA.targets[`${pid}__${key}`];
-  } else {
-    DATA.targets[`${pid}__${key}`] = parseFloat(normalized);
-  }
-  markUnsaved();
+  const removing   = normalized === null || normalized === '' || isNaN(normalized);
+  const label      = metricDef(key)?.label ?? key;
+  const desc       = removing ? `Zielwert von "${label}" entfernt` : `Zielwert von "${label}" gesetzt`;
+  trackChange(desc, () => {
+    if (!DATA.targets) DATA.targets = {};
+    if (removing) {
+      delete DATA.targets[`${pid}__${key}`];
+    } else {
+      DATA.targets[`${pid}__${key}`] = parseFloat(normalized);
+    }
+  });
 }

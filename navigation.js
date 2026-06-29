@@ -114,11 +114,10 @@ function loadFromStorageOrLanding() {
   if (!snap || !snap.data) { showLanding(); return; }
   try {
     DATA = normalizeDatabase(snap.data);
+    CHANGE_LOG = Array.isArray(snap.changeLog) ? snap.changeLog : [];
     isDemoMode = false;
     isEncrypted = !!snap.isEncrypted;
-    hasUnsavedChanges = !!snap.hasUnsavedChanges;
-    // Hinweis: bei verschlüsselter DB ist das Session-Passwort nach einem
-    // Reload nicht mehr im Speicher. Beim nächsten Export wird es abgefragt.
+    hasUnsavedChanges = CHANGE_LOG.length > 0;
     currentPersonId = getPersonList()[0]?.id || null;
     document.getElementById('landing').style.display = 'none';
     document.getElementById('onboarding').style.display = 'none';
@@ -210,6 +209,7 @@ const TABS = [
   { id:'history',    label:'Verlauf'         },
   { id:'entry',      label:'Neuer Eintrag'   },
   { id:'settings',   label:'Einstellungen'   },
+  { id:'changes',    label:'Änderungen', conditional: true },
 ];
 
 function buildTabs() {
@@ -228,6 +228,7 @@ function buildTabs() {
     b.setAttribute('role','tab');
     b.setAttribute('aria-controls',`panel-${t.id}`);
     b.setAttribute('aria-selected','false');
+    if (t.conditional) b.style.display = 'none';
     b.addEventListener('click',()=>activateTab(t.id));
     nav.appendChild(b);
   });
@@ -304,6 +305,7 @@ function renderPanel(id) {
   if (id==='history')    renderHistory();
   if (id==='entry')      renderEntryForm();
   if (id==='settings')   renderSettings();
+  if (id==='changes')    renderChanges();
 }
 
 
@@ -337,24 +339,40 @@ function startApp() {
 
   if (!isDemoMode) updatePWAShortcuts();
   updateUnsavedIndicator();
+  syncChangesTabVisibility();
 }
 
 // ── Ungesichert-Indikator: dezenter roter Punkt am Logo ──
-// "Ungesichert" bedeutet hier: seit dem letzten Datei-Export geändert.
-// Die Daten sind in localStorage sicher; der Punkt erinnert nur daran,
-// dass die exportierte Datei nicht mehr aktuell ist.
+// Erscheint nur wenn CHANGE_LOG Einträge hat (= getrackte Datenänderungen seit letztem Export).
 function updateUnsavedIndicator() {
   const dot = document.getElementById('unsaved-dot');
   if (!dot) return;
-  dot.style.display = (hasUnsavedChanges && !isDemoMode) ? '' : 'none';
+  dot.style.display = (CHANGE_LOG.length > 0 && !isDemoMode) ? '' : 'none';
 }
-// Alias für Altaufrufe
 function updateUnsavedBanner() { updateUnsavedIndicator(); }
+
+// ── Änderungen-Tab ein-/ausblenden ────────────────
+function syncChangesTabVisibility() {
+  const btn = document.getElementById('tab-changes');
+  if (!btn) return;
+  const hasChanges = CHANGE_LOG.length > 0;
+  btn.style.display = hasChanges ? '' : 'none';
+
+  // Falls gerade der Changes-Tab aktiv ist und keine Änderungen mehr → Dashboard
+  if (!hasChanges) {
+    const active = document.querySelector('.tab-btn.active')?.id?.replace('tab-', '');
+    if (active === 'changes') activateTab('dashboard');
+  }
+
+  // Indikator neu positionieren (Breite des sichtbaren Bereichs hat sich geändert)
+  const active = document.querySelector('.tab-btn.active')?.id?.replace('tab-', '');
+  if (active) requestAnimationFrame(() => moveIndicator(active));
+}
 
 // ── Zurück zur Startseite ─────────────────────
 function backToLanding() {
-  // Daten bleiben in localStorage erhalten — kein Datenverlust beim Verlassen.
   DATA = null;
+  CHANGE_LOG = [];
   isDemoMode = false;
   hasUnsavedChanges = false;
   clearSessionPassword();

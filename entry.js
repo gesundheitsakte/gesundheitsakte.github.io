@@ -289,9 +289,10 @@ function confirmAddCustomMetric() {
   const key = 'custom_' + label.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Date.now();
 
   // Dauerhaft als eigene Metrik in DATA registrieren → Pill + Diagramm
-  if (!DATA.customMetrics) DATA.customMetrics = [];
-  DATA.customMetrics.push({ key, label, unit: unit||'', group: 'Eigene Messwerte', graphable: true });
-  markUnsaved();
+  trackChange(`Eigene Metrik "${label}" erstellt`, () => {
+    if (!DATA.customMetrics) DATA.customMetrics = [];
+    DATA.customMetrics.push({ key, label, unit: unit||'', group: 'Eigene Messwerte', graphable: true });
+  });
 
   // Im aktuellen Formular gleich mit Wert vormerken
   customMetrics.push({ key, label, unit: unit||'', value: value||'' });
@@ -483,27 +484,22 @@ function saveEntry() {
   };
 
   if (editingEntryId) {
-    // Bestehenden Eintrag aktualisieren
-    const idx = DATA.entries.findIndex(e => e.id === editingEntryId);
-    if (idx >= 0) {
-      DATA.entries[idx] = {
-        ...DATA.entries[idx],
-        ...entryData,
-        updatedAt: new Date().toISOString(),
-      };
-    }
+    const eid = editingEntryId;
+    trackChange(`Eintrag vom ${fmtDate(entryData.date)} aktualisiert`, () => {
+      const idx = DATA.entries.findIndex(e => e.id === eid);
+      if (idx >= 0) {
+        DATA.entries[idx] = { ...DATA.entries[idx], ...entryData, updatedAt: new Date().toISOString() };
+      }
+      saveData();
+    });
     editingEntryId = null;
-    saveData();
     showToast('Änderungen gespeichert ✓','success');
     setTimeout(()=>activateTab('history'),400);
   } else {
-    // Neuen Eintrag anlegen
-    DATA.entries.push({
-      id:        genId(),
-      ...entryData,
-      createdAt: new Date().toISOString(),
+    trackChange(`Eintrag vom ${fmtDate(entryData.date)} hinzugefügt`, () => {
+      DATA.entries.push({ id: genId(), ...entryData, createdAt: new Date().toISOString() });
+      saveData();
     });
-    saveData();
     showToast('Eintrag gespeichert ✓','success');
     setTimeout(()=>activateTab('dashboard'),400);
   }

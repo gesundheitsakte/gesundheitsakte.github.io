@@ -171,17 +171,24 @@ function _swapPersonRows(id, delta) {
   const rowB = document.getElementById(`srow-${persons[newIdx].id}`);
   const container = document.getElementById('persons-list');
 
+  const movingName = persons[idx].name;
+  const dir = delta < 0 ? 'nach oben' : 'nach unten';
+
   if (!rowA || !rowB || !container) {
-    persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
-    savePersons(persons);
+    trackChange(`"${movingName}" ${dir} verschoben`, () => {
+      persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
+      savePersons(persons);
+    });
     buildPersonSelector();
     renderSettings();
     return;
   }
 
   // Persist new order
-  persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
-  savePersons(persons);
+  trackChange(`"${movingName}" ${dir} verschoben`, () => {
+    persons.splice(newIdx, 0, persons.splice(idx, 1)[0]);
+    savePersons(persons);
+  });
   buildPersonSelector();
 
   // FLIP — record positions before DOM change
@@ -318,14 +325,17 @@ function saveCheckupModal(id, isEdit) {
   const updated = { id, name, intervalMonths: interval, description: desc||'', appliesTo };
   if (phone) updated.phone = phone;
   if (url)   updated.url   = url;
-  let checkups = [...getCheckups()];
-  if (isEdit) {
-    const idx = checkups.findIndex(c => c.id === id);
-    if (idx >= 0) checkups[idx] = updated; else checkups.push(updated);
-  } else {
-    checkups.push(updated);
-  }
-  saveCheckups(checkups);
+  const desc = isEdit ? `Checkup "${name}" aktualisiert` : `Checkup "${name}" hinzugefügt`;
+  trackChange(desc, () => {
+    let checkups = [...getCheckups()];
+    if (isEdit) {
+      const idx = checkups.findIndex(c => c.id === id);
+      if (idx >= 0) checkups[idx] = updated; else checkups.push(updated);
+    } else {
+      checkups.push(updated);
+    }
+    saveCheckups(checkups);
+  });
   document.getElementById('checkup-modal')?.remove();
   renderSettings();
   showToast(isEdit ? 'Checkup aktualisiert ✓' : 'Checkup hinzugefügt ✓', 'success');
@@ -334,7 +344,9 @@ function saveCheckupModal(id, isEdit) {
 function deleteCheckup(id) {
   const c = getCheckups().find(c => c.id === id);
   if (!c || !confirm(`Checkup "${c.name}" löschen?`)) return;
-  saveCheckups(getCheckups().filter(c => c.id !== id));
+  trackChange(`Checkup "${c.name}" gelöscht`, () => {
+    saveCheckups(getCheckups().filter(x => x.id !== id));
+  });
   renderSettings();
   showToast('Checkup gelöscht');
 }
@@ -669,17 +681,19 @@ function savePersonModal(id, isEdit) {
     allergies:     readAllergies(),
   };
 
-  let persons = [...getPersonList()];
-  if (isEdit) {
-    const idx = persons.findIndex(p=>p.id===id);
-    if (idx>=0) persons[idx] = updated; else persons.push(updated);
-  } else {
-    persons.push(updated);
-  }
+  const desc = isEdit ? `Person "${name}" aktualisiert` : `Person "${name}" hinzugefügt`;
+  trackChange(desc, () => {
+    let persons = [...getPersonList()];
+    if (isEdit) {
+      const idx = persons.findIndex(p=>p.id===id);
+      if (idx>=0) persons[idx] = updated; else persons.push(updated);
+    } else {
+      persons.push(updated);
+    }
+    savePersons(persons);
+  });
 
-  savePersons(persons);
   buildPersonSelector();
-  // Keep same selection if editing, else select new person
   if (!isEdit) selectPerson(id);
   else if (id === currentPersonId) applyPersonAccent();
   closePersonModal();
@@ -699,10 +713,12 @@ function deletePerson(id) {
   const warn = entryCount>0 ? `\n⚠ Diese Person hat ${entryCount} Einträge, die ebenfalls gelöscht werden.` : '';
   if (!confirm(`"${p.name}" wirklich löschen?${warn}`)) return;
 
-  const persons = getPersonList().filter(p=>p.id!==id);
-  DATA.entries  = DATA.entries.filter(e=>e.personId!==id);
-  savePersons(persons);
-  saveData();
+  trackChange(`Person "${p.name}" gelöscht`, () => {
+    const persons = getPersonList().filter(q=>q.id!==id);
+    DATA.entries  = DATA.entries.filter(e=>e.personId!==id);
+    savePersons(persons);
+    saveData();
+  });
 
   // Switch to first remaining person
   if (currentPersonId===id) {

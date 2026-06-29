@@ -238,8 +238,11 @@ function applyHistoryFilter(allEntries) {
 
 function deleteEntry(id) {
   if (!confirm('Eintrag wirklich löschen?')) return;
-  DATA.entries = DATA.entries.filter(e=>e.id!==id);
-  saveData();
+  const entry = DATA.entries.find(e => e.id === id);
+  trackChange(`Eintrag vom ${fmtDate(entry?.date || '')} gelöscht`, () => {
+    DATA.entries = DATA.entries.filter(e => e.id !== id);
+    saveData();
+  });
   showToast('Eintrag gelöscht');
   historyFilter = { text: '', type: 'all', doctor: '', dateFrom: '', dateTo: '' };
   renderHistory();
