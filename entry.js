@@ -106,6 +106,9 @@ function renderEntryForm(editEntry = null) {
           <button class="mode-btn${entryMode==='self'?' active':''}" id="mode-btn-self" onclick="setEntryMode('self')">
             Eigene Messung
           </button>
+          <button class="mode-btn" id="mode-btn-health" onclick="triggerHealthImport()">
+            Apple Health
+          </button>
         </div>
       </div>
 

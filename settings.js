@@ -114,22 +114,6 @@ function renderSettings() {
     </div>
 
     <div class="card" style="margin-top:1rem">
-      <div class="card-header"><span class="card-title">Apple Health</span></div>
-      <p class="settings-body">
-        Importiere Messwerte (Gewicht, Blutdruck, Puls u.a.) aus einem Apple-Health-Export.
-        Pro Tag wird der erste Wert übernommen; bereits importierte Tage werden übersprungen.
-      </p>
-      <div class="settings-action-grid">
-        <button class="btn btn-primary settings-action-btn" onclick="triggerHealthImport()">Aus Apple Health importieren</button>
-      </div>
-      <p class="field-hint">
-        In der Health-App: Profil → „Alle Gesundheitsdaten exportieren". Die erzeugte
-        export.zip hier hochladen — sie wird lokal im Browser entpackt und verarbeitet,
-        nichts wird hochgeladen.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
       <p class="settings-intro">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
       <div class="attribution-list">

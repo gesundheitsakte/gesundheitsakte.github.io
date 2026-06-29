@@ -966,15 +966,15 @@ textarea { resize: vertical; min-height: 80px; }
 /* ── Entry mode toggle ───────────────────────── */
 .entry-mode-toggle {
   display: flex;
+  flex-wrap: wrap;
   gap: .5rem;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: .3125rem;
-  width: fit-content;
-  margin: 0 auto;
 }
 .mode-btn {
+  flex: 1 1 auto;
   padding: .5rem 1.125rem;
   font-family: var(--font-sans);
   font-size: .9375rem;
@@ -985,6 +985,8 @@ textarea { resize: vertical; min-height: 80px; }
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background .15s, color .15s, box-shadow .15s;
+  white-space: nowrap;
+  text-align: center;
 }
 .mode-btn.active {
   background: var(--bg);
