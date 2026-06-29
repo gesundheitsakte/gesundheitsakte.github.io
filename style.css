@@ -73,7 +73,7 @@ small { font-size: .8125rem; color: var(--text-muted); }
 }
 .unsaved-dot {
   position: absolute;
-  top: -2px; right: -2px;
+  top: -5px; right: -5px;
   width: 9px; height: 9px;
   background: var(--danger);
   border: 2px solid var(--bg);
