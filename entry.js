@@ -572,8 +572,8 @@ function saveTargetDialog(pid, key) {
 }
 
 function refreshAfterTarget(key) {
-  // Aktualisiert Diagramm und Alle-Werte-Tab wenn offen
   const activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-','');
+  if (activeTab === 'dashboard') renderDashboard();
   if (activeTab === 'graphs' && activeGraphKey === key) drawGraph(key);
   if (activeTab === 'allmetrics') renderAllMetrics();
   updateGraphTargetBtn(key);
