@@ -200,6 +200,7 @@ small { font-size: .8125rem; color: var(--text-muted); }
   margin: 0 auto;
   width: 100%;
   flex: 1;          /* fill remaining vertical space */
+  overflow-x: clip; /* prevents negative-margin bleed from causing horizontal scroll */
 }
 .panel { display: none; }
 .panel.active {
