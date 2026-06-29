@@ -780,6 +780,7 @@ textarea { resize: vertical; min-height: 80px; }
 .dashboard-empty-state svg { width: 2rem; height: 2rem; color: var(--text-muted); }
 .dashboard-empty-state p { font-size: .9375rem; color: var(--text-secondary); margin: 0; }
 .empty-icon  { font-size: 2rem; margin-bottom: .75rem; }
+.empty-icon svg { width: 2rem; height: 2rem; }
 .empty-state p { font-size: .9375rem; }
 
 /* ── Spinner ─────────────────────────────────── */

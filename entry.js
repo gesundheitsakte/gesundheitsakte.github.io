@@ -395,7 +395,7 @@ function rebuildActiveFields() {
         </div>`;
     }).join('');
     return `<div class="form-section">
-      <div class="form-section-title">📊 ${esc(g)}</div>
+      <div class="form-section-title">${esc(g)}</div>
       <div class="form-grid">${fields}</div>
     </div>`;
   }).join('');
