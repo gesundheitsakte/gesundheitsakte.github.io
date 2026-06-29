@@ -833,7 +833,9 @@ textarea { resize: vertical; min-height: 80px; }
   align-items: center;
   line-height: 1;
 }
-.person-order-btn:hover { color: var(--text); }
+@media (hover: hover) {
+  .person-order-btn:hover { color: var(--text); }
+}
 .person-order-btn svg { width: 1.1rem; height: 1.1rem; }
 .person-order-btn-placeholder {
   display: inline-block;
