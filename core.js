@@ -346,10 +346,11 @@ function getTargets() { return DATA.targets || {}; }
 function getTarget(pid, key) { return getTargets()[`${pid}__${key}`] ?? null; }
 function setTarget(pid, key, value) {
   if (!DATA.targets) DATA.targets = {};
-  if (value === null || value === '' || isNaN(value)) {
+  const normalized = typeof value === 'string' ? value.replace(',', '.') : value;
+  if (normalized === null || normalized === '' || isNaN(normalized)) {
     delete DATA.targets[`${pid}__${key}`];
   } else {
-    DATA.targets[`${pid}__${key}`] = parseFloat(value);
+    DATA.targets[`${pid}__${key}`] = parseFloat(normalized);
   }
   markUnsaved();
 }
