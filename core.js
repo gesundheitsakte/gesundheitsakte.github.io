@@ -76,11 +76,19 @@ function markSaved() {
 }
 
 // ── Änderungs-Tracking ────────────────────────────
-// Snapshot des DATA-Objekts ohne lastModified (ändert sich bei jeder saveData-Runde)
+function _sortedJson(obj) {
+  if (Array.isArray(obj)) return obj.map(_sortedJson);
+  if (obj !== null && typeof obj === 'object')
+    return Object.fromEntries(Object.keys(obj).sort().map(k => [k, _sortedJson(obj[k])]));
+  return obj;
+}
+// Snapshot des DATA-Objekts ohne lastModified (ändert sich bei jeder saveData-Runde).
+// Schlüssel werden sortiert, damit unterschiedliche Objektreihenfolgen keinen
+// Scheinunterschied erzeugen.
 function _dataSnapshot() {
   if (!DATA) return '';
   const { lastModified, ...rest } = DATA;
-  return JSON.stringify(rest);
+  return JSON.stringify(_sortedJson(rest));
 }
 
 // Führt eine Datenmutation durch und erfasst sie in CHANGE_LOG, wenn sie
@@ -189,9 +197,11 @@ function personColor(p) {
 }
 const PERSON_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:100%;height:100%;display:block;fill:var(--avatar-icon-color,var(--bg))"><path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd"/></svg>`;
 const PERSON_SMILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:100%;height:100%;display:block;color:var(--avatar-icon-color,var(--bg))"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"/></svg>`;
+const PERSON_FEMALE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:100%;height:100%;display:block;fill:var(--avatar-icon-color,var(--bg))"><path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM17 9C17 3 7 3 7 9C6.5 12 6.5 14.5 7 16.5C9 15.5 10.5 14.5 12 14.5C13.5 14.5 15 15.5 17 16.5C17.5 14.5 17.5 12 17 9Z" clip-rule="evenodd"/></svg>`;
 function personAvatarContent(p) {
   if (p.avatarType === 'initials') return esc(initials(p.name));
   if (p.avatarType === 'smile')    return PERSON_SMILE_SVG;
+  if (p.avatarType === 'icon-f')   return PERSON_FEMALE_SVG;
   return PERSON_ICON_SVG;
 }
 // Returns the AVATAR_COLORS entry with the maximum RGB distance from hex — used
