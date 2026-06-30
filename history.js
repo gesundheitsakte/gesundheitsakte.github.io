@@ -247,8 +247,8 @@ function applyHistoryFilter(allEntries) {
         <div class="timeline-header">
           <span class="timeline-icon">${icon}</span>
           <span class="timeline-category">${esc(title)}</span>
-          <button class="entry-edit-btn" onclick="editEntry('${e.id}')" title="Bearbeiten">✎</button>
-          <button class="entry-delete-btn" onclick="deleteEntry('${e.id}')" title="Löschen">✕</button>
+          <button class="item-menu-btn" title="Aktionen"
+            onclick="openActionMenu(this,[{label:'Bearbeiten',fn:()=>editEntry('${e.id}')},{label:'Löschen',fn:()=>deleteEntry('${e.id}'),danger:true}])">⋮</button>
         </div>
         ${!isSelf && (e.reason||e.diagnosis) ? `<div style="font-size:.875rem;color:var(--text-secondary);margin:.35rem 0">
           ${e.reason?`<strong>${esc(e.reason)}</strong>`:''} ${e.diagnosis?`· ${esc(e.diagnosis)}`:''}

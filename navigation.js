@@ -386,6 +386,57 @@ function backToLanding() {
 }
 
 // ═══════════════════════════════════════════════
+// AKTIONS-MENÜ (⋮)
+// ═══════════════════════════════════════════════
+// Gemeinsam von Dashboard-Karten und Verlauf-Einträgen genutzt.
+// items: [{ label, fn, danger? }]
+
+function _actionMenuClickClose() { closeActionMenu(); }
+
+function openActionMenu(btn, items) {
+  const wasOpen = !!document.getElementById('action-menu');
+  closeActionMenu();
+  if (wasOpen) return; // zweiter Klick auf ⋮ schließt das Menü wieder
+
+  const menu = document.createElement('div');
+  menu.id = 'action-menu';
+  menu.className = 'action-menu';
+  menu.setAttribute('role', 'menu');
+
+  items.forEach(({ label, fn, danger }) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'action-menu-item' + (danger ? ' action-menu-item--danger' : '');
+    el.setAttribute('role', 'menuitem');
+    el.textContent = label;
+    el.onclick = e => { e.stopPropagation(); closeActionMenu(); fn(); };
+    menu.appendChild(el);
+  });
+
+  document.body.appendChild(menu);
+
+  // Position: unterhalb des Buttons, rechtsbündig
+  const br  = btn.getBoundingClientRect();
+  const mr  = menu.getBoundingClientRect();
+  let top   = br.bottom + 4;
+  let left  = br.right - mr.width;
+  if (left < 8) left = 8;
+  if (top + mr.height > window.innerHeight - 8) top = br.top - mr.height - 4;
+  menu.style.top  = top  + 'px';
+  menu.style.left = left + 'px';
+
+  setTimeout(() => {
+    document.addEventListener('click',   _actionMenuClickClose, { once: true });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeActionMenu(); }, { once: true });
+  }, 0);
+}
+
+function closeActionMenu() {
+  document.getElementById('action-menu')?.remove();
+  document.removeEventListener('click', _actionMenuClickClose);
+}
+
+// ═══════════════════════════════════════════════
 // DARK MODE
 // ═══════════════════════════════════════════════
 function initTheme() {

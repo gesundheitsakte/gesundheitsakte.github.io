@@ -146,7 +146,8 @@ function openPersonEdit(pid, section) {
 }
 
 function cardEditBtn(pid, section) {
-  return `<button class="card-edit-btn" onclick="openPersonEdit('${escAttr(pid)}','${section}')" title="Person bearbeiten">✎</button>`;
+  return `<button class="item-menu-btn" title="Aktionen"
+    onclick="openActionMenu(this,[{label:'Bearbeiten',fn:()=>openPersonEdit('${escAttr(pid)}','${escAttr(section)}')}])">⋮</button>`;
 }
 
 function renderConditionsCard(person) {
