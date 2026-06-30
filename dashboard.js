@@ -49,7 +49,8 @@ function renderDashboard() {
     const pinned = favKeys.includes(item.m.key);
     if (!item.last) return statTile(item.m.label, '—', '', 'Noch kein Wert', item.m.key, '', pinned);
     const isCat = item.m.type === 'boolean' || item.m.type === 'select';
-    return statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), isCat ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key, '', pinned);
+    const arrow = isCat ? '' : trendArrow(currentPersonId, item.m.key);
+    return statTile(item.m.label, formatMetricValue(item.m.key, item.last.value), isCat ? '' : item.m.unit, `Zuletzt ${fmtDate(item.last.date)}`, item.m.key, arrow, pinned);
   }).join('');
 
   panel.innerHTML = `
