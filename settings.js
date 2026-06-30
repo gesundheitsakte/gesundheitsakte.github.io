@@ -852,7 +852,7 @@ function renderEncryptionCard() {
       <p class="field-hint">Exporte werden als lesbares JSON gespeichert. Mit einem Passwort kannst du Exporte mit AES-256-GCM verschlüsseln.</p>
       <div class="field-group" style="margin-top:.875rem">
         <label for="enc-pw-new">Neues Passwort</label>
-        <input type="password" id="enc-pw-new" autocomplete="new-password" placeholder="Mindestens 8 Zeichen"
+        <input type="password" id="enc-pw-new" autocomplete="new-password" placeholder="Mindestens 4 Zeichen"
                oninput="checkPwMatch()" onkeydown="if(event.key==='Enter')enableEncryption()">
       </div>
       <div class="field-group" style="margin-top:.625rem">
@@ -873,7 +873,7 @@ function checkPwMatch() {
   const inp1 = document.getElementById('enc-pw-new');
   const inp2 = document.getElementById('enc-pw-confirm');
   if (!inp1 || !inp2) return;
-  const match = pw1.length >= 8 && pw2 && pw1 === pw2;
+  const match = pw1.length >= 4 && pw2 && pw1 === pw2;
   [inp1, inp2].forEach(el => {
     el.style.borderColor = match ? 'var(--success)' : '';
     el.style.boxShadow   = match ? '0 0 0 3px var(--success-light)' : '';
@@ -887,7 +887,7 @@ function enableEncryption() {
   const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = ''; } };
 
   if (!pw1)            return showErr('Bitte ein Passwort eingeben.');
-  if (pw1.length < 8)  return showErr('Das Passwort muss mindestens 8 Zeichen lang sein.');
+  if (pw1.length < 4)  return showErr('Das Passwort muss mindestens 4 Zeichen lang sein.');
   if (pw1 !== pw2)     return showErr('Die Passwörter stimmen nicht überein.');
 
   isEncrypted = true;
