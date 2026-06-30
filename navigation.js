@@ -82,7 +82,7 @@ function init() {
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         const activeBtn = document.querySelector('.tab-btn.active');
         if (!activeBtn) return;
-        const tabs = [...document.querySelectorAll('.tab-btn')];
+        const tabs = [...document.querySelectorAll('.tab-btn')].filter(b => b.style.display !== 'none');
         const idx = tabs.indexOf(activeBtn);
         const next = e.key === 'ArrowRight'
           ? tabs[Math.min(idx + 1, tabs.length - 1)]
