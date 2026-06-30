@@ -1924,6 +1924,13 @@ input.hf-search {
 :root.dark .unsaved-banner,
 :root.dark .demo-banner      { background: color-mix(in srgb, var(--bg-card) 60%, var(--warning-light) 40%); }
 
+/* Modal border for visibility against black backdrop */
+:root.dark .modal            { border: 1px solid var(--border); }
+
+/* Logo: inverted in dark mode (black heart on light badge) */
+:root.dark #logo-bg          { fill: #f0f0f0; }
+:root.dark #logo-svg path    { fill: #000000; }
+
 /* ── Out-of-range arrows in metric table ─────── */
 .range-arrow {
   font-size: .8rem;
