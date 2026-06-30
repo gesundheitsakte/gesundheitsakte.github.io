@@ -111,6 +111,7 @@ async function openDroppedFile(file) {
     return;
   }
   DATA = normalizeDatabase(result.db);
+  CHANGE_LOG = [];
   isDemoMode = false;
   hasUnsavedChanges = false;
   isEncrypted = result.encrypted;
@@ -886,6 +887,7 @@ async function handleDatabaseFile(input) {
     return;
   }
   DATA = normalizeDatabase(result.db);
+  CHANGE_LOG = [];
   isDemoMode = false;
   hasUnsavedChanges = false;
   isEncrypted = result.encrypted;
