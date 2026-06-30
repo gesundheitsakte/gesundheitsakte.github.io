@@ -81,6 +81,7 @@ function renderDashboard() {
       ${renderMedicationsCard(person)}
       ${renderVaccinationsCard(person)}
       ${renderAllergiesCard(person)}
+      ${renderOperationsCard(person)}
     </div>
 
     <div class="card" style="margin-top:1rem">
@@ -247,6 +248,17 @@ function renderAllergiesCard(person) {
     ${items.map(a=>`<div class="condition-item">
       <div class="condition-name">${esc(a.name)}</div>
       <div class="condition-meta">${a.severity?esc(a.severity):''}${a.notes?' · '+esc(a.notes):''}</div>
+    </div>`).join('')}
+  </div>`;
+}
+function renderOperationsCard(person) {
+  const items = (person.operations || []);
+  if (!items.length) return '';
+  return `<div class="card">
+    <div class="card-header"><span class="card-title">Operationen &amp; Eingriffe</span>${cardEditBtn(person.id, 'operations')}</div>
+    ${items.map(o=>`<div class="condition-item">
+      <div class="condition-name">${esc(o.name)}</div>
+      <div class="condition-meta">${o.date?esc(o.date):''}${o.hospital?' · '+esc(o.hospital):''}${o.notes?' · '+esc(o.notes):''}</div>
     </div>`).join('')}
   </div>`;
 }
