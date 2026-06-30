@@ -1889,40 +1889,40 @@ input.hf-search {
 :root.dark {
   --accent:        #5b9ebf;
   --accent-2:      #f0c46a;
-  --accent-light:  #163347;
+  --accent-light:  #0a1820;
   --accent-mid:    #7dbbdb;
-  --danger:        #f5a08c;
-  --danger-light:  #3d1a10;
-  --warning:       #f0bb6e;
-  --warning-light: #3d2200;
-  --success:       #4dbfb2;
-  --success-light: #0d3835;
+  --danger:        #f87171;
+  --danger-light:  #1c0907;
+  --warning:       #fbbf24;
+  --warning-light: #1c1000;
+  --success:       #4ade80;
+  --success-light: #052012;
 
-  --bg:            #0d2035;
-  --bg-subtle:     #1B3A5B;
-  --bg-card:       #1B3A5B;
-  --border:        #2a4968;
+  --bg:            #000000;
+  --bg-subtle:     #111111;
+  --bg-card:       #1a1a1a;
+  --border:        #2e2e2e;
   --border-focus:  #5b9ebf;
 
-  --text-primary:  #f1f5f9;
-  --text-secondary:#94a3b8;
-  --text-muted:    #64748b;
+  --text-primary:  #f0f0f0;
+  --text-secondary:#9ca3af;
+  --text-muted:    #6b7280;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.5);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.7);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.9);
 }
 
-/* Cards and inputs pick up --bg-subtle in dark */
+/* Elevated surfaces use --bg-card in dark mode */
 :root.dark .card,
 :root.dark .stat-tile,
 :root.dark .modal,
-:root.dark .pd-menu          { background: var(--bg-subtle); }
+:root.dark .pd-menu          { background: var(--bg-card); }
 :root.dark .landing,
 :root.dark .onboarding       { background: var(--bg); }
-:root.dark .landing-card     { background: var(--bg-subtle); }
-:root.dark .norm-range-card  { background: var(--bg-subtle); }
+:root.dark .landing-card     { background: var(--bg-card); }
+:root.dark .norm-range-card  { background: var(--bg-card); }
 :root.dark .unsaved-banner,
-:root.dark .demo-banner      { background: color-mix(in srgb, var(--bg) 60%, var(--warning-light) 40%); }
+:root.dark .demo-banner      { background: color-mix(in srgb, var(--bg-card) 60%, var(--warning-light) 40%); }
 
 /* ── Out-of-range arrows in metric table ─────── */
 .range-arrow {
