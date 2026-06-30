@@ -186,7 +186,7 @@ function renderEntryForm(editEntry = null) {
         <div class="form-section health-import-info">
           <p class="health-import-heading">Export aus der Health-App</p>
           <ol class="health-import-list">
-            <li>Öffne die <strong>Gesundheit</strong>-App auf dem iPhone</li>
+            <li>Öffne die <strong>Health</strong>-App auf dem iPhone</li>
             <li>Tippe oben rechts auf dein <strong>Profilbild</strong></li>
             <li>Wähle <strong>„Alle Gesundheitsdaten exportieren"</strong></li>
             <li>Übertrage die erzeugte <code>export.zip</code> auf dieses Gerät (z.B. per AirDrop oder iCloud Drive)</li>
