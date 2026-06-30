@@ -214,10 +214,10 @@ function generateAndPrint() {
     return pts.slice(-4);
   }
 
-  // Alle Datum-Spalten ermitteln (bis zu 4 letzte Messdaten über alle Metriken)
-  const allDateSet = new Set();
-  measuredMetrics.forEach(m => getPoints(m).forEach(p => allDateSet.add(p.date)));
-  const allDates = [...allDateSet].sort().slice(-4);
+  // Alle Monate (YYYY-MM) ermitteln; pro Monat nur eine Spalte (bis zu 4 Monate)
+  const allMonthSet = new Set();
+  measuredMetrics.forEach(m => getPoints(m).forEach(p => allMonthSet.add(p.date.slice(0, 7))));
+  const allMonths = [...allMonthSet].sort().slice(-4);
 
   // Arztbesuche (nur doctor-type, keine Selbstmessungen in diesem Abschnitt)
   const doctorVisits = entries
@@ -248,8 +248,8 @@ function generateAndPrint() {
     const mInGroup = measuredMetrics.filter(m => m.group === g);
     const rows = mInGroup.map(m => {
       const pts = getPoints(m);
-      const cells = allDates.map(date => {
-        const pt = pts.find(p => p.date === date);
+      const cells = allMonths.map(ym => {
+        const pt = pts.find(p => p.date.slice(0, 7) === ym);
         return pt ? `<td class="rpt-val">${pt.value}</td>` : `<td class="rpt-empty">—</td>`;
       }).join('');
       const norm = normLabel(m);
@@ -259,11 +259,11 @@ function generateAndPrint() {
         ${cells}
       </tr>`;
     }).join('');
-    return `<tr class="rpt-group-hdr"><td colspan="${2+allDates.length}">${esc(g)}</td></tr>${rows}`;
+    return `<tr class="rpt-group-hdr"><td colspan="${2+allMonths.length}">${esc(g)}</td></tr>${rows}`;
   }).join('');
 
-  const dateHeaders = allDates.map(d => {
-    const dt = new Date(d+'T00:00:00');
+  const dateHeaders = allMonths.map(ym => {
+    const dt = new Date(ym + '-01T00:00:00');
     return `<th>${dt.toLocaleDateString('de-AT',{month:'2-digit',year:'2-digit'})}</th>`;
   }).join('');
 
