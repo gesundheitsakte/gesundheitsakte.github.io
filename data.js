@@ -761,10 +761,23 @@ function validateDatabase(obj) {
   if (obj.customMetrics !== undefined && !Array.isArray(obj.customMetrics)) {
     errors.push('Feld "customMetrics" muss ein Array sein.');
   }
-  // Personen-Grundstruktur stichprobenartig prüfen
+  // Personen-Grundstruktur prüfen
   (obj.persons || []).forEach((p, i) => {
     if (!p.id)   errors.push(`Person #${i+1}: "id" fehlt.`);
     if (!p.name) errors.push(`Person #${i+1}: "name" fehlt.`);
+  });
+  // Einträge auf gültige personId und entryType prüfen
+  const validPersonIds = new Set((obj.persons || []).map(p => p.id));
+  const validEntryTypes = new Set(['doctor', 'self', 'apple-health']);
+  (obj.entries || []).forEach((e, i) => {
+    if (!e.personId) {
+      errors.push(`Eintrag #${i+1}: "personId" fehlt.`);
+    } else if (!validPersonIds.has(e.personId)) {
+      errors.push(`Eintrag #${i+1}: unbekannte personId "${e.personId}".`);
+    }
+    if (e.entryType && !validEntryTypes.has(e.entryType)) {
+      errors.push(`Eintrag #${i+1}: ungültiger entryType "${e.entryType}".`);
+    }
   });
   return errors;
 }
