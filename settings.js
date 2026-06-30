@@ -407,12 +407,7 @@ function openPersonModal(person, scrollTo) {
               <button type="button" class="avatar-type-option${avatarType==='icon'||!avatarType?' selected':''}"
                       onclick="selectAvatarType('icon')" data-type="icon">
                 <div class="avatar-type-preview" style="background:${personColor(p)}">${PERSON_ICON_SVG}</div>
-                <span>Männlich</span>
-              </button>
-              <button type="button" class="avatar-type-option${avatarType==='icon-f'?' selected':''}"
-                      onclick="selectAvatarType('icon-f')" data-type="icon-f">
-                <div class="avatar-type-preview" style="background:${personColor(p)}">${PERSON_FEMALE_SVG}</div>
-                <span>Weiblich</span>
+                <span>Symbol</span>
               </button>
               <button type="button" class="avatar-type-option${avatarType==='smile'?' selected':''}"
                       onclick="selectAvatarType('smile')" data-type="smile">
@@ -704,7 +699,7 @@ function savePersonModal(id, isEdit) {
     bloodType: blood || null,
     socialSecurityNumber: svnr || null,
     color: color || null,
-    avatarType: ['initials', 'smile', 'icon-f'].includes(avatarType) ? avatarType : null,
+    avatarType: ['initials', 'smile'].includes(avatarType) ? avatarType : null,
     favoriteMetrics: favMetrics.length ? favMetrics : null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
