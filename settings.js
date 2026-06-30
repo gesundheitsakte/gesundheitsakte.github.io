@@ -17,7 +17,7 @@
 // Persons live in DATA.persons (the loaded JSON database)
 function savePersons(persons) {
   DATA.persons = persons;
-  markUnsaved();
+  saveData();
   if (!isDemoMode) updatePWAShortcuts();
 }
 
@@ -745,7 +745,6 @@ function deletePerson(id) {
     const persons = getPersonList().filter(q=>q.id!==id);
     DATA.entries  = DATA.entries.filter(e=>e.personId!==id);
     savePersons(persons);
-    saveData();
   });
 
   // Switch to first remaining person

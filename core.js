@@ -376,7 +376,7 @@ function resolveNormalRange(metricKey, personId) {
 
 function saveCheckups(checkups) {
   DATA.checkups = checkups;
-  markUnsaved();
+  saveData();
 }
 
 // ── Zielwerte: DATA.targets = { "personId__metricKey": number } ──────────
