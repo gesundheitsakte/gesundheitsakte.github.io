@@ -196,7 +196,12 @@ function selectPerson(id) {
   applyPersonAccent();
 
   const active = document.querySelector('.panel.active');
-  if (active) renderPanel(active.id.replace('panel-',''));
+  if (active) {
+    active.style.animation = 'none';
+    void active.offsetWidth;
+    active.style.animation = '';
+    renderPanel(active.id.replace('panel-',''));
+  }
 }
 
 // ═══════════════════════════════════════════════
