@@ -48,7 +48,7 @@ function setupGlobalDropzone() {
     if (!file) {
       // Nur warnen wenn überhaupt Dateien gedroppt wurden
       if (e.dataTransfer?.files?.length) {
-        showToast('Bitte eine JSON- oder .health-Datei ablegen', 'error');
+        showToast('Bitte eine JSON-Datei ablegen', 'error');
       }
       return;
     }
@@ -489,7 +489,7 @@ async function exportData() {
     try {
       const envelope = await encryptDatabase(out, pw);
       fileContent = JSON.stringify(envelope, null, 2);
-      extension = 'health';               // verschlüsselte Dateien → .health
+      extension = 'json';
     } catch (e) {
       console.error(e);
       showToast('Verschlüsselung fehlgeschlagen', 'error');
@@ -874,7 +874,7 @@ function showLanding() {
         Alle Daten bleiben auf deinem Gerät. Es werden keine Daten an Server übertragen.
       </p>
     </div>
-    <input type="file" id="landing-file-input" accept=".json,.health" style="display:none"
+    <input type="file" id="landing-file-input" accept=".json" style="display:none"
            onchange="handleDatabaseFile(this)">`;
 }
 
