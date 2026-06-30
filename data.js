@@ -774,6 +774,7 @@ function normalizeDatabase(obj) {
   return {
     version:       obj.version || '2.0',
     createdAt:     obj.createdAt || new Date().toISOString(),
+    lastModified:  obj.lastModified || null,
     checkups:      Array.isArray(obj.checkups)      ? obj.checkups      : [],
     targets:       (typeof obj.targets === 'object' && obj.targets) ? obj.targets : {},
     healthImports: (typeof obj.healthImports === 'object' && obj.healthImports) ? obj.healthImports : {},
