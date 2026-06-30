@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════
    Familien-Gesundheitsakte — changes.js
    ───────────────────────────────────────────────
-   Tab "Änderungen": Anzeige und Verwaltung des
-   CHANGE_LOG (nicht gespeicherte Änderungen).
+   Tab "Änderungen": Anzeige des CHANGE_LOG
+   (nicht gespeicherte Änderungen).
 
    Teil eines klassischen Multi-Script-Setups (kein ES-Modul):
    alle Dateien teilen denselben globalen Scope. Reihenfolge der
@@ -10,33 +10,8 @@
    ═══════════════════════════════════════════════ */
 'use strict';
 
-// ── Diff-Berechnung ─────────────────────────────
-// Zwei-Zeiger-Ansatz: O(m+n) statt O(m*n). Funktioniert perfekt für
-// typische Einzel-Feld-Änderungen (Name, Farbe, Zielwert …), da diese
-// genau einen zusammenhängenden geänderten Block erzeugen.
-function _computeLineDiff(beforeJson, afterJson) {
-  const fmt = j => JSON.stringify(_sortedJson(JSON.parse(j)), null, 2);
-  const a = fmt(beforeJson).split('\n');
-  const b = fmt(afterJson).split('\n');
-
-  // Gemeinsames Präfix
-  let start = 0;
-  while (start < a.length && start < b.length && a[start] === b[start]) start++;
-
-  // Gemeinsames Suffix (rückwärts, nicht ins Präfix laufen)
-  let endA = a.length - 1, endB = b.length - 1;
-  while (endA >= start && endB >= start && a[endA] === b[endB]) { endA--; endB--; }
-
-  const result = [];
-  for (let i = 0; i < start; i++)          result.push({ type: 'ctx', line: a[i] });
-  for (let i = start; i <= endA; i++)       result.push({ type: 'del', line: a[i] });
-  for (let i = start; i <= endB; i++)       result.push({ type: 'add', line: b[i] });
-  for (let i = endA + 1; i < a.length; i++) result.push({ type: 'ctx', line: a[i] });
-  return result;
-}
-
 function _renderDiffHtml(diff) {
-  if (!diff.length) return '<span class="diff-ctx">(keine Unterschiede)</span>';
+  if (!diff || !diff.length) return '<span class="diff-ctx">(keine Unterschiede)</span>';
   if (diff[0].type === 'info') return `<span class="diff-info">${esc(diff[0].line)}</span>`;
 
   const CONTEXT = 2;
@@ -65,36 +40,6 @@ function _renderDiffHtml(diff) {
   return html;
 }
 
-// ── Änderung rückgängig machen ──────────────────
-function revertToChange(changeId) {
-  const idx = CHANGE_LOG.findIndex(c => c.id === changeId);
-  if (idx < 0) return;
-
-  const count = CHANGE_LOG.length - idx;
-  const plural = count === 1 ? 'diese Änderung' : `diese und ${count - 1} nachfolgende Änderung${count > 2 ? 'en' : ''}`;
-  if (!confirm(`${plural} rückgängig machen?`)) return;
-
-  const snap = JSON.parse(CHANGE_LOG[idx].before);
-  DATA = { ...snap, lastModified: new Date().toISOString() };
-
-  // Ungültige Person abfangen
-  if (!getPersonList().find(p => p.id === currentPersonId)) {
-    currentPersonId = getPersonList()[0]?.id || null;
-  }
-
-  CHANGE_LOG.splice(idx);
-  hasUnsavedChanges = CHANGE_LOG.length > 0;
-
-  updateUnsavedIndicator();
-  syncChangesTabVisibility();
-  persistNow();
-  buildPersonSelector();
-  applyPersonAccent();
-  renderChanges();
-  const _activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-', '');
-  if (_activeTab && _activeTab !== 'changes') renderPanel(_activeTab);
-}
-
 // ── Tab rendern ──────────────────────────────────
 function renderChanges() {
   const panel = document.getElementById('panel-changes');
@@ -112,8 +57,7 @@ function renderChanges() {
     <span class="changes-export-hint">Strg+S exportiert ebenfalls</span>
   </div>`;
 
-  const entries = [...CHANGE_LOG].reverse().map((c, revIdx) => {
-    const origIdx = CHANGE_LOG.length - 1 - revIdx;
+  const entries = [...CHANGE_LOG].reverse().map(c => {
     const ts  = new Date(c.ts).toLocaleString('de-AT', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
@@ -130,13 +74,10 @@ function renderChanges() {
           <button class="btn btn-ghost btn-sm change-diff-toggle"
                   onclick="toggleChangeDiff('${diffId}')"
                   aria-expanded="false" aria-controls="${diffId}">Diff ▼</button>
-          <button class="btn btn-ghost btn-sm" style="color:var(--danger)"
-                  onclick="revertToChange('${c.id}')"
-                  title="Diese${origIdx < CHANGE_LOG.length - 1 ? ' und nachfolgende Änderungen' : ' Änderung'} rückgängig machen">↩</button>
         </div>
       </div>
       <div class="change-diff" id="${diffId}" style="display:none">
-        <pre class="diff-block"><code>${_renderDiffHtml(_computeLineDiff(c.before, c.after))}</code></pre>
+        <pre class="diff-block"><code>${_renderDiffHtml(c.diff)}</code></pre>
       </div>
     </div>`;
   }).join('');

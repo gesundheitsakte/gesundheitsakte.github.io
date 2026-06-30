@@ -114,7 +114,12 @@ function loadFromStorageOrLanding() {
   if (!snap || !snap.data) { showLanding(); return; }
   try {
     DATA = normalizeDatabase(snap.data);
-    CHANGE_LOG = Array.isArray(snap.changeLog) ? snap.changeLog : [];
+    CHANGE_LOG = Array.isArray(snap.changeLog)
+      ? snap.changeLog.map(c => c.diff ? c : {
+          id: c.id, ts: c.ts, description: c.description,
+          diff: (c.before && c.after) ? _computeLineDiff(c.before, c.after) : [],
+        })
+      : [];
     isDemoMode = false;
     isEncrypted = !!snap.isEncrypted;
     hasUnsavedChanges = CHANGE_LOG.length > 0;

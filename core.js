@@ -22,7 +22,7 @@ let isDemoMode       = false; // true wenn Demo-Daten geladen
 let hasUnsavedChanges = false; // für roten Punkt am Logo
 let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert werden soll
                               // (Passwort liegt in crypto.js _sessionPassword)
-let CHANGE_LOG       = [];    // [{ id, ts, description, before, after }] — nicht gespeicherte Änderungen
+let CHANGE_LOG       = [];    // [{ id, ts, description, diff }] — nicht gespeicherte Änderungen
 
 const AVATAR_COLORS = [
   '#1B3A5B','#2C6E8F','#2A9D8F','#E9A23B','#F2785C',
@@ -91,6 +91,24 @@ function _dataSnapshot() {
   return JSON.stringify(_sortedJson(rest));
 }
 
+// Zwei-Zeiger-Diff zweier JSON-Snapshots. O(m+n), funktioniert gut für
+// typische Einzel-Feld-Änderungen, die einen zusammenhängenden Block erzeugen.
+function _computeLineDiff(beforeJson, afterJson) {
+  const fmt = j => JSON.stringify(_sortedJson(JSON.parse(j)), null, 2);
+  const a = fmt(beforeJson).split('\n');
+  const b = fmt(afterJson).split('\n');
+  let start = 0;
+  while (start < a.length && start < b.length && a[start] === b[start]) start++;
+  let endA = a.length - 1, endB = b.length - 1;
+  while (endA >= start && endB >= start && a[endA] === b[endB]) { endA--; endB--; }
+  const result = [];
+  for (let i = 0; i < start; i++)           result.push({ type: 'ctx', line: a[i] });
+  for (let i = start; i <= endA; i++)        result.push({ type: 'del', line: a[i] });
+  for (let i = start; i <= endB; i++)        result.push({ type: 'add', line: b[i] });
+  for (let i = endA + 1; i < a.length; i++) result.push({ type: 'ctx', line: a[i] });
+  return result;
+}
+
 // Führt eine Datenmutation durch und erfasst sie in CHANGE_LOG, wenn sie
 // den JSON-Inhalt tatsächlich verändert. So werden rein formale Aufrufe
 // (Zielwert auf gleichen Wert setzen etc.) nicht geloggt.
@@ -99,9 +117,7 @@ function trackChange(description, mutate) {
   mutate();
   const after = _dataSnapshot();
   if (before === after) return;
-  CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, before, after });
-  // Guard: keep at most 50 entries to avoid exhausting the ~5 MB localStorage quota
-  if (CHANGE_LOG.length > 50) CHANGE_LOG.splice(0, CHANGE_LOG.length - 50);
+  CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, diff: _computeLineDiff(before, after) });
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
   if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
