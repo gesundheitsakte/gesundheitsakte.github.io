@@ -1017,7 +1017,7 @@ textarea { resize: vertical; min-height: 80px; }
   text-align: center;
 }
 .mode-btn.active {
-  background: var(--bg);
+  background: var(--bg-card);
   color: var(--text-primary);
   box-shadow: var(--shadow-sm);
 }
