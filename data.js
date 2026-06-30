@@ -44,11 +44,11 @@ function setupGlobalDropzone() {
     if (overlay) overlay.classList.remove('active');
 
     const file = [...(e.dataTransfer?.files || [])]
-      .find(f => f.name.toLowerCase().endsWith('.json'));
+      .find(f => /\.(json|health)$/i.test(f.name));
     if (!file) {
       // Nur warnen wenn überhaupt Dateien gedroppt wurden
       if (e.dataTransfer?.files?.length) {
-        showToast('Bitte eine JSON-Datei ablegen', 'error');
+        showToast('Bitte eine JSON- oder .health-Datei ablegen', 'error');
       }
       return;
     }

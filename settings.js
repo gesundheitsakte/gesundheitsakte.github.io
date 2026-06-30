@@ -832,7 +832,8 @@ function renderEncryptionCard() {
       <p class="field-hint">Alle Exporte werden mit deinem Passwort verschlüsselt. Ohne Passwort sind die Daten nicht lesbar.</p>
       <div class="field-group" style="margin-top:.875rem">
         <label for="enc-pw-current">Aktuelles Passwort bestätigen</label>
-        <input type="password" id="enc-pw-current" autocomplete="current-password" placeholder="Passwort eingeben">
+        <input type="password" id="enc-pw-current" autocomplete="current-password" placeholder="Passwort eingeben"
+               onkeydown="if(event.key==='Enter')disableEncryption()">
       </div>
       <p id="enc-error" style="color:var(--danger);font-size:.8125rem;margin:.375rem 0 0;display:none"></p>
       <div style="margin-top:.875rem">
@@ -851,17 +852,32 @@ function renderEncryptionCard() {
       <p class="field-hint">Exporte werden als lesbares JSON gespeichert. Mit einem Passwort kannst du Exporte mit AES-256-GCM verschlüsseln.</p>
       <div class="field-group" style="margin-top:.875rem">
         <label for="enc-pw-new">Neues Passwort</label>
-        <input type="password" id="enc-pw-new" autocomplete="new-password" placeholder="Mindestens 8 Zeichen">
+        <input type="password" id="enc-pw-new" autocomplete="new-password" placeholder="Mindestens 8 Zeichen"
+               oninput="checkPwMatch()" onkeydown="if(event.key==='Enter')enableEncryption()">
       </div>
       <div class="field-group" style="margin-top:.625rem">
         <label for="enc-pw-confirm">Passwort bestätigen</label>
-        <input type="password" id="enc-pw-confirm" autocomplete="new-password" placeholder="Passwort wiederholen">
+        <input type="password" id="enc-pw-confirm" autocomplete="new-password" placeholder="Passwort wiederholen"
+               oninput="checkPwMatch()" onkeydown="if(event.key==='Enter')enableEncryption()">
       </div>
       <p id="enc-error" style="color:var(--danger);font-size:.8125rem;margin:.375rem 0 0;display:none"></p>
       <div style="margin-top:.875rem">
         <button class="btn btn-primary settings-action-btn" onclick="enableEncryption()">Verschlüsselung aktivieren</button>
       </div>
     </div>`;
+}
+
+function checkPwMatch() {
+  const pw1  = document.getElementById('enc-pw-new')?.value || '';
+  const pw2  = document.getElementById('enc-pw-confirm')?.value || '';
+  const inp1 = document.getElementById('enc-pw-new');
+  const inp2 = document.getElementById('enc-pw-confirm');
+  if (!inp1 || !inp2) return;
+  const match = pw1.length >= 8 && pw2 && pw1 === pw2;
+  [inp1, inp2].forEach(el => {
+    el.style.borderColor = match ? 'var(--success)' : '';
+    el.style.boxShadow   = match ? '0 0 0 3px var(--success-light)' : '';
+  });
 }
 
 function enableEncryption() {
