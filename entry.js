@@ -30,21 +30,21 @@ function _entryKeyHandler(e) {
   }
 }
 
-function renderEntryForm(editEntry = null) {
+function renderEntryForm(editingEntry = null) {
   const panel   = document.getElementById('panel-entry');
   const person  = getPersonList().find(p=>p.id===currentPersonId);
   const checkups = getCheckups().filter(c=>checkupApplies(c,person));
   activeFormMetrics = new Set();
   customMetrics     = [];
 
-  const isEdit = !!editEntry;
-  editingEntryId = isEdit ? editEntry.id : null;
-  entryMode      = isEdit ? (editEntry.entryType || 'doctor') : 'doctor';
+  const isEdit = !!editingEntry;
+  editingEntryId = isEdit ? editingEntry.id : null;
+  entryMode      = isEdit ? (editingEntry.entryType || 'doctor') : 'doctor';
 
   // Beim Bearbeiten: vorhandene Messwerte als aktive Pills / Werte vormerken
   if (isEdit) {
-    Object.keys(editEntry.metrics || {}).forEach(k => activeFormMetrics.add(k));
-    Object.entries(editEntry.customMetrics || {}).forEach(([k, m]) => {
+    Object.keys(editingEntry.metrics || {}).forEach(k => activeFormMetrics.add(k));
+    Object.entries(editingEntry.customMetrics || {}).forEach(([k, m]) => {
       customMetrics.push({ key: k, label: m.label, unit: m.unit, value: m.value });
     });
   }
@@ -120,7 +120,7 @@ function renderEntryForm(editEntry = null) {
             <label for="entry-date">Datum</label>
             <input type="date" id="entry-date"
                    max="${todayISO()}"
-                   value="${isEdit ? editEntry.date : todayISO()}">
+                   value="${isEdit ? editingEntry.date : todayISO()}">
           </div>
         </div>
       </div>
@@ -132,29 +132,29 @@ function renderEntryForm(editEntry = null) {
           <div class="form-grid">
             <div class="field-group">
               <label for="entry-doctor">Arzt / Facharzt</label>
-              <input type="text" id="entry-doctor" list="doctor-suggestions" autocomplete="off" placeholder="z.B. Dr. Huber, Hausarzt" value="${isEdit?escAttr(editEntry.doctor||''):''}">
+              <input type="text" id="entry-doctor" list="doctor-suggestions" autocomplete="off" placeholder="z.B. Dr. Huber, Hausarzt" value="${isEdit?escAttr(editingEntry.doctor||''):''}">
               <datalist id="doctor-suggestions">
                 ${[...new Set(DATA.entries.filter(e=>e.doctor?.trim()).map(e=>e.doctor.trim()))].map(d=>`<option value="${escAttr(d)}">`).join('')}
               </datalist>
             </div>
             <div class="field-group">
               <label for="entry-reason">Grund des Besuchs</label>
-              <input type="text" id="entry-reason" autocomplete="off" placeholder="z.B. Routinekontrolle" value="${isEdit?escAttr(editEntry.reason||''):''}">
+              <input type="text" id="entry-reason" autocomplete="off" placeholder="z.B. Routinekontrolle" value="${isEdit?escAttr(editingEntry.reason||''):''}">
             </div>
             <div class="field-group">
               <label for="entry-diagnosis">Diagnose / Befund</label>
-              <input type="text" id="entry-diagnosis" autocomplete="off" placeholder="z.B. Kein Befund" value="${isEdit?escAttr(editEntry.diagnosis||''):''}">
+              <input type="text" id="entry-diagnosis" autocomplete="off" placeholder="z.B. Kein Befund" value="${isEdit?escAttr(editingEntry.diagnosis||''):''}">
             </div>
             <div class="field-group">
               <label for="entry-checkup">Checkup zuordnen</label>
               <select id="entry-checkup">
                 <option value="">— Kein Checkup —</option>
-                ${checkups.map(c=>`<option value="${c.id}" ${isEdit&&editEntry.checkupId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
+                ${checkups.map(c=>`<option value="${c.id}" ${isEdit&&editingEntry.checkupId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
               </select>
             </div>
             <div class="field-group full">
               <label for="entry-notes">Notizen</label>
-              <textarea id="entry-notes" autocomplete="off" placeholder="Weitere Notizen…">${isEdit?esc(editEntry.notes||''):''}</textarea>
+              <textarea id="entry-notes" autocomplete="off" placeholder="Weitere Notizen…">${isEdit?esc(editingEntry.notes||''):''}</textarea>
             </div>
           </div>
         </div>
@@ -223,7 +223,7 @@ function renderEntryForm(editEntry = null) {
     });
     rebuildActiveFields();
     // Predefined-Werte eintragen (doctor-mode: mf-, self-mode: self-)
-    Object.entries(editEntry.metrics || {}).forEach(([k, v]) => {
+    Object.entries(editingEntry.metrics || {}).forEach(([k, v]) => {
       const el = document.getElementById((entryMode==='self'?'self-':'mf-') + k);
       if (el) el.value = v;
     });

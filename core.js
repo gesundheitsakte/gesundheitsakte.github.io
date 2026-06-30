@@ -100,6 +100,8 @@ function trackChange(description, mutate) {
   const after = _dataSnapshot();
   if (before === after) return;
   CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, before, after });
+  // Guard: keep at most 50 entries to avoid exhausting the ~5 MB localStorage quota
+  if (CHANGE_LOG.length > 50) CHANGE_LOG.splice(0, CHANGE_LOG.length - 50);
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
   if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
@@ -300,12 +302,13 @@ function lastMetricValue(pid, key) {
 // Gibt für einen computed-Metric die synthetische Zeitreihe zurück.
 // Aktuell: BMI aus Gewicht + Größe.
 function computedMetricHistory(pid, key) {
+  function lastBefore(series, date) { const f=series.filter(d=>d.date<=date); return f.length?f[f.length-1].value:null; }
+
   if (key === 'bmi') {
     const weights = metricHistory(pid, 'weight');
     const heights = metricHistory(pid, 'height');
     if (!weights.length || !heights.length) return [];
     const allDates = [...new Set([...weights.map(d=>d.date),...heights.map(d=>d.date)])].sort();
-    function lastBefore(series, date) { const f=series.filter(d=>d.date<=date); return f.length?f[f.length-1].value:null; }
     const points = [];
     for (const date of allDates) {
       const w = lastBefore(weights, date), h = lastBefore(heights, date);
@@ -319,7 +322,6 @@ function computedMetricHistory(pid, key) {
     const hips   = metricHistory(pid, 'hip_circumference');
     if (!waists.length || !hips.length) return [];
     const allDates = [...new Set([...waists.map(d=>d.date),...hips.map(d=>d.date)])].sort();
-    function lastBefore(series, date) { const f=series.filter(d=>d.date<=date); return f.length?f[f.length-1].value:null; }
     const points = [];
     for (const date of allDates) {
       const w = lastBefore(waists, date), h = lastBefore(hips, date);

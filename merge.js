@@ -164,12 +164,6 @@ function mergeTargets(ta, tb, merged, conflicts, personsById) {
 let _mergePick = { a: null, b: null };
 
 // ── Einstieg ──────────────────────────────────────
-// Aus dem laufenden Betrieb: aktuelle DB ist A, nur B muss gewählt werden.
-function startMerge() {
-  if (!DATA) { startMergeFromLanding(); return; }
-  openMergePicker(DATA);
-}
-
 // Von der Landing-Page: noch nichts geladen → beide Dateien im Modal wählen.
 function startMergeFromLanding() {
   openMergePicker(null);
@@ -279,8 +273,15 @@ function updateMergeCompareBtn() {
 // Beide Dateien da → Merge-Plan berechnen und Konflikt-Modal öffnen.
 function comparePickedFiles() {
   if (!_mergePick.a || !_mergePick.b) return;
-  const bName = _mergePick.b.name;          // vor dem Zurücksetzen sichern
+  const bName = _mergePick.b.name;
   _mergePlan = computeMergePlan(_mergePick.a.db, _mergePick.b.db);
+  // Verschlüsselungsinfo vor dem Zurücksetzen von _mergePick sichern
+  _mergePlan.encryptionInfo = {
+    encA: _mergePick.a.encrypted,
+    encB: _mergePick.b.encrypted,
+    pwA:  _mergePick.a.password,
+    pwB:  _mergePick.b.password,
+  };
   closeMergePicker();                        // setzt _mergePick = {a:null,b:null}
   openMergeModal(bName);
 }
@@ -429,15 +430,14 @@ function applyMerge() {
   // Verschlüsselung: wenn eine der Quelldateien verschlüsselt war, bleibt
   // das Ergebnis verschlüsselt. Passwort aus der verschlüsselten Quelle
   // übernehmen (A bevorzugt).
-  const encA = _mergePick.a?.encrypted, encB = _mergePick.b?.encrypted;
+  const { encA, encB, pwA, pwB } = _mergePlan.encryptionInfo || {};
   if (encA || encB) {
     isEncrypted = true;
-    setSessionPassword(_mergePick.a?.password || _mergePick.b?.password || null);
+    setSessionPassword(pwA || pwB || null);
   } else {
     isEncrypted = false;
     clearSessionPassword();
   }
-  _mergePick = { a: null, b: null };
 
   currentPersonId = getPersonList()[0]?.id || null;
   document.getElementById('landing').style.display = 'none';

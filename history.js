@@ -231,15 +231,13 @@ function applyHistoryFilter(allEntries) {
         const def=metricDef(k);
         const display = def?.type==='boolean'
           ? (v===true||v==='true'?'Ja':'Nein')
-          : def?.type==='select' ? String(v) : esc(v);
+          : def?.type==='select' ? esc(String(v)) : esc(v);
         return `<span class="field-item"><span class="field-key">${esc(def?.label??k)}:</span>${display}${def?.unit&&def.type!=='boolean'&&def.type!=='select'?' '+esc(def.unit):''}</span>`;
       }).join('');
 
     const customEntries = Object.values(e.customMetrics||{})
       .map(m=>`<span class="field-item"><span class="field-key">${esc(m.label)}:</span>${esc(m.value)}${m.unit?' '+esc(m.unit):''}</span>`)
       .join('');
-
-    const pdfBadge = '';
 
     _parts.push(`<li class="timeline-item">
       <div class="timeline-date">${fmtShort(e.date)}</div>
@@ -272,6 +270,5 @@ function deleteEntry(id) {
     saveData();
   });
   showToast('Eintrag gelöscht');
-  historyFilter = { text: '', type: 'all', doctor: '', dateFrom: '', dateTo: '' };
   renderHistory();
 }

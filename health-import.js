@@ -295,7 +295,8 @@ function confirmHealthImport() {
 
     const selfByDate = {};
     for (const e of DATA.entries) {
-      if (e.personId === personId && e.entryType === 'self') selfByDate[e.date] = e;
+      if (e.personId === personId && (e.entryType === 'self' || e.entryType === 'apple-health'))
+        selfByDate[e.date] = e;
     }
     for (const date of Object.keys(byDate)) {
       const ex = selfByDate[date];

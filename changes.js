@@ -91,6 +91,8 @@ function revertToChange(changeId) {
   buildPersonSelector();
   applyPersonAccent();
   renderChanges();
+  const _activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-', '');
+  if (_activeTab && _activeTab !== 'changes') renderPanel(_activeTab);
 }
 
 // ── Tab rendern ──────────────────────────────────

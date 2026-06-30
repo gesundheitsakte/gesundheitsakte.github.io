@@ -658,7 +658,7 @@ function buildICS(events, person) {
 
     const descParts = [];
     if (c.description) descParts.push(c.description);
-    descParts.push(`Intervall: ${c.intervalMonths>=12
+    descParts.push(`Intervall: ${c.intervalMonths % 12 === 0 && c.intervalMonths > 12
       ? (c.intervalMonths/12)+' Jahr'+(c.intervalMonths/12>1?'e':'')
       : c.intervalMonths+' Monate'}`);
     if (c.phone) descParts.push(`Telefon: ${c.phone}`);
@@ -680,11 +680,10 @@ function buildICS(events, person) {
     if (c.url) lines.push(`URL:${icsEscape(c.url)}`);
     lines.push(
       'TRANSP:TRANSPARENT',
-      // Erinnerung 1 Tag vorher um 09:00 (bei Ganztags-Events der saubere Weg)
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       `DESCRIPTION:${icsEscape(`Erinnerung: ${c.name}`)}`,
-      'TRIGGER;VALUE=DATE-TIME:' + icsAlarmTrigger(ev.dueDate),
+      'TRIGGER:-P1D',
       'END:VALARM',
       'END:VEVENT',
     );
@@ -709,13 +708,6 @@ function icsDatePlusOne(iso) {
   const p = n => String(n).padStart(2,'0');
   return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
 }
-// Alarm: Tag vorher, 09:00 lokale Zeit → als floating local time (ohne Z).
-function icsAlarmTrigger(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() - 1);
-  const p = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T090000`;
-}
 // Sonderzeichen in TEXT-Feldern escapen (RFC 5545 §3.3.11).
 function icsEscape(s) {
   return String(s)
@@ -724,16 +716,28 @@ function icsEscape(s) {
     .replace(/,/g, '\\,')
     .replace(/\r?\n/g, '\\n');
 }
-// Zeilen >75 Oktette müssen umgebrochen werden (Folding mit Leerzeichen).
+// Zeilen >75 Oktette müssen umgebrochen werden (Folding mit Leerzeichen, RFC 5545 §3.1).
+// Zählt UTF-8-Bytes statt JS-Zeichen, damit Umlaute korrekt behandelt werden.
 function foldICSLine(line) {
-  if (line.length <= 75) return line;
-  let out = '';
-  let cur = line;
-  while (cur.length > 75) {
-    out += cur.slice(0, 75) + '\r\n ';
-    cur = cur.slice(75);
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 75) return line;
+  let out = '', remaining = line, isFirst = true;
+  while (remaining.length > 0) {
+    const limit = isFirst ? 75 : 74; // Folgezeilen: 1 Byte Leerzeichen abziehen
+    let byteCount = 0, charIdx = 0;
+    while (charIdx < remaining.length) {
+      const charBytes = enc.encode(remaining[charIdx]).length;
+      if (byteCount + charBytes > limit) break;
+      byteCount += charBytes;
+      charIdx++;
+    }
+    if (charIdx === 0) charIdx = 1; // mind. 1 Zeichen pro Chunk
+    if (charIdx >= remaining.length) { out += remaining; break; }
+    out += remaining.slice(0, charIdx) + '\r\n ';
+    remaining = remaining.slice(charIdx);
+    isFirst = false;
   }
-  return out + cur;
+  return out;
 }
 function slugify(s) {
   return String(s).toLowerCase()
@@ -1055,7 +1059,6 @@ async function finishOnboarding() {
     entries: [],
   };
   isDemoMode = false;
-  hasUnsavedChanges = true; // neue DB ist noch nicht exportiert
   isEncrypted = !!wantEncrypt;
   if (wantEncrypt) setSessionPassword(password);
   else clearSessionPassword();

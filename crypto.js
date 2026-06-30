@@ -45,7 +45,6 @@ let _sessionPassword = null;
 function setSessionPassword(pw) { _sessionPassword = pw || null; }
 function getSessionPassword()   { return _sessionPassword; }
 function clearSessionPassword() { _sessionPassword = null; }
-function hasSessionPassword()   { return !!_sessionPassword; }
 
 // ── Base64 <-> ArrayBuffer ────────────────────────
 function bufToBase64(buf) {

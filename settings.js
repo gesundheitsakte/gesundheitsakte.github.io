@@ -55,7 +55,7 @@ function renderSettings() {
 
   // Checkup rows
   const checkupRows = getCheckups().map(c => {
-    const every = c.intervalMonths >= 12
+    const every = c.intervalMonths % 12 === 0 && c.intervalMonths > 12
       ? `alle ${c.intervalMonths/12} J.`
       : `alle ${c.intervalMonths} M.`;
     const applies = [
@@ -916,7 +916,8 @@ function disableEncryption() {
   if (!pw) return showErr('Bitte das aktuelle Passwort eingeben.');
 
   const sessionPw = getSessionPassword();
-  if (sessionPw && pw !== sessionPw) return showErr('Das Passwort ist nicht korrekt.');
+  if (!sessionPw) return showErr('Kein aktives Passwort in dieser Sitzung. Bitte importiere zuerst die verschlüsselte Datei, um dich zu authentifizieren.');
+  if (pw !== sessionPw) return showErr('Das Passwort ist nicht korrekt.');
 
   isEncrypted = false;
   clearSessionPassword();

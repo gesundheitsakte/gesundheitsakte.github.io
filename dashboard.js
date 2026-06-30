@@ -325,12 +325,6 @@ function nudgeEmptyTile(el) {
   el.classList.add('stat-tile--nudge');
   el.addEventListener('animationend', () => el.classList.remove('stat-tile--nudge'), { once: true });
 }
-function bmiCat(v) {
-  if (v<18.5) return 'Untergewicht';
-  if (v<25)   return 'Normalgewicht';
-  if (v<30)   return 'Übergewicht';
-  return 'Adipositas';
-}
 function renderCheckupItem({checkup,status,label,lastDate}) {
   const dc = {ok:'dot-ok',warning:'dot-warning',overdue:'dot-overdue'}[status]??'dot-na';
   const bc = {ok:'badge-ok',warning:'badge-warning',overdue:'badge-overdue'}[status]??'badge-na';
@@ -345,7 +339,7 @@ function renderCheckupItem({checkup,status,label,lastDate}) {
         </a>`
       : '<span class="checkup-contact-placeholder"></span>',
     checkup.url
-      ? `<a class="checkup-contact" href="${escAttr(checkup.url)}" target="_blank" rel="noopener noreferrer" title="Website öffnen" onclick="event.stopPropagation()" aria-label="Website öffnen">
+      ? `<a class="checkup-contact" href="${/^https?:\/\//i.test(checkup.url) ? escAttr(checkup.url) : ''}" target="_blank" rel="noopener noreferrer" title="Website öffnen" onclick="event.stopPropagation()" aria-label="Website öffnen">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" /></svg>
         </a>`
       : '<span class="checkup-contact-placeholder"></span>',

@@ -154,7 +154,7 @@ function renderPersonDropdown() {
 
   menu.innerHTML = getPersonList().map(p => `
     <div class="pd-item${p.id === currentPersonId ? ' active' : ''}"
-         onclick="selectPerson('${p.id}');closePersonDropdown()">
+         onclick="selectPerson('${escAttr(p.id)}');closePersonDropdown()">
       <span class="pd-item-initials" style="background:${personColor(p)}">${personAvatarContent(p)}</span>
       <span class="pd-item-name">${esc(p.name)}</span>
       ${p.id === currentPersonId ? '<span class="pd-item-check">✓</span>' : ''}
@@ -354,7 +354,6 @@ function updateUnsavedIndicator() {
   if (!dot) return;
   dot.style.display = (CHANGE_LOG.length > 0 && !isDemoMode) ? '' : 'none';
 }
-function updateUnsavedBanner() { updateUnsavedIndicator(); }
 
 // ── Änderungen-Tab ein-/ausblenden ────────────────
 function syncChangesTabVisibility() {
