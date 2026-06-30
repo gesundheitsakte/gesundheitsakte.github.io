@@ -22,7 +22,8 @@ let isDemoMode       = false; // true wenn Demo-Daten geladen
 let hasUnsavedChanges = false; // für roten Punkt am Logo
 let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert werden soll
                               // (Passwort liegt in crypto.js _sessionPassword)
-let CHANGE_LOG       = [];    // [{ id, ts, description, diff }] — nicht gespeicherte Änderungen
+let CHANGE_LOG          = [];   // [{ id, ts, description, diff }] — nicht gespeicherte Änderungen
+let _originalSnapshot   = null; // DATA-Snapshot vor der ersten ungespeicherten Änderung
 
 const AVATAR_COLORS = [
   '#1B3A5B','#2C6E8F','#2A9D8F','#E9A23B','#F2785C',
@@ -69,6 +70,7 @@ function markSaved() {
   // "Gespeichert" = als Datei exportiert. Der lokale Stand bleibt in
   // localStorage erhalten; nur der "ungesichert"-Indikator wird gelöscht.
   CHANGE_LOG = [];
+  _originalSnapshot = null;
   hasUnsavedChanges = false;
   updateUnsavedIndicator();
   if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
@@ -117,6 +119,7 @@ function trackChange(description, mutate) {
   mutate();
   const after = _dataSnapshot();
   if (before === after) return;
+  if (CHANGE_LOG.length === 0) _originalSnapshot = before;
   CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, diff: _computeLineDiff(before, after) });
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
@@ -150,6 +153,7 @@ function persistNow() {
       isEncrypted,
       hasUnsavedChanges,
       changeLog: CHANGE_LOG,
+      originalSnapshot: _originalSnapshot,
       data: DATA,
     }));
   } catch (e) {

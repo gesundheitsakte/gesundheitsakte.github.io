@@ -40,6 +40,29 @@ function _renderDiffHtml(diff) {
   return html;
 }
 
+// ── Alle Änderungen verwerfen ────────────────────
+function revertAllChanges() {
+  if (!_originalSnapshot) return;
+  if (!confirm('Alle nicht gespeicherten Änderungen verwerfen und zum zuletzt exportierten Stand zurückkehren?')) return;
+
+  DATA = { ...JSON.parse(_originalSnapshot), lastModified: new Date().toISOString() };
+  _originalSnapshot = null;
+  CHANGE_LOG = [];
+  hasUnsavedChanges = false;
+
+  if (!getPersonList().find(p => p.id === currentPersonId)) {
+    currentPersonId = getPersonList()[0]?.id || null;
+  }
+
+  updateUnsavedIndicator();
+  syncChangesTabVisibility();
+  persistNow();
+  buildPersonSelector();
+  applyPersonAccent();
+  const activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-', '');
+  if (activeTab && activeTab !== 'changes') renderPanel(activeTab);
+}
+
 // ── Tab rendern ──────────────────────────────────
 function renderChanges() {
   const panel = document.getElementById('panel-changes');
@@ -55,6 +78,8 @@ function renderChanges() {
   const exportHint = `<div class="changes-export-bar">
     <button class="btn btn-primary" onclick="exportData()">Exportieren ↓</button>
     <span class="changes-export-hint">Strg+S exportiert ebenfalls</span>
+    <button class="btn btn-ghost btn-sm" style="color:var(--danger);margin-left:auto"
+            onclick="revertAllChanges()">Alle verwerfen</button>
   </div>`;
 
   const entries = [...CHANGE_LOG].reverse().map(c => {

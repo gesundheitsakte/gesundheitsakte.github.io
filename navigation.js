@@ -120,6 +120,7 @@ function loadFromStorageOrLanding() {
           diff: (c.before && c.after) ? _computeLineDiff(c.before, c.after) : [],
         })
       : [];
+    _originalSnapshot = snap.originalSnapshot || null;
     isDemoMode = false;
     isEncrypted = !!snap.isEncrypted;
     hasUnsavedChanges = CHANGE_LOG.length > 0;
@@ -382,6 +383,7 @@ function syncChangesTabVisibility() {
 function backToLanding() {
   DATA = null;
   CHANGE_LOG = [];
+  _originalSnapshot = null;
   isDemoMode = false;
   hasUnsavedChanges = false;
   clearSessionPassword();
