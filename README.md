@@ -72,7 +72,7 @@ Chronologische Timeline aller Einträge mit **Jahres-Trennzeilen** (sticky beim 
 
 ### Import & Export
 
-- Export als `.json` (Klartext) oder `.health` (verschlüsselt)
+- Export als `.json` (Klartext oder verschlüsselt)
 - Import erkennt automatisch Klartext vs. verschlüsselt
 - **Datenbanken zusammenführen**: Zwei Dateien vereinigen, Konflikte einzeln auflösen
 

@@ -183,7 +183,7 @@ function openMergePicker(base) {
     : `<div class="merge-pick-slot" id="merge-slot-a">
          <div class="merge-pick-label">Datei A</div>
          <label class="merge-pick-drop">
-           <input type="file" accept=".json,.health,application/json"
+           <input type="file" accept=".json,application/json"
                   onchange="onMergeFilePicked('a', this)">
            <span class="merge-pick-cta">Erste Datei wählen…</span>
          </label>
@@ -209,7 +209,7 @@ function openMergePicker(base) {
           <div class="merge-pick-slot" id="merge-slot-b">
             <div class="merge-pick-label">Datei B</div>
             <label class="merge-pick-drop">
-              <input type="file" accept=".json,.health,application/json"
+              <input type="file" accept=".json,application/json"
                      onchange="onMergeFilePicked('b', this)">
               <span class="merge-pick-cta">${base ? 'Datei wählen…' : 'Zweite Datei wählen…'}</span>
             </label>
