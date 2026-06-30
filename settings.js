@@ -530,17 +530,21 @@ function openPersonModal(person, scrollTo) {
 function conditionRow(i, c={}) {
   return `<div class="inline-row" id="crow-${i}">
     <input type="text" placeholder="Leiden" value="${escAttr(c.name||'')}" data-ci="${i}" data-field="name" oninput="syncConditionRow(this)">
-    <input type="text" placeholder="Seit (Jahr)" style="max-width:110px" value="${escAttr(c.since||'')}" data-ci="${i}" data-field="since" oninput="syncConditionRow(this)">
-    <input type="text" placeholder="Notizen" value="${escAttr(c.notes||'')}" data-ci="${i}" data-field="notes" oninput="syncConditionRow(this)">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('crow-${i}')">✕</button>
+    <input type="text" placeholder="Seit (Jahr)" value="${escAttr(c.since||'')}" data-ci="${i}" data-field="since" oninput="syncConditionRow(this)">
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(c.notes||'')}" data-ci="${i}" data-field="notes" oninput="syncConditionRow(this)">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('crow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 function familyRow(i, f={}) {
   return `<div class="inline-row" id="frow-${i}">
     <input type="text" placeholder="Erkrankung" value="${escAttr(f.condition||'')}" data-fi="${i}" data-field="condition" oninput="syncFamilyRow(this)">
-    <input type="text" placeholder="Verwandtschaft" style="max-width:130px" value="${escAttr(f.relation||'')}" data-fi="${i}" data-field="relation" oninput="syncFamilyRow(this)">
-    <input type="text" placeholder="Notizen" value="${escAttr(f.notes||'')}" data-fi="${i}" data-field="notes" oninput="syncFamilyRow(this)">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('frow-${i}')">✕</button>
+    <input type="text" placeholder="Verwandtschaft" value="${escAttr(f.relation||'')}" data-fi="${i}" data-field="relation" oninput="syncFamilyRow(this)">
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(f.notes||'')}" data-fi="${i}" data-field="notes" oninput="syncFamilyRow(this)">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('frow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 
@@ -556,37 +560,45 @@ function removeRow(id) { document.getElementById(id)?.remove(); }
 function medicationRow(i, m={}) {
   return `<div class="inline-row" id="mrow-${i}">
     <input type="text" placeholder="Medikament" value="${escAttr(m.name||'')}">
-    <input type="text" placeholder="Dosierung" style="max-width:100px" value="${escAttr(m.dosage||'')}">
-    <input type="text" placeholder="Seit (Jahr)" style="max-width:90px" value="${escAttr(m.since||'')}">
-    <input type="text" placeholder="Notizen" value="${escAttr(m.notes||'')}">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('mrow-${i}')">✕</button>
+    <input type="text" placeholder="Dosierung" value="${escAttr(m.dosage||'')}">
+    <input type="text" placeholder="Seit (Jahr)" value="${escAttr(m.since||'')}">
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(m.notes||'')}">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('mrow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 function vaccinationRow(i, v={}) {
   return `<div class="inline-row" id="vrow-${i}">
     <input type="text" placeholder="Impfstoff / Krankheit" value="${escAttr(v.name||'')}">
-    <input type="date" style="max-width:140px" value="${escAttr(v.date||'')}" title="Impfdatum">
-    <input type="text" placeholder="Auffrischung" style="max-width:120px" value="${escAttr(v.nextDue||'')}">
-    <input type="text" placeholder="Notizen" value="${escAttr(v.notes||'')}">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('vrow-${i}')">✕</button>
+    <input type="date" value="${escAttr(v.date||'')}" title="Impfdatum">
+    <input type="text" placeholder="Auffrischung" value="${escAttr(v.nextDue||'')}">
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(v.notes||'')}">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('vrow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 function allergyRow(i, a={}) {
   return `<div class="inline-row" id="arow-${i}">
     <input type="text" placeholder="Allergie" value="${escAttr(a.name||'')}">
-    <input type="text" placeholder="Schweregrad" style="max-width:120px" value="${escAttr(a.severity||'')}">
-    <input type="text" placeholder="Notizen" value="${escAttr(a.notes||'')}">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('arow-${i}')">✕</button>
+    <input type="text" placeholder="Schweregrad" value="${escAttr(a.severity||'')}">
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(a.notes||'')}">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('arow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 
 function operationRow(i, o={}) {
   return `<div class="inline-row" id="oprow-${i}">
     <input type="text" placeholder="Eingriff / Operation" value="${escAttr(o.name||'')}">
-    <input type="text" placeholder="Jahr / Datum" style="max-width:110px" value="${escAttr(o.date||'')}">
+    <input type="text" placeholder="Jahr / Datum" value="${escAttr(o.date||'')}">
     <input type="text" placeholder="Krankenhaus / Arzt" value="${escAttr(o.hospital||'')}">
-    <input type="text" placeholder="Notizen" value="${escAttr(o.notes||'')}">
-    <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('oprow-${i}')">✕</button>
+    <div class="inline-row-last">
+      <input type="text" placeholder="Notizen" value="${escAttr(o.notes||'')}">
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);flex-shrink:0" onclick="removeRow('oprow-${i}')">✕</button>
+    </div>
   </div>`;
 }
 

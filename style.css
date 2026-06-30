@@ -901,20 +901,25 @@ textarea { resize: vertical; min-height: 80px; }
 /* ── Inline row (conditions / family history editor) */
 .inline-row {
   display: flex;
-  gap: .5rem;
-  align-items: center;
-  padding: .5rem .625rem;
+  flex-direction: column;
+  gap: .375rem;
+  padding: .625rem;
   margin-bottom: .375rem;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
 .inline-row input {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
   font-size: .875rem;
   padding: .4375rem .625rem;
 }
+.inline-row-last {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+.inline-row-last input { flex: 1; min-width: 0; width: auto; }
 
 /* ── Modal ───────────────────────────────────── */
 .modal-overlay {
@@ -979,7 +984,6 @@ textarea { resize: vertical; min-height: 80px; }
 @media (max-width: 640px) {
   .settings-person-row { flex-wrap: wrap; }
   .settings-person-row > div:last-child { width: 100%; }
-  .inline-row { overflow-x: auto; }
 }
 
 /* ── Entry mode toggle ───────────────────────── */
