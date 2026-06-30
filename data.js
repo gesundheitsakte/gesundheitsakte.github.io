@@ -1024,7 +1024,7 @@ function addOnboardingPerson() {
   }
 
   onboardingPersons.push({
-    id: 'person_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
+    id: genId(),
     name, birthday, gender,
     bloodType: null, conditions: [], familyHistory: [],
   });
