@@ -472,7 +472,6 @@ async function exportData() {
   // Demo-Flag beim Export entfernen, damit eine exportierte Datei
   // als echte Datenbank weiterverwendet werden kann
   const out = { ...DATA };
-  delete out.isDemo;
 
   let fileContent, extension;
   if (isEncrypted) {
