@@ -1927,8 +1927,7 @@ input.hf-search {
 /* Modal border for visibility against black backdrop */
 :root.dark .modal            { border: 1px solid var(--border); }
 
-/* Logo: inverted in dark mode (black heart on light badge) */
-:root.dark #logo-bg          { fill: #f0f0f0; }
+/* Logo: heart becomes black in dark mode */
 :root.dark #logo-svg path    { fill: #000000; }
 
 /* ── Out-of-range arrows in metric table ─────── */
