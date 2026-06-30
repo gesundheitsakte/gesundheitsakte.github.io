@@ -264,8 +264,10 @@ function applyHistoryFilter(allEntries) {
 
 function deleteEntry(id) {
   if (!confirm('Eintrag wirklich löschen?')) return;
-  const entry = DATA.entries.find(e => e.id === id);
-  trackChange(`Eintrag vom ${fmtDate(entry?.date || '')} gelöscht`, () => {
+  const entry  = DATA.entries.find(e => e.id === id);
+  const person = getPersonList().find(p => p.id === entry?.personId);
+  const who    = person ? ` (${person.name})` : '';
+  trackChange(`Eintrag vom ${fmtDate(entry?.date || '')} gelöscht${who}`, () => {
     DATA.entries = DATA.entries.filter(e => e.id !== id);
     saveData();
   });
