@@ -437,7 +437,8 @@ function saveEntry() {
         if (el.value) metrics[key] = el.value;
       } else {
         const val = el?.value?.trim();
-        if (val) metrics[key] = parseFloat(val);
+        const num = parseFloat(val);
+        if (val && !isNaN(num)) metrics[key] = num;
       }
     });
   } else {
@@ -453,7 +454,8 @@ function saveEntry() {
         if (val) metrics[m.key] = val;
       } else {
         const val = el.value?.trim();
-        if (val) metrics[m.key] = parseFloat(val);
+        const num = parseFloat(val);
+        if (val && !isNaN(num)) metrics[m.key] = num;
       }
     });
   }
@@ -467,11 +469,12 @@ function saveEntry() {
   customMetrics.forEach(m=>{
     const el = activeContainer?.querySelector(`.cmv-input[data-key="${m.key}"]`);
     const val = el?.value.trim();
-    if (val && val !== '') {
+    const num = parseFloat(val);
+    if (val && !isNaN(num)) {
       customMetricValues[m.key] = {
         label: m.label,
         unit:  m.unit,
-        value: parseFloat(val),
+        value: num,
       };
     }
   });
