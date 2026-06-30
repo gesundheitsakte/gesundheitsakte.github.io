@@ -184,7 +184,7 @@ function renderEntryForm(editEntry = null) {
       <!-- ── Apple Health Infoscreen ── -->
       <div id="health-import-section" style="display:${entryMode==='apple-health'?'':'none'}">
         <div class="form-section health-import-info">
-          <p class="health-import-heading">Export aus der Gesundheit-App</p>
+          <p class="health-import-heading">Export aus der Health-App</p>
           <ol class="health-import-list">
             <li>Öffne die <strong>Gesundheit</strong>-App auf dem iPhone</li>
             <li>Tippe oben rechts auf dein <strong>Profilbild</strong></li>
