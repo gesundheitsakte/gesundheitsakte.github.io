@@ -93,9 +93,10 @@ const APP_CONFIG = {
     },
     { "key": "lh_value",
       "label": "LH-Wert",
-      "unit": "IU/L",
+      "unit": "",
       "group": "Zyklus",
       "graphable": true,
+      "type": "boolean",
       "appliesTo": { "gender": "female" }
     },
     { "key": "menstruation",
