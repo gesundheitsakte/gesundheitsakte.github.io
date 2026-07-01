@@ -205,6 +205,7 @@ async function _upload(cfg, currentETag, force = false, silent = false) {
   const newETag = resp.headers.get('ETag') || currentETag;
   _saveSyncState({ lastETag: newETag, lastSyncAt: new Date().toISOString() });
   if (!silent) showToast('Datenbank hochgeladen ✓', 'success');
+  markSaved();
   return true;
 }
 
@@ -375,8 +376,10 @@ function saveSyncSettings() {
   if (!url)   { showToast('Bitte eine Endpunkt-URL eingeben', 'error'); return; }
   if (!token) { showToast('Bitte ein Token eingeben', 'error'); return; }
   _saveSyncConfig({ url, token });
-  const btn = document.getElementById('topbar-sync-btn');
-  if (btn) btn.style.display = '';
+  const syncBtn   = document.getElementById('topbar-sync-btn');
+  const exportBtn = document.getElementById('topbar-export-btn');
+  if (syncBtn)   syncBtn.style.display   = '';
+  if (exportBtn) exportBtn.style.display = 'none';
   showToast('Sync-Einstellungen gespeichert ✓', 'success');
   renderSettings();
 }
@@ -385,8 +388,10 @@ function removeSyncConfig() {
   if (!confirm('Sync-Konfiguration entfernen?')) return;
   _saveSyncConfig(null);
   _saveSyncState({});
-  const btn = document.getElementById('topbar-sync-btn');
-  if (btn) btn.style.display = 'none';
+  const syncBtn   = document.getElementById('topbar-sync-btn');
+  const exportBtn = document.getElementById('topbar-export-btn');
+  if (syncBtn)   syncBtn.style.display   = 'none';
+  if (exportBtn) exportBtn.style.display = '';
   renderSettings();
   showToast('Sync-Konfiguration entfernt');
 }

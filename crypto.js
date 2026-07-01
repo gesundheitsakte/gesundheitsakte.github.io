@@ -25,8 +25,8 @@
 
    Eine unverschlüsselte Datei hat KEIN "encrypted"-Feld → Klartext-Pfad.
 
-   Das Session-Passwort wird ausschließlich im RAM gehalten
-   (_sessionPassword), nie in localStorage/sessionStorage geschrieben.
+   Das Session-Passwort wird im RAM gehalten (_sessionPassword) und
+   für den automatischen Sync auch in localStorage persistiert.
    ═══════════════════════════════════════════════ */
 'use strict';
 
@@ -39,12 +39,29 @@ const CRYPTO_CONFIG = {
   keyBits: 256,
 };
 
-// Passwort der aktuell geladenen verschlüsselten DB — nur im Speicher.
+// Passwort der aktuell geladenen verschlüsselten DB — im RAM und localStorage.
 let _sessionPassword = null;
+const SESSION_PW_KEY = 'health-session-pw';
 
-function setSessionPassword(pw) { _sessionPassword = pw || null; }
-function getSessionPassword()   { return _sessionPassword; }
-function clearSessionPassword() { _sessionPassword = null; }
+function setSessionPassword(pw) {
+  _sessionPassword = pw || null;
+  try {
+    if (_sessionPassword) localStorage.setItem(SESSION_PW_KEY, _sessionPassword);
+    else                  localStorage.removeItem(SESSION_PW_KEY);
+  } catch {}
+}
+function getSessionPassword() {
+  if (_sessionPassword) return _sessionPassword;
+  try {
+    const stored = localStorage.getItem(SESSION_PW_KEY);
+    if (stored) { _sessionPassword = stored; return stored; }
+  } catch {}
+  return null;
+}
+function clearSessionPassword() {
+  _sessionPassword = null;
+  try { localStorage.removeItem(SESSION_PW_KEY); } catch {}
+}
 
 // ── Base64 <-> ArrayBuffer ────────────────────────
 function bufToBase64(buf) {

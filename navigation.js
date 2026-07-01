@@ -349,8 +349,10 @@ function startApp() {
   // Print button only visible when app is running
   document.getElementById('topbar-print-btn').style.display = '';
   // Sync button only visible when configured and not in demo mode
-  document.getElementById('topbar-sync-btn').style.display =
-    (typeof hasSyncConfig === 'function' && hasSyncConfig() && !isDemoMode) ? '' : 'none';
+  const _syncActive = typeof hasSyncConfig === 'function' && hasSyncConfig() && !isDemoMode;
+  document.getElementById('topbar-sync-btn').style.display  = _syncActive ? '' : 'none';
+  // Export button hidden when sync is active (sync replaces manual export)
+  document.getElementById('topbar-export-btn').style.display = _syncActive ? 'none' : '';
 
   currentPersonId = null;
   activeGraphKey = null;
