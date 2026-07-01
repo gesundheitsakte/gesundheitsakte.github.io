@@ -1072,7 +1072,7 @@ function drawZyklusGraph(area) {
   const ROWS = [
     { key: 'menstruation',   label: 'Blutung' },
     { key: 'lh_value',       label: 'LH' },
-    { key: 'cervical_mucus', label: 'Zervix' },
+    { key: 'cervical_mucus', label: 'Schleim' },
     { key: 'sex',            label: 'Sex' },
   ];
   const ZABBR = { trocken: 'T', cremig: 'C', 'wässrig': 'W', 'glasig-dehnbar (spinnbar)': 'G' };
@@ -1181,7 +1181,7 @@ function drawZyklusGraph(area) {
       svgDayLabels += `<text x="${cxOf(di).toFixed(1)}" y="${DAY_Y}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${di + 1}</text>`;
   });
 
-  const svgLegend = `<text x="${PL}" y="${LEGEND_Y}" font-size="9.5" fill="var(--text-muted)">Zervix: <tspan font-weight="600">T</tspan> trocken · <tspan font-weight="600">C</tspan> cremig · <tspan font-weight="600">W</tspan> wässrig · <tspan font-weight="600">G</tspan> glasig-dehnbar</text>`;
+  const svgLegend = `<text x="${PL}" y="${LEGEND_Y}" font-size="9.5" fill="var(--text-muted)">Schleim: <tspan font-weight="600">T</tspan> trocken · <tspan font-weight="600">C</tspan> cremig · <tspan font-weight="600">W</tspan> wässrig · <tspan font-weight="600">G</tspan> glasig-dehnbar</text>`;
 
   area.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
     ${svgBoxes}${svgChart}${svgDayLabels}${svgLegend}
