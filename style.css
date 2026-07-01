@@ -726,6 +726,38 @@ textarea { resize: vertical; min-height: 80px; }
 .settings-intro a:hover { text-decoration: underline; }
 .field-hint       { font-size: .875rem; color: var(--text-muted); margin-top: .75rem; }
 
+/* ── Settings: theme picker ──────────────────── */
+.settings-theme-row {
+  display: flex;
+  gap: .625rem;
+  padding: .75rem 1rem 1rem;
+}
+.settings-theme-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .375rem;
+  padding: .875rem .5rem;
+  background: var(--bg-subtle);
+  border: 1.5px solid var(--border);
+  border-radius: .5rem;
+  color: var(--text-secondary);
+  font-size: .875rem;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.settings-theme-btn svg { width: 1.5rem; height: 1.5rem; }
+.settings-theme-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+.settings-theme-btn:not(.active):hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
 /* ── Metric picker (Eintrag-Formular) ────────── */
 .metric-group-label {
   font-size: .75rem; font-weight: 700; text-transform: uppercase;

@@ -116,6 +116,26 @@ function renderSettings() {
     ${renderEncryptionCard()}
 
     <div class="card" style="margin-top:1rem">
+      <div class="card-header"><span class="card-title">Darstellung</span></div>
+      <div class="settings-theme-row">
+        ${(() => {
+          const isDark = document.documentElement.classList.contains('dark');
+          return `
+            <button class="settings-theme-btn${!isDark?' active':''}"
+                    aria-pressed="${!isDark}"
+                    onclick="applyDark(false,true); renderSettings()">
+              ${SVG_SUN}<span>Hell</span>
+            </button>
+            <button class="settings-theme-btn${isDark?' active':''}"
+                    aria-pressed="${isDark}"
+                    onclick="applyDark(true,true); renderSettings()">
+              ${SVG_MOON}<span>Dunkel</span>
+            </button>`;
+        })()}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
       <p class="settings-intro">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
       <div class="attribution-list">

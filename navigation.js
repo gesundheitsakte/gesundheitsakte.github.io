@@ -516,36 +516,11 @@ function closeModalAccessible() {
 // ═══════════════════════════════════════════════
 function initTheme() {
   const saved = localStorage.getItem('theme');
-  // Set print icon (always the same)
   const eb = document.getElementById('topbar-export-btn');
   if (eb) eb.innerHTML = SVG_EXPORT;
   const pb = document.getElementById('topbar-print-btn');
   if (pb) pb.innerHTML = SVG_PRINT;
-  // Apply saved theme (also sets moon/sun icon)
   applyDark(saved === 'dark', false);
-
-  // Theme-Button: touchend statt click, damit blur() auf iOS Safari
-  // zuverlässig vor dem Fokus-Ring feuert. Für Desktop bleibt click als Fallback.
-  const tb = document.getElementById('theme-toggle-btn');
-  if (!tb) return;
-  let _touchFired = false;
-  tb.addEventListener('touchend', e => {
-    e.preventDefault();          // verhindert das nachfolgende click-Event
-    _touchFired = true;
-    tb.blur();
-    toggleTheme();
-  }, { passive: false });
-  tb.addEventListener('click', () => {
-    if (_touchFired) { _touchFired = false; return; } // bereits per touchend behandelt
-    toggleTheme();
-  });
-}
-
-function toggleTheme() {
-  const isDark = document.documentElement.classList.contains('dark');
-  applyDark(!isDark, true);
-  // Fokus nach Tap entfernen — verhindert den sichtbaren Fokus-Ring auf Touch-Geräten
-  document.activeElement?.blur();
 }
 
 // SVG icon strings for header buttons (Heroicons)
@@ -577,8 +552,6 @@ function updatePWAShortcuts() {
 
 function applyDark(dark, save) {
   document.documentElement.classList.toggle('dark', dark);
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.innerHTML = dark ? SVG_SUN : SVG_MOON;
   if (save) localStorage.setItem('theme', dark ? 'dark' : 'light');
   applyPersonAccent();
 }
