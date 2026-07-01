@@ -277,12 +277,6 @@ async function syncData(opts = {}) {
             ...serverDb.persons.map(p => mergedById.get(p.id)).filter(Boolean),
             ...plan.merged.persons.filter(p => !serverIds.has(p.id)),
           ];
-          // Zielwerte: Schlüssel, die nur lokal existieren (nicht auf Server), wurden
-          // dort gelöscht. Union-Merge würde sie wiederherstellen → explizit entfernen.
-          const serverTargetKeys = new Set(Object.keys(serverDb.targets || {}));
-          for (const key of Object.keys(plan.merged.targets || {})) {
-            if (!serverTargetKeys.has(key)) delete plan.merged.targets[key];
-          }
         }
         await _applyMerge(plan.merged);
         showToast('Automatisch zusammengeführt und synchronisiert ✓', 'success');

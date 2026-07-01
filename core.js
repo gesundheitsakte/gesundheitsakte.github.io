@@ -427,7 +427,7 @@ function setTarget(pid, key, value) {
   trackChange(desc, () => {
     if (!DATA.targets) DATA.targets = {};
     if (removing) {
-      delete DATA.targets[`${pid}__${key}`];
+      DATA.targets[`${pid}__${key}`] = null; // Tombstone: null statt delete, damit Merge Konflikt erkennt
     } else {
       DATA.targets[`${pid}__${key}`] = parseFloat(normalized);
     }
