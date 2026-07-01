@@ -218,48 +218,56 @@ async function syncData(opts = {}) {
       if (errors.length) { showToast('Serverdatei ist ungültig', 'error'); return; }
 
       const serverDb = normalizeDatabase(serverResult.db);
-      const capturedCfg        = cfg;
-      const capturedServerETag = serverETag;
-      const capturedStoredETag = storedETag;
-
-      _mergePlan = computeMergePlan(DATA, serverDb);
-      _mergePlan.encryptionInfo = {
+      const encInfo = {
         encA: isEncrypted,
         encB: serverResult.encrypted,
         pwA:  getSessionPassword(),
         pwB:  serverResult.password,
       };
 
-      _mergeCallback = async (merged, encInfo) => {
+      const plan = computeMergePlan(DATA, serverDb);
+
+      // Gemeinsame Post-Merge-Aktion: Daten übernehmen und hochladen
+      const _applyMerge = async (merged) => {
+        _pushBackup(JSON.stringify(DATA), storedETag);
+        DATA = normalizeDatabase(merged);
+        CHANGE_LOG = [];
+        _originalSnapshot = null;
+        hasUnsavedChanges = false;
+        if (encInfo.encA || encInfo.encB) {
+          isEncrypted = true;
+          setSessionPassword(encInfo.pwA || encInfo.pwB || null);
+        } else {
+          isEncrypted = false;
+          clearSessionPassword();
+        }
+        clearPersistedData();
+        startApp();
+        persistNow();
+        await _upload(cfg, serverETag, true, true);
+      };
+
+      if (plan.stats.conflicts === 0) {
+        // Keine feldweisen Konflikte → automatisch zusammenführen
+        await _applyMerge(plan.merged);
+        showToast('Automatisch zusammengeführt und synchronisiert ✓', 'success');
+        return;
+      }
+
+      // Konflikte vorhanden → Merge-Modal öffnen
+      _mergePlan = plan;
+      _mergePlan.encryptionInfo = encInfo;
+      _mergeCallback = async (merged) => {
         _syncInProgress = true;
         _setSyncSpinner(true);
         try {
-          _pushBackup(JSON.stringify(DATA), capturedStoredETag);
-          DATA = normalizeDatabase(merged);
-          CHANGE_LOG = [];
-          _originalSnapshot = null;
-          hasUnsavedChanges = false;
-
-          if (encInfo.encA || encInfo.encB) {
-            isEncrypted = true;
-            setSessionPassword(encInfo.pwA || encInfo.pwB || null);
-          } else {
-            isEncrypted = false;
-            clearSessionPassword();
-          }
-
-          clearPersistedData();
-          startApp();
-          persistNow();
-
-          await _upload(capturedCfg, capturedServerETag, true, true);
+          await _applyMerge(merged);
           showToast('Zusammengeführt und synchronisiert ✓', 'success');
         } finally {
           _syncInProgress = false;
           _setSyncSpinner(false);
         }
       };
-
       openMergeModal('dem Server');
       return;
     }
