@@ -195,6 +195,15 @@ function toggleMetricSelector() {
   btn.classList.toggle('is-open', !isOpen);
 }
 
+function collapseMetricSelector() {
+  const body = document.getElementById('metric-selector');
+  const btn  = document.querySelector('.collapsible-header');
+  if (!body || !btn || body.hidden) return;
+  body.hidden = true;
+  btn.setAttribute('aria-expanded', 'false');
+  btn.classList.remove('is-open');
+}
+
 function selectGraphRange(range) {
   activeGraphRange = range;
   // Update button states without full re-render — match by data-range, nicht textContent
@@ -210,6 +219,7 @@ function setSecondMetric(key) {
 }
 
 function selectGraphMetric(key) {
+  collapseMetricSelector();
   if (key === ZYKLUS_KEY) {
     activeGraphKey  = ZYKLUS_KEY;
     activeGraphKey2 = null;
