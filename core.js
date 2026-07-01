@@ -24,6 +24,7 @@ let isEncrypted      = false; // true wenn die DB verschlüsselt gespeichert wer
                               // (Passwort liegt in crypto.js _sessionPassword)
 let CHANGE_LOG          = [];   // [{ id, ts, description, diff }] — nicht gespeicherte Änderungen
 let _originalSnapshot   = null; // DATA-Snapshot vor der ersten ungespeicherten Änderung
+let RECENT_CHANGES      = [];   // [{ id, ts, description }] — dauerhafter Verlauf, max 50 Einträge
 
 const AVATAR_COLORS = [
   '#1B3A5B','#2C6E8F','#2A9D8F','#E9A23B','#F2785C',
@@ -120,7 +121,13 @@ function trackChange(description, mutate) {
   const after = _dataSnapshot();
   if (before === after) return;
   if (CHANGE_LOG.length === 0) _originalSnapshot = before;
-  CHANGE_LOG.push({ id: genId(), ts: new Date().toISOString(), description, diff: _computeLineDiff(before, after) });
+  const entry = { id: genId(), ts: new Date().toISOString(), description, diff: _computeLineDiff(before, after) };
+  CHANGE_LOG.push(entry);
+  if (!isDemoMode) {
+    RECENT_CHANGES.unshift({ id: entry.id, ts: entry.ts, description: entry.description });
+    if (RECENT_CHANGES.length > RECENT_CHANGES_MAX) RECENT_CHANGES.length = RECENT_CHANGES_MAX;
+    try { localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(RECENT_CHANGES)); } catch {}
+  }
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
   if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
@@ -133,7 +140,9 @@ function trackChange(description, mutate) {
 // Verschlüsselung greift bewusst nur beim Datei-Export. Auf einem geteilten
 // Gerät bedeutet das: lokale Daten ruhen unverschlüsselt — bewusster
 // Trade-off zugunsten der Bequemlichkeit (vom Nutzer so gewählt).
-const STORAGE_KEY = 'health-db-v1';
+const STORAGE_KEY         = 'health-db-v1';
+const RECENT_CHANGES_KEY  = 'health-recent-log';
+const RECENT_CHANGES_MAX  = 50;
 let _persistTimer = null;
 
 function schedulePersist() {
@@ -171,6 +180,14 @@ function readPersistedData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
+}
+
+function loadRecentChanges() {
+  try {
+    const raw = localStorage.getItem(RECENT_CHANGES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    RECENT_CHANGES = Array.isArray(parsed) ? parsed : [];
+  } catch { RECENT_CHANGES = []; }
 }
 
 // ═══════════════════════════════════════════════

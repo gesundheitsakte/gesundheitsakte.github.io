@@ -979,9 +979,9 @@ function renderChangelogCard() {
     const d = new Date(iso);
     return `${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
-  const recent = [...CHANGE_LOG].reverse().slice(0, 10);
+  const recent = RECENT_CHANGES.slice(0, 10);
   const body = recent.length === 0
-    ? `<p class="settings-empty">Keine ausstehenden Änderungen.</p>`
+    ? `<p class="settings-empty">Noch keine Änderungen aufgezeichnet.</p>`
     : `<ul class="settings-changelog">${recent.map(c => `
         <li class="settings-changelog-item">
           <span class="settings-changelog-desc">${esc(c.description)}</span>

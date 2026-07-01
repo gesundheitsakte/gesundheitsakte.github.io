@@ -121,6 +121,7 @@ function init() {
 
 // Lädt persistierte Daten aus localStorage oder zeigt die Startseite.
 function loadFromStorageOrLanding() {
+  loadRecentChanges();
   const snap = readPersistedData();
   if (!snap || !snap.data) { showLanding(); return; }
   try {
