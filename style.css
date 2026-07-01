@@ -2221,7 +2221,7 @@ input.hf-search {
   }
   /* Navigation, Banner und interaktive Elemente ausblenden */
   .topbar, .tab-bar, .demo-banner,
-  .unsaved-dot, #topbar-print-btn,
+  .unsaved-dot, #topbar-export-btn, #topbar-print-btn,
   .target-btn, .add-entry-btn, .item-menu-btn, .action-menu,
   .graph-controls, .range-btn-group, .bcal-nav,
   .collapsible-header .collapse-chevron { display: none !important; }
