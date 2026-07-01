@@ -104,7 +104,7 @@ const APP_CONFIG = {
       "group": "Zyklus",
       "graphable": true,
       "type": "select",
-      "options": ["ja", "nein"],
+      "options": ["Stark", "Schwach"],
       "appliesTo": { "gender": "female" }
     },
     { "key": "cervical_mucus",
