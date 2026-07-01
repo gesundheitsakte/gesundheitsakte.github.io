@@ -73,11 +73,25 @@ function _syncUrl(cfg, extra = {}) {
   return cfg.url + '?' + params.toString();
 }
 
+let _syncSpinnerStart = 0;
+const SYNC_SPIN_MIN_MS = 600; // one full rotation at spin-cw 600ms
+
 function _setSyncSpinner(active) {
   const btn  = document.getElementById('topbar-sync-btn');
   const icon = btn?.querySelector('.sync-icon');
-  if (icon) icon.classList.toggle('syncing', active);
-  if (btn)  btn.disabled = active;
+  if (!btn || !icon) return;
+  if (active) {
+    _syncSpinnerStart = Date.now();
+    icon.classList.add('syncing');
+    btn.disabled = true;
+  } else {
+    const elapsed   = Date.now() - _syncSpinnerStart;
+    const remaining = Math.max(0, SYNC_SPIN_MIN_MS - elapsed);
+    setTimeout(() => {
+      icon.classList.remove('syncing');
+      btn.disabled = false;
+    }, remaining);
+  }
 }
 
 // ═══════════════════════════════════════════════
