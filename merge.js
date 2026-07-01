@@ -48,7 +48,10 @@ function mergeItemLabel(collection, obj, personsById) {
   if (collection === 'customMetrics') return obj.label || obj.key || obj.id;
   if (collection === 'entries') {
     const who = personsById[obj.personId]?.name || obj.personId || '?';
-    const what = obj.entryType === 'self' ? 'Eigene Messung' : (obj.doctor || 'Arztbesuch');
+    let what;
+    if (obj.entryType === 'self') what = 'Eigene Messung';
+    else if (obj.entryType === 'apple-health') what = 'Apple Health Import';
+    else what = obj.doctor || 'Arztbesuch';
     return `${who} — ${what} (${obj.date || '?'})`;
   }
   return obj.id;
@@ -110,7 +113,7 @@ function computeMergePlan(a, b) {
   }
 
   // targets ist ein Objekt { personId: { metricKey: value } }, kein id-Array.
-  mergeTargets(a.targets || {}, b.targets || {}, merged, conflicts, personsById);
+  mergeTargets(a.targets || {}, b.targets || {}, merged, conflicts, personsById, stats);
 
   return { merged, conflicts, stats };
 }
@@ -139,13 +142,13 @@ function mergeHealthImports(ha, hb) {
 
 // targets: flaches Format { "personId__metricKey": value }
 // Konflikt nur wenn beide denselben Key haben und Werte abweichen.
-function mergeTargets(ta, tb, merged, conflicts, personsById) {
+function mergeTargets(ta, tb, merged, conflicts, personsById, stats) {
   const allKeys = new Set([...Object.keys(ta), ...Object.keys(tb)]);
   for (const flatKey of allKeys) {
     const va = ta[flatKey], vb = tb[flatKey];
-    if (va !== undefined && vb === undefined)      merged.targets[flatKey] = va;
-    else if (va === undefined && vb !== undefined) merged.targets[flatKey] = vb;
-    else if (va === vb)                            merged.targets[flatKey] = va;
+    if (va !== undefined && vb === undefined)      { merged.targets[flatKey] = va; stats.added++; }
+    else if (va === undefined && vb !== undefined) { merged.targets[flatKey] = vb; stats.added++; }
+    else if (va === vb)                            { merged.targets[flatKey] = va; stats.identical++; }
     else {
       merged.targets[flatKey] = va; // Platzhalter = A
       const sep = flatKey.indexOf('__');
@@ -158,6 +161,7 @@ function mergeTargets(ta, tb, merged, conflicts, personsById) {
         fields: [{ path: mk, valA: va, valB: vb }],
         targetFlatKey: flatKey,
       });
+      stats.conflicts++;
     }
   }
 }
@@ -374,9 +378,13 @@ function fieldLabel(path) {
     date:'Datum', doctor:'Arzt', reason:'Grund', diagnosis:'Diagnose', notes:'Notizen',
     checkupId:'Checkup', metrics:'Messwerte', customMetrics:'Eigene Messwerte',
     conditions:'Leiden', familyHistory:'Familienanamnese', medications:'Medikamente',
-    vaccinations:'Impfungen', allergies:'Allergien', entryType:'Eintragstyp',
-    intervalMonths:'Intervall (Monate)', description:'Beschreibung', appliesTo:'Gilt für',
+    vaccinations:'Impfungen', allergies:'Allergien', operations:'Operationen',
+    entryType:'Eintragstyp', intervalMonths:'Intervall (Monate)',
+    description:'Beschreibung', appliesTo:'Gilt für',
     phone:'Telefon', url:'Website', label:'Bezeichnung', unit:'Einheit', group:'Gruppe',
+    socialSecurityNumber:'Sozialversicherungsnummer', color:'Farbe',
+    favoriteMetrics:'Favoriten', hiddenSections:'Ausgeblendete Abschnitte',
+    avatarType:'Profilbild', personId:'Person', id:'ID',
   };
   return map[path] || path;
 }
@@ -408,6 +416,7 @@ function markConflictChoice(ci, fi, choice) {
 // ── Anwenden ──────────────────────────────────────
 function applyMerge() {
   const { merged, conflicts } = _mergePlan;
+  const encInfo = _mergePlan.encryptionInfo || {};
 
   for (const c of conflicts) {
     const choices = c._choices || {};
@@ -432,7 +441,7 @@ function applyMerge() {
   // Verschlüsselung: wenn eine der Quelldateien verschlüsselt war, bleibt
   // das Ergebnis verschlüsselt. Passwort aus der verschlüsselten Quelle
   // übernehmen (A bevorzugt).
-  const { encA, encB, pwA, pwB } = _mergePlan.encryptionInfo || {};
+  const { encA, encB, pwA, pwB } = encInfo;
   if (encA || encB) {
     isEncrypted = true;
     setSessionPassword(pwA || pwB || null);
