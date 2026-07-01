@@ -27,6 +27,7 @@ let _boolCalOffset = 0;
 // Für Zyklus-Übersicht: sentinel key und Zyklusindex-Offset (0 = aktuellster Zyklus)
 const ZYKLUS_KEY = '__zyklus__';
 let _zyklusOffset = 0;
+let _graphFakeFullscreen = false;
 
 // Zweite Metrik für Vergleichs-Diagramm (null = Einzel-Modus)
 let activeGraphKey2 = null;
@@ -1219,21 +1220,38 @@ function drawZyklusGraph(area) {
 }
 
 // ── Vollbild ──────────────────────────────────────
-function toggleGraphFullscreen() {
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
-    document.getElementById('graph-card')?.requestFullscreen();
-  }
-}
+const FS_ICON_ENTER = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5"/></svg>';
+const FS_ICON_EXIT  = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5"/></svg>';
 
-document.addEventListener('fullscreenchange', () => {
+function _updateFsBtn(isFs) {
   const btn = document.getElementById('graph-fs-btn');
   if (!btn) return;
-  const isFs = !!document.fullscreenElement;
   btn.title = isFs ? 'Vollbild beenden' : 'Vollbild';
   btn.setAttribute('aria-label', btn.title);
-  btn.innerHTML = isFs
-    ? '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5"/></svg>'
-    : '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5"/></svg>';
-});
+  btn.innerHTML = isFs ? FS_ICON_EXIT : FS_ICON_ENTER;
+}
+
+function _exitFakeFullscreen() {
+  if (!_graphFakeFullscreen) return;
+  _graphFakeFullscreen = false;
+  document.getElementById('graph-card')?.classList.remove('graph-card--fs');
+  document.body.classList.remove('graph-fs-active');
+  _updateFsBtn(false);
+}
+
+function toggleGraphFullscreen() {
+  const card = document.getElementById('graph-card');
+  if (!card) return;
+  if (typeof card.requestFullscreen === 'function') {
+    document.fullscreenElement ? document.exitFullscreen() : card.requestFullscreen();
+    return;
+  }
+  // Fake fullscreen for iOS and browsers without the Fullscreen API
+  _graphFakeFullscreen = !_graphFakeFullscreen;
+  card.classList.toggle('graph-card--fs', _graphFakeFullscreen);
+  document.body.classList.toggle('graph-fs-active', _graphFakeFullscreen);
+  _updateFsBtn(_graphFakeFullscreen);
+}
+
+document.addEventListener('fullscreenchange', () => _updateFsBtn(!!document.fullscreenElement));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') _exitFakeFullscreen(); });
