@@ -96,7 +96,8 @@ const APP_CONFIG = {
       "unit": "",
       "group": "Zyklus",
       "graphable": true,
-      "type": "boolean",
+      "type": "select",
+      "options": ["Positiv", "Negativ"],
       "appliesTo": { "gender": "female" }
     },
     { "key": "menstruation",
@@ -113,7 +114,8 @@ const APP_CONFIG = {
       "unit": "",
       "group": "Zyklus",
       "graphable": true,
-      "type": "boolean",
+      "type": "select",
+      "options": ["Ja", "Nein"],
       "appliesTo": { "gender": "female" }
     },
     { "key": "cervical_mucus",

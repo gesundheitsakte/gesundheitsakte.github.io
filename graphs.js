@@ -1094,7 +1094,7 @@ function drawZyklusGraph(area) {
 
       if (hasData) {
         if (key === 'lh_value') {
-          if (val === true || val === 'true') {
+          if (val === 'Positiv') {
             fill = 'var(--accent)'; text = '+';
           } else {
             fill = 'var(--success)'; text = '−';
@@ -1106,7 +1106,7 @@ function drawZyklusGraph(area) {
           fill = 'var(--success)';
           text = ZABBR[val] ?? val.charAt(0).toUpperCase();
         } else if (key === 'sex') {
-          if (val === true || val === 'true') {
+          if (val === 'Ja') {
             fill = 'var(--accent-2)'; text = '♥';
           } else {
             fill = 'var(--bg-subtle)';
