@@ -82,7 +82,7 @@ function init() {
       if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
         const persons = getPersonList();
         const idx = parseInt(e.key, 10) - 1;
-        if (idx < persons.length) {
+        if (idx < persons.length && persons[idx].id !== currentPersonId) {
           e.preventDefault();
           selectPerson(persons[idx].id);
         }
