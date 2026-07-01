@@ -1022,7 +1022,7 @@ function drawZyklusGraph(area) {
   const MN = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   const sd = new Date(cycle.start + 'T00:00:00');
   const ed = new Date(cycle.end   + 'T00:00:00');
-  const label = `Zyklus ${cycleIdx + 1} · ${sd.getDate()}. ${MN[sd.getMonth()]} – ${ed.getDate()}. ${MN[ed.getMonth()]} ${ed.getFullYear()}`;
+  const label = `${sd.getDate()}. ${MN[sd.getMonth()]} – ${ed.getDate()}. ${MN[ed.getMonth()]} ${ed.getFullYear()}`;
   const prevBtn = document.getElementById('zyklus-nav-prev');
   const nextBtn = document.getElementById('zyklus-nav-next');
   const lblEl   = document.getElementById('zyklus-nav-label');
