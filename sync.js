@@ -250,8 +250,8 @@ async function syncData(opts = {}) {
       if (plan.stats.conflicts === 0 && plan.stats.added === 0) {
         // Inhalt identisch, nur Reihenfolge kann abweichen → Zeitstempel entscheidet
         // (Merge würde lokale Reihenfolge bevorzugen und Server-Änderungen überschreiben)
-        const localMod  = DATA?.lastModified  ? new Date(DATA.lastModified)       : null;
-        const serverMod = serverDb.lastModified ? new Date(serverDb.lastModified) : null;
+        const localMod  = DATA?.lastModified   ? new Date(DATA.lastModified)       : null;
+        const serverMod = serverDb.lastModified ? new Date(serverDb.lastModified)  : null;
         if (serverMod && (!localMod || serverMod > localMod)) {
           await _applyDownload(serverText, serverETag);
         } else if (localMod && (!serverMod || localMod > serverMod)) {
@@ -264,7 +264,19 @@ async function syncData(opts = {}) {
       }
 
       if (plan.stats.conflicts === 0) {
-        // Neue Einträge auf einer Seite, keine Konflikte → automatisch zusammenführen
+        // Neue Einträge auf einer Seite, keine Konflikte → automatisch zusammenführen.
+        // Personen-Reihenfolge aus der neueren Datenbank übernehmen, da computeMergePlan
+        // immer die lokale Reihenfolge (Seite A) bevorzugt.
+        const localMod  = DATA?.lastModified   ? new Date(DATA.lastModified)       : null;
+        const serverMod = serverDb.lastModified ? new Date(serverDb.lastModified)  : null;
+        if (serverMod && (!localMod || serverMod > localMod)) {
+          const serverIds  = new Set(serverDb.persons.map(p => p.id));
+          const mergedById = new Map(plan.merged.persons.map(p => [p.id, p]));
+          plan.merged.persons = [
+            ...serverDb.persons.map(p => mergedById.get(p.id)).filter(Boolean),
+            ...plan.merged.persons.filter(p => !serverIds.has(p.id)),
+          ];
+        }
         await _applyMerge(plan.merged);
         showToast('Automatisch zusammengeführt und synchronisiert ✓', 'success');
         return;
