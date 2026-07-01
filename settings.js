@@ -974,25 +974,33 @@ function enableEncryption() {
   renderSettings();
 }
 
-function renderChangelogCard() {
+function _changelogBody() {
   const pad = n => String(n).padStart(2, '0');
   const fmtTs = iso => {
     const d = new Date(iso);
     return `${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
   const recent = RECENT_CHANGES.slice(0, 10);
-  const body = recent.length === 0
+  return recent.length === 0
     ? `<p class="settings-empty">Noch keine Änderungen aufgezeichnet.</p>`
     : `<ul class="settings-changelog">${recent.map(c => `
         <li class="settings-changelog-item">
           <span class="settings-changelog-desc">${esc(c.description)}</span>
           <span class="settings-changelog-ts">${esc(fmtTs(c.ts))}</span>
         </li>`).join('')}</ul>`;
+}
+
+function renderChangelogCard() {
   return `
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Letzte Änderungen</span></div>
-      ${body}
+      <div id="settings-changelog-body">${_changelogBody()}</div>
     </div>`;
+}
+
+function refreshChangelogCard() {
+  const el = document.getElementById('settings-changelog-body');
+  if (el) el.innerHTML = _changelogBody();
 }
 
 function disableEncryption() {

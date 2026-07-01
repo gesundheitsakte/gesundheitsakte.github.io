@@ -127,6 +127,7 @@ function trackChange(description, mutate) {
     RECENT_CHANGES.unshift({ id: entry.id, ts: entry.ts, description: entry.description });
     if (RECENT_CHANGES.length > RECENT_CHANGES_MAX) RECENT_CHANGES.length = RECENT_CHANGES_MAX;
     try { localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(RECENT_CHANGES)); } catch {}
+    if (typeof refreshChangelogCard === 'function') refreshChangelogCard();
   }
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
