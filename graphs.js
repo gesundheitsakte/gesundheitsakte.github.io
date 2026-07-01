@@ -1193,7 +1193,7 @@ function drawZyklusGraph(area) {
 
   const svgLegend = `<text x="${PL}" y="${LEGEND_Y}" font-size="9.5" fill="var(--text-muted)">Schleim: <tspan font-weight="600">T</tspan> trocken · <tspan font-weight="600">C</tspan> cremig · <tspan font-weight="600">W</tspan> wässrig · <tspan font-weight="600">G</tspan> glasig-dehnbar</text>`;
 
-  const colHoverRect = `<rect id="zyklus-col-hover" x="0" y="${ROWS_TOP}" width="${dayW.toFixed(1)}" height="${CHART_BOT - ROWS_TOP}" rx="2" fill="var(--text-primary)" fill-opacity="0.07" pointer-events="none" style="display:none"/>`;
+  const colHoverRect = `<rect id="zyklus-col-hover" x="0" y="${ROWS_TOP}" width="${dayW.toFixed(1)}" height="${CHART_BOT - ROWS_TOP}" rx="2" fill="var(--text-muted)" fill-opacity="0.1" pointer-events="none" style="display:none"/>`;
 
   area.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
     ${colHoverRect}${svgBoxes}${svgChart}${svgDayLabels}${svgLegend}
