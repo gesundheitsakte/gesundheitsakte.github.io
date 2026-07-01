@@ -1271,3 +1271,13 @@ function toggleGraphFullscreen() {
 
 document.addEventListener('fullscreenchange', () => _updateFsBtn(!!document.fullscreenElement));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') _exitFakeFullscreen(); });
+
+// iOS fix: after orientation change the touch hit areas of position:fixed elements
+// stay locked to the old viewport dimensions. Toggling the class forces a recalculation.
+window.addEventListener('resize', () => {
+  if (!_graphFakeFullscreen) return;
+  const card = document.getElementById('graph-card');
+  if (!card) return;
+  card.classList.remove('graph-card--fs');
+  requestAnimationFrame(() => card.classList.add('graph-card--fs'));
+});
