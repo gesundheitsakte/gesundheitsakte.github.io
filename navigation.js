@@ -78,6 +78,17 @@ function init() {
         return;
       }
 
+      // Ctrl/Cmd + 1–9 — Person wechseln
+      if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
+        const persons = getPersonList();
+        const idx = parseInt(e.key, 10) - 1;
+        if (idx < persons.length) {
+          e.preventDefault();
+          selectPerson(persons[idx].id);
+        }
+        return;
+      }
+
       // Left/Right arrow keys: switch tabs
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         const activeBtn = document.querySelector('.tab-btn.active');
