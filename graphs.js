@@ -1091,7 +1091,7 @@ function drawZyklusGraph(area) {
           if (val === true || val === 'true') {
             fill = 'var(--accent)'; text = '+';
           } else {
-            fill = 'var(--bg-subtle)'; text = '−'; tc = 'var(--text-muted)';
+            fill = 'var(--success)'; text = '−';
           }
         } else if (key === 'menstruation') {
           fill = 'var(--danger)';
