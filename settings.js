@@ -360,6 +360,7 @@ function openPersonModal(person, scrollTo) {
   _vacCount  = (p.vaccinations  || []).length;
   _algCount  = (p.allergies     || []).length;
   _opCount   = (p.operations    || []).length;
+  const hidden = p.hiddenSections || [];
 
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
@@ -452,42 +453,78 @@ function openPersonModal(person, scrollTo) {
           <input type="hidden" id="pm-fav-metrics" value="${escAttr(JSON.stringify(p.favoriteMetrics || []))}">
         </div>
         <div id="pm-section-conditions" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Chronische Leiden</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Chronische Leiden</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-conditions" ${!hidden.includes('conditions')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-conditions">
             ${(p.conditions||[]).map((c,i)=>conditionRow(i,c)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addConditionRow()">+ Leiden hinzufügen</button>
         </div>
         <div id="pm-section-family" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Familiengeschichte</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Familiengeschichte</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-family" ${!hidden.includes('family')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-family">
             ${(p.familyHistory||[]).map((f,i)=>familyRow(i,f)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addFamilyRow()">+ Eintrag hinzufügen</button>
         </div>
         <div id="pm-section-medications" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Medikamente</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Medikamente</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-medications" ${!hidden.includes('medications')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-medications">
             ${(p.medications||[]).map((m,i)=>medicationRow(i,m)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addMedicationRow()">+ Medikament hinzufügen</button>
         </div>
         <div id="pm-section-vaccinations" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Impfungen</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Impfungen</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-vaccinations" ${!hidden.includes('vaccinations')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-vaccinations">
             ${(p.vaccinations||[]).map((v,i)=>vaccinationRow(i,v)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addVaccinationRow()">+ Impfung hinzufügen</button>
         </div>
         <div id="pm-section-allergies" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Allergien</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Allergien</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-allergies" ${!hidden.includes('allergies')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-allergies">
             ${(p.allergies||[]).map((a,i)=>allergyRow(i,a)).join('')}
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-top:.5rem" onclick="addAllergyRow()">+ Allergie hinzufügen</button>
         </div>
         <div id="pm-section-operations" style="margin-top:1rem">
-          <div class="form-section-title" style="margin-bottom:.75rem">Operationen &amp; Eingriffe</div>
+          <div class="form-section-header">
+            <span class="form-section-title">Operationen &amp; Eingriffe</span>
+            <label class="section-vis-toggle" title="Im Dashboard anzeigen">
+              <input type="checkbox" id="pm-show-operations" ${!hidden.includes('operations')?'checked':''}>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
           <div id="pm-operations">
             ${(p.operations||[]).map((o,i)=>operationRow(i,o)).join('')}
           </div>
@@ -687,6 +724,8 @@ function savePersonModal(id, isEdit) {
   const color      = document.getElementById('pm-color')?.value || null;
   const avatarType = document.getElementById('pm-avatar-type')?.value || 'icon';
   const favMetrics = JSON.parse(document.getElementById('pm-fav-metrics')?.value || '[]');
+  const hiddenSections = ['conditions','family','medications','vaccinations','allergies','operations']
+    .filter(s => !document.getElementById(`pm-show-${s}`)?.checked);
 
   if (!name)     { showToast('Bitte einen Namen eingeben','error'); return; }
   if (!birthday) { showToast('Bitte ein Geburtsdatum eingeben','error'); return; }
@@ -700,7 +739,8 @@ function savePersonModal(id, isEdit) {
     socialSecurityNumber: svnr || null,
     color: color || null,
     avatarType: ['initials', 'smile'].includes(avatarType) ? avatarType : null,
-    favoriteMetrics: favMetrics.length ? favMetrics : null,
+    favoriteMetrics:  favMetrics.length ? favMetrics : null,
+    hiddenSections:   hiddenSections.length ? hiddenSections : null,
     conditions:    readConditions(),
     familyHistory: readFamilyHistory(),
     medications:   readMedications(),

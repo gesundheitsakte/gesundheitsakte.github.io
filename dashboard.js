@@ -148,10 +148,27 @@ function openPersonEdit(pid, section) {
 
 function cardEditBtn(pid, section) {
   return `<button class="item-menu-btn" title="Aktionen"
-    onclick="openActionMenu(this,[{label:'Bearbeiten',fn:()=>openPersonEdit('${escAttr(pid)}','${escAttr(section)}')}])">⋮</button>`;
+    onclick="openActionMenu(this,[
+      {label:'Bearbeiten',fn:()=>openPersonEdit('${escAttr(pid)}','${escAttr(section)}')},
+      {label:'Karte ausblenden',fn:()=>hideSection('${escAttr(pid)}','${escAttr(section)}')}
+    ])">⋮</button>`;
+}
+
+function hideSection(pid, section) {
+  const persons = getPersonList();
+  const p = persons.find(q => q.id === pid);
+  if (!p) return;
+  const hidden = new Set(p.hiddenSections || []);
+  hidden.add(section);
+  trackChange(`Abschnitt im Dashboard ausgeblendet`, () => {
+    p.hiddenSections = [...hidden];
+    savePersons(persons);
+  });
+  renderDashboard();
 }
 
 function renderConditionsCard(person) {
+  if ((person.hiddenSections || []).includes('conditions')) return '';
   const conds = person.conditions || [];
   return `<div class="card">
     <div class="card-header">
@@ -172,6 +189,7 @@ function renderConditionsCard(person) {
 }
 
 function renderFamilyHistoryCard(person) {
+  if ((person.hiddenSections || []).includes('family')) return '';
   const fh = person.familyHistory || [];
   return `<div class="card">
     <div class="card-header">
@@ -221,6 +239,7 @@ function trendArrow(pid, key) {
 }
 
 function renderMedicationsCard(person) {
+  if ((person.hiddenSections || []).includes('medications')) return '';
   const items = (person.medications || []);
   if (!items.length) return '';
   return `<div class="card">
@@ -232,6 +251,7 @@ function renderMedicationsCard(person) {
   </div>`;
 }
 function renderVaccinationsCard(person) {
+  if ((person.hiddenSections || []).includes('vaccinations')) return '';
   const items = (person.vaccinations || []);
   if (!items.length) return '';
   return `<div class="card">
@@ -243,6 +263,7 @@ function renderVaccinationsCard(person) {
   </div>`;
 }
 function renderAllergiesCard(person) {
+  if ((person.hiddenSections || []).includes('allergies')) return '';
   const items = (person.allergies || []);
   if (!items.length) return '';
   return `<div class="card">
@@ -254,6 +275,7 @@ function renderAllergiesCard(person) {
   </div>`;
 }
 function renderOperationsCard(person) {
+  if ((person.hiddenSections || []).includes('operations')) return '';
   const items = (person.operations || []);
   if (!items.length) return '';
   return `<div class="card">
