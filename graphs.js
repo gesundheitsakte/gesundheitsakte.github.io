@@ -653,7 +653,7 @@ function drawDualGraph(key1, key2, area) {
   const hdr = document.getElementById('graph-header');
   if (hdr) {
     hdr.innerHTML = `<span class="card-title">${esc(def1?.label ?? key1)}</span>
-      <span style="color:var(--text-muted);margin:0 .35rem;font-weight:400;font-size:.8125rem">vs.</span>
+      <span style="color:var(--text-muted);margin:0 .35rem;font-weight:400;font-size:.8125rem">&amp;</span>
       <span class="card-title">${esc(def2?.label ?? key2)}</span>`;
   }
 
