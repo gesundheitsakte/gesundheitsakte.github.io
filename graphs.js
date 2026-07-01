@@ -1095,7 +1095,7 @@ function drawZyklusGraph(area) {
           }
         } else if (key === 'menstruation') {
           fill = 'var(--danger)';
-          text = val === 'Stark' ? 'BB' : 'B';
+          text = val === 'Stark' ? '●' : '◒';
         } else if (key === 'cervical_mucus') {
           fill = 'var(--success)';
           text = ZABBR[val] ?? val.charAt(0).toUpperCase();
