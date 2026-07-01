@@ -90,12 +90,12 @@ function renderChanges() {
     const diffId = `diff-${c.id}`;
     return `<div class="change-entry" id="ce-${c.id}">
       <div class="change-header">
-        <div class="change-meta">
+        <div class="change-row1">
           <span class="change-dot"></span>
           <span class="change-title">${esc(c.description)}</span>
-          <span class="change-ts">${ts}</span>
         </div>
-        <div class="change-actions">
+        <div class="change-row2">
+          <span class="change-ts">${ts}</span>
           <button class="btn btn-ghost btn-sm change-diff-toggle"
                   onclick="toggleChangeDiff('${diffId}')"
                   aria-expanded="false" aria-controls="${diffId}">Diff ▼</button>
