@@ -193,6 +193,7 @@ function closePersonDropdown() {
 
 function selectPerson(id) {
   currentPersonId = id;
+  localStorage.setItem('selected-person-id', id);
   const p = getPersonList().find(p=>p.id===id);
 
   // Update label + checkmark without re-opening menu
@@ -341,7 +342,9 @@ function startApp() {
 
   // Deep link: ?person=ID (aus PWA-Shortcut) öffnet direkt bei dieser Person
   const urlPid      = new URLSearchParams(window.location.search).get('person');
-  const startPerson = (urlPid && getPersonList().find(p => p.id === urlPid))
+  const savedPid    = localStorage.getItem('selected-person-id');
+  const startPerson = (urlPid    && getPersonList().find(p => p.id === urlPid))
+                   || (savedPid  && getPersonList().find(p => p.id === savedPid))
                    || getPersonList()[0];
   if (startPerson) selectPerson(startPerson.id);
   if (urlPid) history.replaceState(null, '', window.location.pathname);
