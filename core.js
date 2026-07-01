@@ -282,8 +282,9 @@ function checkupStatus(checkup, pid) {
   due.setMonth(due.getMonth() + checkup.intervalMonths);
   const dueISO = due.toISOString().slice(0,10);
   const diff = Math.round((due - new Date()) / 86400000);
-  if (diff < 0)  return { status:'overdue', label:`${Math.abs(diff)} Tage überfällig`, lastDate:last.date, dueDate: dueISO };
-  if (diff <= 30) return { status:'warning', label:`In ${diff} Tagen fällig`,           lastDate:last.date, dueDate: dueISO };
+  if (diff < 0)   return { status:'overdue', label:`${Math.abs(diff)} Tage überfällig`, lastDate:last.date, dueDate: dueISO };
+  if (diff === 0) return { status:'warning', label:`Heute fällig`,                       lastDate:last.date, dueDate: dueISO };
+  if (diff <= 30) return { status:'warning', label:`In ${diff} Tagen fällig`,            lastDate:last.date, dueDate: dueISO };
   return               { status:'ok',      label:`Bis ${fmtShort(dueISO)}`,              lastDate:last.date, dueDate: dueISO };
 }
 
