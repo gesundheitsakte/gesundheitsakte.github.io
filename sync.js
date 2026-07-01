@@ -247,8 +247,24 @@ async function syncData(opts = {}) {
         await _upload(cfg, serverETag, true, true);
       };
 
+      if (plan.stats.conflicts === 0 && plan.stats.added === 0) {
+        // Inhalt identisch, nur Reihenfolge kann abweichen → Zeitstempel entscheidet
+        // (Merge würde lokale Reihenfolge bevorzugen und Server-Änderungen überschreiben)
+        const localMod  = DATA?.lastModified  ? new Date(DATA.lastModified)       : null;
+        const serverMod = serverDb.lastModified ? new Date(serverDb.lastModified) : null;
+        if (serverMod && (!localMod || serverMod > localMod)) {
+          await _applyDownload(serverText, serverETag);
+        } else if (localMod && (!serverMod || localMod > serverMod)) {
+          await _upload(cfg, serverETag, true, false);
+        } else {
+          _saveSyncState({ lastETag: serverETag, lastSyncAt: new Date().toISOString() });
+          if (!opts.silent) showToast('Bereits synchron ✓', 'info');
+        }
+        return;
+      }
+
       if (plan.stats.conflicts === 0) {
-        // Keine feldweisen Konflikte → automatisch zusammenführen
+        // Neue Einträge auf einer Seite, keine Konflikte → automatisch zusammenführen
         await _applyMerge(plan.merged);
         showToast('Automatisch zusammengeführt und synchronisiert ✓', 'success');
         return;
