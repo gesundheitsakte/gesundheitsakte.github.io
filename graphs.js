@@ -956,6 +956,11 @@ function renderMetricTable(data, def) {
 // ZYKLUS-ÜBERSICHT — kombiniertes Diagramm
 // ══════════════════════════════════════════════════════════════
 
+function isoShift(iso, n) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+}
+
 function detectCycles(pid) {
   const mensDates = new Set();
   DATA.entries.forEach(e => {
@@ -968,18 +973,14 @@ function detectCycles(pid) {
   const sorted = [...mensDates].sort();
   const cycleStarts = [];
   for (const d of sorted) {
-    const prev = new Date(d + 'T00:00:00');
-    prev.setDate(prev.getDate() - 1);
-    if (!mensDates.has(prev.toISOString().slice(0, 10))) cycleStarts.push(d);
+    if (!mensDates.has(isoShift(d, -1))) cycleStarts.push(d);
   }
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const n = new Date(); const todayISO = new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())).toISOString().slice(0, 10);
   return cycleStarts.map((start, i) => {
     let end;
     if (i + 1 < cycleStarts.length) {
-      const d = new Date(cycleStarts[i + 1] + 'T00:00:00');
-      d.setDate(d.getDate() - 1);
-      end = d.toISOString().slice(0, 10);
+      end = isoShift(cycleStarts[i + 1], -1);
     } else {
       end = todayISO;
     }
@@ -1032,8 +1033,8 @@ function drawZyklusGraph(area) {
 
   // Build day list
   const days = [];
-  for (let d = new Date(sd); d <= ed; d.setDate(d.getDate() + 1))
-    days.push(d.toISOString().slice(0, 10));
+  for (let cur = cycle.start; cur <= cycle.end; cur = isoShift(cur, 1))
+    days.push(cur);
   const N = days.length;
 
   // Collect per-day metric data from entries
