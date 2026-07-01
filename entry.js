@@ -224,8 +224,11 @@ function renderEntryForm(editingEntry = null) {
     rebuildActiveFields();
     // Predefined-Werte eintragen (doctor-mode: mf-, self-mode: self-)
     Object.entries(editingEntry.metrics || {}).forEach(([k, v]) => {
-      const el = document.getElementById((entryMode==='self'?'self-':'mf-') + k);
-      if (el) el.value = v;
+      const el  = document.getElementById((entryMode==='self'?'self-':'mf-') + k);
+      if (!el) return;
+      const def = metricDef(k);
+      if (def?.type === 'boolean') el.checked = (v === true || v === 'true');
+      else el.value = v;
     });
     renderCustomMetricList();
   }
@@ -415,6 +418,7 @@ function rebuildActiveFields() {
 
 // ── Save entry ────────────────────────────────
 function saveEntry() {
+  if (entryMode === 'apple-health') return;
   const date = document.getElementById('entry-date')?.value;
   if (!date) { showToast('Bitte ein Datum angeben', 'error'); return; }
   if (date > todayISO()) {
