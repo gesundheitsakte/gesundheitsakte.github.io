@@ -1063,8 +1063,8 @@ function drawZyklusGraph(area) {
 
   // ── Box rows ──────────────────────────────────
   const ROWS = [
-    { key: 'lh_value',       label: 'LH' },
     { key: 'menstruation',   label: 'Blutung' },
+    { key: 'lh_value',       label: 'LH' },
     { key: 'cervical_mucus', label: 'Zervix' },
     { key: 'sex',            label: 'Sex' },
   ];
@@ -1089,9 +1089,9 @@ function drawZyklusGraph(area) {
       if (hasData) {
         if (key === 'lh_value') {
           if (val === true || val === 'true') {
-            fill = 'var(--accent)'; text = 'LH';
+            fill = 'var(--accent)'; text = '+';
           } else {
-            fill = 'var(--bg-subtle)';
+            fill = 'var(--bg-subtle)'; text = '−'; tc = 'var(--text-muted)';
           }
         } else if (key === 'menstruation') {
           fill = 'var(--danger)';
