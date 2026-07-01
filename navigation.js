@@ -413,10 +413,14 @@ function backToLanding() {
 
 function _actionMenuClickClose() { closeActionMenu(); }
 
+let _actionMenuTrigger = null;
+
 function openActionMenu(btn, items) {
   const wasOpen = !!document.getElementById('action-menu');
-  closeActionMenu();
+  closeActionMenu(wasOpen); // restore focus only when closing without reopening
   if (wasOpen) return; // zweiter Klick auf ⋮ schließt das Menü wieder
+
+  _actionMenuTrigger = btn;
 
   const menu = document.createElement('div');
   menu.id = 'action-menu';
@@ -429,8 +433,23 @@ function openActionMenu(btn, items) {
     el.className = 'action-menu-item' + (danger ? ' action-menu-item--danger' : '');
     el.setAttribute('role', 'menuitem');
     el.textContent = label;
-    el.onclick = e => { e.stopPropagation(); closeActionMenu(); fn(); };
+    el.onclick = e => { e.stopPropagation(); closeActionMenu(false); fn(); };
     menu.appendChild(el);
+  });
+
+  menu.addEventListener('keydown', e => {
+    const menuItems = [...menu.querySelectorAll('.action-menu-item')];
+    const idx = menuItems.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      menuItems[(idx + 1) % menuItems.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      menuItems[(idx - 1 + menuItems.length) % menuItems.length]?.focus();
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      closeActionMenu();
+    }
   });
 
   document.body.appendChild(menu);
@@ -445,15 +464,51 @@ function openActionMenu(btn, items) {
   menu.style.top  = top  + 'px';
   menu.style.left = left + 'px';
 
+  // Focus first item
+  requestAnimationFrame(() => menu.querySelector('.action-menu-item')?.focus());
+
   setTimeout(() => {
     document.addEventListener('click',   _actionMenuClickClose, { once: true });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeActionMenu(); }, { once: true });
   }, 0);
 }
 
-function closeActionMenu() {
+function closeActionMenu(restoreFocus = true) {
   document.getElementById('action-menu')?.remove();
   document.removeEventListener('click', _actionMenuClickClose);
+  if (restoreFocus) _actionMenuTrigger?.focus();
+  _actionMenuTrigger = null;
+}
+
+// ═══════════════════════════════════════════════
+// MODAL FOCUS MANAGEMENT
+// ═══════════════════════════════════════════════
+let _preFocusElement = null;
+
+function openModalAccessible(modal) {
+  _preFocusElement = document.activeElement;
+  const focusTarget = modal.querySelector('.modal-close, [autofocus], input, select, textarea, button');
+  requestAnimationFrame(() => focusTarget?.focus());
+
+  modal.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const sel = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
+    const focusable = [...modal.querySelectorAll(sel)].filter(
+      el => !el.hidden && getComputedStyle(el).display !== 'none'
+    );
+    if (focusable.length < 2) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
+  });
+}
+
+function closeModalAccessible() {
+  _preFocusElement?.focus();
+  _preFocusElement = null;
 }
 
 // ═══════════════════════════════════════════════

@@ -90,6 +90,7 @@ function renderGraphs() {
         const sec    = m.key === activeGraphKey2 ? ' metric-btn--secondary' : '';
         return `<button class="metric-btn${activeGraphKey===m.key?' active':''}${sec}${dim}"
                 data-key="${m.key}"
+                aria-pressed="${activeGraphKey===m.key?'true':'false'}"
                 onclick="selectGraphMetric('${m.key}')">${esc(m.label)}</button>`;
       }).join('')}
     </div>`).join('');
@@ -120,7 +121,7 @@ function renderGraphs() {
 
   panel.innerHTML = `
     <div class="card collapsible-card" id="metric-selector-card" onclick="toggleMetricSelector()">
-      <button class="card-header collapsible-header" aria-expanded="false" aria-controls="metric-selector" tabindex="-1">
+      <button class="card-header collapsible-header" aria-expanded="false" aria-controls="metric-selector" onclick="toggleMetricSelector(); event.stopPropagation()">
         <span class="card-title">Messwert auswählen</span>
         <svg class="collapse-chevron" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>

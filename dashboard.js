@@ -147,7 +147,7 @@ function openPersonEdit(pid, section) {
 }
 
 function cardEditBtn(pid, section) {
-  return `<button class="item-menu-btn" title="Aktionen"
+  return `<button class="item-menu-btn" title="Aktionen" aria-label="Aktionen"
     onclick="openActionMenu(this,[
       {label:'Bearbeiten',fn:()=>openPersonEdit('${escAttr(pid)}','${escAttr(section)}')},
       {label:'Karte ausblenden',fn:()=>hideSection('${escAttr(pid)}','${escAttr(section)}')}

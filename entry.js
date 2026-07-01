@@ -282,7 +282,7 @@ function openAddCustomMetric() {
     <div class="modal" style="max-width:380px">
       <div class="modal-header">
         <h2>Messwert hinzufügen</h2>
-        <button class="modal-close" onclick="document.getElementById('custom-metric-popup').remove()">✕</button>
+        <button class="modal-close" aria-label="Schließen" onclick="document.getElementById('custom-metric-popup').remove()">✕</button>
       </div>
       <div class="modal-body">
         <div class="stack">
@@ -567,7 +567,7 @@ function openTargetDialog(metricKey) {
     <div class="modal" style="max-width:360px">
       <div class="modal-header">
         <h2>Zielwert: ${esc(def?.label ?? metricKey)}</h2>
-        <button class="modal-close" onclick="document.getElementById('target-modal').remove()">✕</button>
+        <button class="modal-close" aria-label="Schließen" onclick="document.getElementById('target-modal').remove()">✕</button>
       </div>
       <div class="modal-body">
         <div class="field-group">

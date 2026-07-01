@@ -234,7 +234,7 @@ function openEditCheckup(id) {
     <div class="modal" style="max-width:480px">
       <div class="modal-header">
         <h2>${existing ? 'Checkup bearbeiten' : 'Checkup hinzufügen'}</h2>
-        <button class="modal-close" onclick="document.getElementById('checkup-modal').remove()">✕</button>
+        <button class="modal-close" aria-label="Schließen" onclick="document.getElementById('checkup-modal').remove()">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -369,7 +369,7 @@ function openPersonModal(person, scrollTo) {
     <div class="modal">
       <div class="modal-header">
         <h2>${isEdit?'Person bearbeiten':'Person hinzufügen'}</h2>
-        <button class="modal-close" onclick="closePersonModal()">✕</button>
+        <button class="modal-close" aria-label="Schließen" onclick="closePersonModal()">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -456,7 +456,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Chronische Leiden</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-conditions" ${!hidden.includes('conditions')?'checked':''}>
+              <input type="checkbox" id="pm-show-conditions" aria-label="Chronische Leiden im Dashboard anzeigen" ${!hidden.includes('conditions')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -469,7 +469,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Familiengeschichte</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-family" ${!hidden.includes('family')?'checked':''}>
+              <input type="checkbox" id="pm-show-family" aria-label="Familiengeschichte im Dashboard anzeigen" ${!hidden.includes('family')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -482,7 +482,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Medikamente</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-medications" ${!hidden.includes('medications')?'checked':''}>
+              <input type="checkbox" id="pm-show-medications" aria-label="Medikamente im Dashboard anzeigen" ${!hidden.includes('medications')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -495,7 +495,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Impfungen</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-vaccinations" ${!hidden.includes('vaccinations')?'checked':''}>
+              <input type="checkbox" id="pm-show-vaccinations" aria-label="Impfungen im Dashboard anzeigen" ${!hidden.includes('vaccinations')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -508,7 +508,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Allergien</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-allergies" ${!hidden.includes('allergies')?'checked':''}>
+              <input type="checkbox" id="pm-show-allergies" aria-label="Allergien im Dashboard anzeigen" ${!hidden.includes('allergies')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -521,7 +521,7 @@ function openPersonModal(person, scrollTo) {
           <div class="form-section-header">
             <span class="form-section-title">Operationen &amp; Eingriffe</span>
             <label class="section-vis-toggle" title="Im Dashboard anzeigen">
-              <input type="checkbox" id="pm-show-operations" ${!hidden.includes('operations')?'checked':''}>
+              <input type="checkbox" id="pm-show-operations" aria-label="Operationen &amp; Eingriffe im Dashboard anzeigen" ${!hidden.includes('operations')?'checked':''}>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -538,6 +538,7 @@ function openPersonModal(person, scrollTo) {
     </div>`;
 
   document.body.appendChild(modal);
+  openModalAccessible(modal);
   if (scrollTo) {
     const sectionMap = {
       conditions:  'pm-section-conditions',
@@ -772,6 +773,7 @@ function savePersonModal(id, isEdit) {
 function closePersonModal() {
   document.getElementById('person-modal')?.remove();
   _condCount=0; _famCount=0; _medCount=0; _vacCount=0; _algCount=0; _opCount=0;
+  closeModalAccessible();
 }
 
 function deletePerson(id) {

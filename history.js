@@ -70,29 +70,30 @@ function renderHistory() {
           <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <input class="hf-search" id="hf-search" type="text"
+               aria-label="Einträge durchsuchen"
                placeholder="Einträge durchsuchen…"
                value="${escAttr(historyFilter.text)}"
                oninput="setHistoryText(this.value)">
         ${historyFilter.text
-          ? `<button class="hf-clear" onclick="setHistoryText('')">✕</button>`
+          ? `<button class="hf-clear" aria-label="Suche löschen" onclick="setHistoryText('')">✕</button>`
           : ''}
       </div>
       <div class="hf-date-row">
         <div class="hf-date-wrap">
-          <label class="hf-date-label">Von</label>
+          <label class="hf-date-label" for="hf-date-from">Von</label>
           <input type="date" class="hf-date" id="hf-date-from"
                  value="${historyFilter.dateFrom}"
                  onchange="setHistoryDate('from', this.value)">
         </div>
         <div class="hf-date-sep">–</div>
         <div class="hf-date-wrap">
-          <label class="hf-date-label">Bis</label>
+          <label class="hf-date-label" for="hf-date-to">Bis</label>
           <input type="date" class="hf-date" id="hf-date-to"
                  value="${historyFilter.dateTo}"
                  onchange="setHistoryDate('to', this.value)">
         </div>
         ${historyFilter.dateFrom || historyFilter.dateTo
-          ? `<button class="hf-clear" style="position:static;margin-left:.25rem"
+          ? `<button class="hf-clear" aria-label="Datumsfilter löschen" style="position:static;margin-left:.25rem"
                      onclick="clearHistoryDates()">✕</button>`
           : ''}
       </div>
@@ -245,7 +246,7 @@ function applyHistoryFilter(allEntries) {
         <div class="timeline-header">
           <span class="timeline-icon">${icon}</span>
           <span class="timeline-category">${esc(title)}</span>
-          <button class="item-menu-btn" title="Aktionen"
+          <button class="item-menu-btn" title="Aktionen" aria-label="Aktionen"
             onclick="openActionMenu(this,[{label:'Bearbeiten',fn:()=>editEntry('${e.id}')},{label:'Löschen',fn:()=>deleteEntry('${e.id}'),danger:true}])">⋮</button>
         </div>
         ${!isSelf && (e.reason||e.diagnosis) ? `<div style="font-size:.875rem;color:var(--text-secondary);margin:.35rem 0">
