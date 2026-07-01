@@ -386,7 +386,7 @@ function fieldLabel(path) {
     favoriteMetrics:'Favoriten', hiddenSections:'Ausgeblendete Abschnitte',
     avatarType:'Profilbild', personId:'Person', id:'ID',
   };
-  return map[path] || path;
+  return map[path] || metricDef(path)?.label || path;
 }
 
 // Wert lesbar darstellen (Objekte/Arrays kompakt).
