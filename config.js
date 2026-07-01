@@ -92,7 +92,7 @@ const APP_CONFIG = {
       "appliesTo": { "gender": "female" }
     },
     { "key": "lh_value",
-      "label": "LH-Wert",
+      "label": "LH-Test",
       "unit": "",
       "group": "Zyklus",
       "graphable": true,
