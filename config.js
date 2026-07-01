@@ -108,6 +108,14 @@ const APP_CONFIG = {
       "options": ["Stark", "Schwach"],
       "appliesTo": { "gender": "female" }
     },
+    { "key": "sex",
+      "label": "Sex",
+      "unit": "",
+      "group": "Zyklus",
+      "graphable": true,
+      "type": "boolean",
+      "appliesTo": { "gender": "female" }
+    },
     { "key": "cervical_mucus",
       "label": "Zervixschleim",
       "unit": "",
