@@ -135,7 +135,7 @@ function renderGraphs() {
         <div class="graph-card-title" id="graph-header">
           <span class="card-title"></span>
         </div>
-        <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
+        <div class="graph-controls">
           <button class="btn btn-ghost btn-sm" id="graph-target-btn"
                   onclick="openTargetDialog(activeGraphKey)"
                   title="Zielwert setzen / ändern"
