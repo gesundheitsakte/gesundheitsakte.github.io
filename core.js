@@ -123,12 +123,12 @@ function trackChange(description, mutate) {
   if (CHANGE_LOG.length === 0) _originalSnapshot = before;
   const entry = { id: genId(), ts: new Date().toISOString(), description, diff: _computeLineDiff(before, after) };
   CHANGE_LOG.push(entry);
+  RECENT_CHANGES.unshift({ id: entry.id, ts: entry.ts, description: entry.description });
+  if (RECENT_CHANGES.length > RECENT_CHANGES_MAX) RECENT_CHANGES.length = RECENT_CHANGES_MAX;
   if (!isDemoMode) {
-    RECENT_CHANGES.unshift({ id: entry.id, ts: entry.ts, description: entry.description });
-    if (RECENT_CHANGES.length > RECENT_CHANGES_MAX) RECENT_CHANGES.length = RECENT_CHANGES_MAX;
     try { localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(RECENT_CHANGES)); } catch {}
-    if (typeof refreshChangelogCard === 'function') refreshChangelogCard();
   }
+  if (typeof refreshChangelogCard === 'function') refreshChangelogCard();
   hasUnsavedChanges = true;
   updateUnsavedIndicator();
   if (typeof syncChangesTabVisibility === 'function') syncChangesTabVisibility();
