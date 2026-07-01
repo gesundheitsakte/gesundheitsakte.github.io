@@ -164,7 +164,7 @@ async function _applyDownload(serverText, serverETag) {
 // ═══════════════════════════════════════════════
 // UPLOAD — lokale Daten zum Server schicken
 // ═══════════════════════════════════════════════
-async function _upload(cfg, currentETag, force = false) {
+async function _upload(cfg, currentETag, force = false, silent = false) {
   let body;
   if (isEncrypted) {
     let pw = getSessionPassword();
@@ -204,7 +204,7 @@ async function _upload(cfg, currentETag, force = false) {
 
   const newETag = resp.headers.get('ETag') || currentETag;
   _saveSyncState({ lastETag: newETag, lastSyncAt: new Date().toISOString() });
-  showToast('Datenbank hochgeladen ✓', 'success');
+  if (!silent) showToast('Datenbank hochgeladen ✓', 'success');
   return true;
 }
 
@@ -253,19 +253,59 @@ async function syncData(opts = {}) {
 
     const serverText = await serverResp.text();
 
-    // 3. Konflikt-Prüfung: ETag hat sich seit letztem Sync geändert
+    // 3. Konflikt-Prüfung: ETag hat sich seit letztem Sync geändert → feldweiser Merge
     const storedETag = state.lastETag || null;
     if (storedETag && serverETag && serverETag !== storedETag) {
-      let serverLastModified = null;
-      try {
-        const parsed = JSON.parse(serverText);
-        if (!parsed.encrypted) serverLastModified = parsed.lastModified || null;
-      } catch {}
+      const serverResult = await parseImportedFile(serverText, 'Server');
+      if (!serverResult) return;
 
-      const action = await _showConflictDialog(DATA?.lastModified || null, serverLastModified);
-      if (action === 'cancel')   return;
-      if (action === 'download') { await _applyDownload(serverText, serverETag); return; }
-      await _upload(cfg, serverETag, true);
+      const errors = validateDatabase(serverResult.db);
+      if (errors.length) { showToast('Serverdatei ist ungültig', 'error'); return; }
+
+      const serverDb = normalizeDatabase(serverResult.db);
+      const capturedCfg        = cfg;
+      const capturedServerETag = serverETag;
+      const capturedStoredETag = storedETag;
+
+      _mergePlan = computeMergePlan(DATA, serverDb);
+      _mergePlan.encryptionInfo = {
+        encA: isEncrypted,
+        encB: serverResult.encrypted,
+        pwA:  getSessionPassword(),
+        pwB:  serverResult.password,
+      };
+
+      _mergeCallback = async (merged, encInfo) => {
+        _syncInProgress = true;
+        _setSyncSpinner(true);
+        try {
+          _pushBackup(JSON.stringify(DATA), capturedStoredETag);
+          DATA = normalizeDatabase(merged);
+          CHANGE_LOG = [];
+          _originalSnapshot = null;
+          hasUnsavedChanges = false;
+
+          if (encInfo.encA || encInfo.encB) {
+            isEncrypted = true;
+            setSessionPassword(encInfo.pwA || encInfo.pwB || null);
+          } else {
+            isEncrypted = false;
+            clearSessionPassword();
+          }
+
+          clearPersistedData();
+          startApp();
+          persistNow();
+
+          await _upload(capturedCfg, capturedServerETag, true, true);
+          showToast('Zusammengeführt und synchronisiert ✓', 'success');
+        } finally {
+          _syncInProgress = false;
+          _setSyncSpinner(false);
+        }
+      };
+
+      openMergeModal('dem Server');
       return;
     }
 

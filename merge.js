@@ -32,6 +32,9 @@ const MERGE_LABELS = {
 // Zwischenspeicher während eines laufenden Merge-Vorgangs.
 let _mergePlan = null;
 
+// Optionaler Callback für sync.js: wenn gesetzt, übernimmt er die Post-Merge-Aktionen.
+let _mergeCallback = null;
+
 // ── Hilfen ────────────────────────────────────────
 function stableStringify(v) {
   // Deterministisches JSON (Schlüssel sortiert) für inhaltlichen Vergleich.
@@ -433,6 +436,15 @@ function applyMerge() {
     merged[c.collection][c.targetIndex] = resolved;
   }
 
+  if (_mergeCallback) {
+    const cb = _mergeCallback;
+    _mergeCallback = null;
+    _mergePlan = null;
+    document.getElementById('merge-modal')?.remove();
+    cb(merged, encInfo);
+    return;
+  }
+
   DATA = normalizeDatabase(merged);
   _mergePlan = null;
   document.getElementById('merge-modal')?.remove();
@@ -459,6 +471,7 @@ function applyMerge() {
 }
 
 function cancelMerge() {
+  _mergeCallback = null;
   _mergePlan = null;
   document.getElementById('merge-modal')?.remove();
 }
