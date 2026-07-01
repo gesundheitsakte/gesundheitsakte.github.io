@@ -810,6 +810,7 @@ function deletePerson(id) {
   trackChange(`Person "${p.name}" gelöscht`, () => {
     const persons = getPersonList().filter(q=>q.id!==id);
     DATA.entries  = DATA.entries.filter(e=>e.personId!==id);
+    Object.keys(DATA.targets).forEach(k => { if (k.startsWith(id + '__')) delete DATA.targets[k]; });
     savePersons(persons);
   });
 
