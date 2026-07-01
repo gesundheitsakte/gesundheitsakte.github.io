@@ -1054,7 +1054,8 @@ function drawZyklusGraph(area) {
   const CHART_H   = 140;
   const CHART_BOT = CHART_TOP + CHART_H;
   const DAY_Y     = CHART_BOT + 20;
-  const H         = DAY_Y + 8;
+  const LEGEND_Y  = DAY_Y + 18;
+  const H         = LEGEND_Y + 8;
 
   const dayW  = iW / N;
   const bxL   = (i) => PL + i * dayW + 0.5;
@@ -1174,7 +1175,9 @@ function drawZyklusGraph(area) {
       svgDayLabels += `<text x="${cxOf(di).toFixed(1)}" y="${DAY_Y}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${di + 1}</text>`;
   });
 
+  const svgLegend = `<text x="${PL}" y="${LEGEND_Y}" font-size="9.5" fill="var(--text-muted)">Zervix: <tspan font-weight="600">T</tspan> trocken · <tspan font-weight="600">C</tspan> cremig · <tspan font-weight="600">W</tspan> wässrig · <tspan font-weight="600">G</tspan> glasig-dehnbar</text>`;
+
   area.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-    ${svgBoxes}${svgChart}${svgDayLabels}
+    ${svgBoxes}${svgChart}${svgDayLabels}${svgLegend}
   </svg>`;
 }
