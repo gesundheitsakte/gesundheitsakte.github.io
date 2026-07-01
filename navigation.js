@@ -42,6 +42,7 @@ function init() {
     // Escape: closes topmost modal
     if (e.key === 'Escape' && topModal) {
       if (topModal.id === 'person-modal') closePersonModal();
+      else if (topModal.id === 'merge-modal') cancelMerge();
       else topModal.remove();
       return;
     }
