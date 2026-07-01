@@ -594,6 +594,16 @@ async function parseImportedFile(text, filename = '') {
     return { db: parsed, encrypted: false, password: null };
   }
 
+  // Gespeichertes Session-Passwort zuerst probieren (kein Dialog beim Auto-Sync)
+  const sessionPw = getSessionPassword();
+  if (sessionPw) {
+    try {
+      const db = await decryptDatabase(parsed, sessionPw);
+      return { db, encrypted: true, password: sessionPw };
+    } catch {}
+    // Gespeichertes Passwort falsch → Dialog anzeigen
+  }
+
   while (true) {
     const pw = await promptPassword({
       title: 'Verschlüsselte Datei',

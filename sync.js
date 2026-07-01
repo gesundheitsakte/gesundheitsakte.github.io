@@ -81,58 +81,6 @@ function _setSyncSpinner(active) {
 }
 
 // ═══════════════════════════════════════════════
-// KONFLIKT-DIALOG
-// ═══════════════════════════════════════════════
-function _showConflictDialog(localTs, serverTs) {
-  return new Promise(resolve => {
-    document.getElementById('sync-conflict-modal')?.remove();
-    const fmt = iso => iso ? new Date(iso).toLocaleString('de-AT') : '—';
-
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.id = 'sync-conflict-modal';
-    modal.innerHTML = `
-      <div class="modal" style="max-width:420px">
-        <div class="modal-header">
-          <h2>Synchronisierungskonflikt</h2>
-          <button class="modal-close" id="sc-x">✕</button>
-        </div>
-        <div class="modal-body">
-          <p style="font-size:.9375rem;line-height:1.55;margin-bottom:1rem">
-            Die Datei auf dem Server wurde geändert, seit du zuletzt synchronisiert hast.
-            Welche Version soll behalten werden?
-          </p>
-          <div class="db-stats">
-            <div class="db-stats-row">
-              <span class="db-stats-label">Lokal geändert</span>
-              <span class="db-stats-value">${esc(fmt(localTs))}</span>
-            </div>
-            <div class="db-stats-row">
-              <span class="db-stats-label">Server geändert</span>
-              <span class="db-stats-value">${esc(fmt(serverTs))}</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer" style="flex-direction:column;gap:.5rem;align-items:stretch">
-          <div style="display:flex;gap:.5rem">
-            <button class="btn btn-primary" style="flex:1" id="sc-download">Serverversion übernehmen</button>
-            <button class="btn btn-ghost"   style="flex:1" id="sc-upload">Lokal hochladen</button>
-          </div>
-          <button class="btn btn-ghost" id="sc-cancel">Abbrechen</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-
-    const close = v => { modal.remove(); resolve(v); };
-    modal.querySelector('#sc-download').onclick = () => close('download');
-    modal.querySelector('#sc-upload').onclick   = () => close('upload');
-    modal.querySelector('#sc-cancel').onclick   = () => close('cancel');
-    modal.querySelector('#sc-x').onclick        = () => close('cancel');
-    modal.addEventListener('click', e => { if (e.target === modal) close('cancel'); });
-  });
-}
-
-// ═══════════════════════════════════════════════
 // DOWNLOAD — Serverdaten in die App laden
 // ═══════════════════════════════════════════════
 async function _applyDownload(serverText, serverETag) {
@@ -252,7 +200,13 @@ async function syncData(opts = {}) {
       return;
     }
 
-    const serverText = await serverResp.text();
+    let serverText;
+    try {
+      serverText = await serverResp.text();
+    } catch {
+      showToast('Sync fehlgeschlagen – Antwort konnte nicht gelesen werden', 'error');
+      return;
+    }
 
     // 3. Konflikt-Prüfung: ETag hat sich seit letztem Sync geändert → feldweiser Merge
     const storedETag = state.lastETag || null;
@@ -324,11 +278,14 @@ async function syncData(opts = {}) {
       await _applyDownload(serverText, serverETag);
     } else if (localTs && serverTs && localTs > serverTs) {
       await _upload(cfg, storedETag);
-    } else if (!storedETag) {
-      await _upload(cfg, null);
     } else if (CHANGE_LOG.length > 0) {
-      // Timestamps couldn't be compared (e.g. encrypted server file) but local changes exist
+      // Ausstehende lokale Änderungen — hochladen (auch wenn Timestamps nicht vergleichbar,
+      // z.B. bei verschlüsselter Server-Datei)
       await _upload(cfg, storedETag);
+    } else if (!storedETag) {
+      // Noch nie auf diesem Gerät synchronisiert, keine lokalen Änderungen
+      // → Server-Version übernehmen
+      await _applyDownload(serverText, serverETag);
     } else {
       if (!opts.silent) showToast('Bereits synchron ✓', 'info');
     }
