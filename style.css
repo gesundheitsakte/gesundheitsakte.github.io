@@ -1885,6 +1885,28 @@ input.hf-search {
   .target-btn:hover { color: var(--accent); background: var(--accent-light); }
 }
 
+.add-entry-btn {
+  position: absolute;
+  bottom: .5rem;
+  right: .5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: .125rem .25rem;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  opacity: 0;
+  transition: opacity .15s, color .15s, background .15s;
+}
+.stat-tile:focus-within .add-entry-btn { opacity: 1; }
+@media (hover: hover) {
+  .stat-tile:hover .add-entry-btn { opacity: 1; }
+  .add-entry-btn:hover { color: var(--accent); background: var(--accent-light); }
+}
+
 /* ── Graph X-axis tick labels ────────────────── */
 /* Edge ticks (first/last) always visible */
 .xtick-edge { /* always shown */ }
@@ -2021,9 +2043,10 @@ input.hf-search {
   }
 }
 
-/* ── Touch devices: target-btn immer sichtbar (kein hover nötig) ── */
+/* ── Touch devices: target-btn / add-entry-btn immer sichtbar (kein hover nötig) ── */
 @media (pointer: coarse) {
   .stat-tile--clickable .target-btn { opacity: 1; }
+  .stat-tile .add-entry-btn { opacity: 1; }
 }
 
 /* ── Self-mode metric group: spacing on mobile ── */
@@ -2139,7 +2162,7 @@ input.hf-search {
   /* Navigation, Banner und interaktive Elemente ausblenden */
   .topbar, .tab-bar, .demo-banner,
   .unsaved-dot, #topbar-print-btn,
-  .target-btn, .item-menu-btn, .action-menu,
+  .target-btn, .add-entry-btn, .item-menu-btn, .action-menu,
   .graph-controls, .range-btn-group, .bcal-nav,
   .collapsible-header .collapse-chevron { display: none !important; }
   /* Karten ohne Schatten, seitliche Abstände reduzieren */

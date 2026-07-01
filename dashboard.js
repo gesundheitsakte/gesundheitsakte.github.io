@@ -123,7 +123,7 @@ function renderAllMetrics() {
       const arrow = (last && !isCat) ? trendArrow(currentPersonId, m.key) : '';
       return last
         ? statTile(m.label, formatMetricValue(m.key, last.value), isCat ? '' : m.unit, sub, m.key, arrow)
-        : statTile(m.label, '—', m.unit, sub);
+        : statTile(m.label, '—', m.unit, sub, m.computed ? undefined : m.key);
     }).join('');
 
     return `
@@ -301,9 +301,12 @@ function statTile(label, value, unit, sub, metricKey, arrow, pinned) {
               onclick="event.stopPropagation();openTargetDialog('${metricKey}')"
               title="${targetVal !== null ? esc('Ziel: '+targetVal+tUnit) : 'Zielwert setzen'}">${targetVal !== null ? '◉' : '◎'}</button>`
     : '';
+  const addEntryBtn = (metricKey && !def?.computed)
+    ? `<button class="add-entry-btn" onclick="event.stopPropagation();openEntryForMetric('${escAttr(metricKey)}')" title="Eintrag hinzufügen">+</button>`
+    : '';
   const pinEl = pinned ? `<span class="pin-indicator" title="Favorit">${_PIN_SVG}</span>` : '';
   return `<div ${attrs} style="position:relative">
-    ${pinEl}${targetBtn}
+    ${pinEl}${targetBtn}${addEntryBtn}
     <div class="stat-label">${esc(label)}</div>
     <div class="stat-value">${esc(value)}${unit?`<span class="stat-unit">${esc(unit)}</span>`:''}${arrow||''}</div>
     <div class="stat-sub">${esc(sub)}</div>

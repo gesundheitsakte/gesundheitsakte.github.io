@@ -600,6 +600,18 @@ function saveTargetDialog(pid, key) {
   showToast(val === '' ? 'Zielwert entfernt' : 'Zielwert gespeichert ✓', 'success');
 }
 
+function openEntryForMetric(key) {
+  activateTab('entry');
+  setEntryMode('self');
+  setTimeout(() => {
+    const el = document.getElementById('self-' + key);
+    if (el) {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.focus();
+    }
+  }, 50);
+}
+
 function refreshAfterTarget(key) {
   const activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-','');
   if (activeTab === 'dashboard') renderDashboard();
