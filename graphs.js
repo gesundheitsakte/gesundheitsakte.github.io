@@ -28,6 +28,7 @@ let _boolCalOffset = 0;
 const ZYKLUS_KEY = '__zyklus__';
 let _zyklusOffset = 0;
 let _graphFakeFullscreen = false;
+let _zyklusTouchOutsideCleanup = null;
 
 // Zweite Metrik für Vergleichs-Diagramm (null = Einzel-Modus)
 let activeGraphKey2 = null;
@@ -1200,22 +1201,37 @@ function drawZyklusGraph(area) {
     ${colHoverRect}${svgBoxes}${svgChart}${svgDayLabels}${svgLegend}
   </svg>`;
 
+  if (_zyklusTouchOutsideCleanup) { _zyklusTouchOutsideCleanup(); _zyklusTouchOutsideCleanup = null; }
+
+  const svg = area.querySelector('svg');
+  const hr  = svg.querySelector('#zyklus-col-hover');
+
+  function applyColHighlight(clientX) {
+    const br  = svg.getBoundingClientRect();
+    const svgX = (clientX - br.left) * (W / br.width);
+    const idx  = Math.floor((svgX - PL) / dayW);
+    if (idx >= 0 && idx < N) {
+      hr.setAttribute('x', (PL + idx * dayW).toFixed(1));
+      hr.setAttribute('width', dayW.toFixed(1));
+      hr.style.display = '';
+    } else {
+      hr.style.display = 'none';
+    }
+  }
+
   if (window.matchMedia('(hover: hover)').matches) {
-    const svg = area.querySelector('svg');
-    const hr  = svg.querySelector('#zyklus-col-hover');
-    svg.addEventListener('mousemove', ev => {
-      const br   = svg.getBoundingClientRect();
-      const svgX = (ev.clientX - br.left) * (W / br.width);
-      const idx  = Math.floor((svgX - PL) / dayW);
-      if (idx >= 0 && idx < N) {
-        hr.setAttribute('x', (PL + idx * dayW).toFixed(1));
-        hr.setAttribute('width', dayW.toFixed(1));
-        hr.style.display = '';
-      } else {
-        hr.style.display = 'none';
-      }
-    });
+    svg.addEventListener('mousemove', ev => applyColHighlight(ev.clientX));
     svg.addEventListener('mouseleave', () => { hr.style.display = 'none'; });
+  }
+
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    svg.addEventListener('touchstart', ev => {
+      const touch = ev.touches[0];
+      if (touch) applyColHighlight(touch.clientX);
+    }, { passive: true });
+    const hideOnOutside = ev => { if (!svg.contains(ev.target)) hr.style.display = 'none'; };
+    document.addEventListener('touchstart', hideOnOutside, { passive: true });
+    _zyklusTouchOutsideCleanup = () => document.removeEventListener('touchstart', hideOnOutside);
   }
 }
 
