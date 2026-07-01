@@ -2161,6 +2161,10 @@ input.hf-search {
   font-size: .8125rem;
   color: var(--text-muted);
 }
+@media (max-width: 520px) {
+  .changes-export-bar { gap: .5rem; }
+  .changes-export-hint { display: none; }
+}
 .change-list {
   display: flex;
   flex-direction: column;
