@@ -929,6 +929,14 @@ textarea { resize: vertical; min-height: 80px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Sync-Button Lade-Animation */
+.sync-icon { display: block; }
+.sync-icon.syncing {
+  animation: spin-cw 1.2s linear infinite;
+  transform-origin: center;
+}
+@keyframes spin-cw { to { transform: rotate(360deg); } }
+
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 1000px) {
   .grid-4 { grid-template-columns: 1fr 1fr; }

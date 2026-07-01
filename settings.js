@@ -115,6 +115,8 @@ function renderSettings() {
 
     ${renderEncryptionCard()}
 
+    ${renderSyncCard()}
+
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Darstellung</span></div>
       <div class="settings-theme-row">

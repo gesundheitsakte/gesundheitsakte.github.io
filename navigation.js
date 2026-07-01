@@ -140,6 +140,9 @@ function loadFromStorageOrLanding() {
     document.getElementById('onboarding').style.display = 'none';
     startApp();
     updateUnsavedIndicator();
+    if (typeof syncData === 'function' && hasSyncConfig() && !isDemoMode) {
+      setTimeout(() => syncData({ silent: true }), 1500);
+    }
   } catch (e) {
     console.warn('Konnte gespeicherte Daten nicht laden:', e);
     showLanding();
@@ -345,6 +348,9 @@ function startApp() {
   document.getElementById('demo-banner').style.display = isDemoMode ? '' : 'none';
   // Print button only visible when app is running
   document.getElementById('topbar-print-btn').style.display = '';
+  // Sync button only visible when configured and not in demo mode
+  document.getElementById('topbar-sync-btn').style.display =
+    (typeof hasSyncConfig === 'function' && hasSyncConfig() && !isDemoMode) ? '' : 'none';
 
   currentPersonId = null;
   activeGraphKey = null;
@@ -518,6 +524,8 @@ function initTheme() {
   const saved = localStorage.getItem('theme');
   const eb = document.getElementById('topbar-export-btn');
   if (eb) eb.innerHTML = SVG_EXPORT;
+  const sb = document.getElementById('topbar-sync-btn');
+  if (sb) sb.innerHTML = SVG_SYNC;
   const pb = document.getElementById('topbar-print-btn');
   if (pb) pb.innerHTML = SVG_PRINT;
   applyDark(saved === 'dark', false);
@@ -529,6 +537,9 @@ const SVG_SUN = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 
 </svg>`;
 const SVG_MOON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+</svg>`;
+const SVG_SYNC = `<svg class="sync-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
 </svg>`;
 const SVG_EXPORT = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
