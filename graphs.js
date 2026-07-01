@@ -127,7 +127,7 @@ function renderGraphs() {
       <div id="metric-selector" class="collapsible-body" hidden onclick="event.stopPropagation()">${metricButtons}${compareSection}</div>
     </div>
     <div id="norm-range-card" style="display:none;margin-top:1rem"></div>
-    <div class="card" style="margin-top:1rem">
+    <div class="card" style="margin-top:1rem" id="graph-card">
       <div class="graph-card-header">
         <div class="graph-card-title" id="graph-header">
           <span class="card-title"></span>
@@ -157,6 +157,11 @@ function renderGraphs() {
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
             </button>
           </div>
+          <button class="btn btn-ghost btn-sm bcal-nav-btn" id="graph-fs-btn"
+                  onclick="toggleGraphFullscreen()" title="Vollbild"
+                  aria-label="Vollbild">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5"/></svg>
+          </button>
         </div>
       </div>
       <div id="graph-area" style="margin-top:.75rem"></div>
@@ -1181,3 +1186,23 @@ function drawZyklusGraph(area) {
     ${svgBoxes}${svgChart}${svgDayLabels}${svgLegend}
   </svg>`;
 }
+
+// ── Vollbild ──────────────────────────────────────
+function toggleGraphFullscreen() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.getElementById('graph-card')?.requestFullscreen();
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('graph-fs-btn');
+  if (!btn) return;
+  const isFs = !!document.fullscreenElement;
+  btn.title = isFs ? 'Vollbild beenden' : 'Vollbild';
+  btn.setAttribute('aria-label', btn.title);
+  btn.innerHTML = isFs
+    ? '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5"/></svg>'
+    : '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5"/></svg>';
+});
