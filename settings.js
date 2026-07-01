@@ -137,6 +137,8 @@ function renderSettings() {
       </div>
     </div>
 
+    ${renderChangelogCard()}
+
     <div class="card" style="margin-top:1rem">
       <div class="card-header"><span class="card-title">Quellen &amp; Lizenzen</span></div>
       <p class="settings-intro">Diese App ist Open Source. Der Quellcode ist auf <a href="https://github.com/gesundheitsakte/gesundheitsakte.github.io" target="_blank" rel="noopener noreferrer">GitHub</a> einsehbar.</p>
@@ -969,6 +971,27 @@ function enableEncryption() {
   setSessionPassword(pw1);
   showToast('Verschlüsselung aktiviert — nächster Export wird verschlüsselt ✓', 'success');
   renderSettings();
+}
+
+function renderChangelogCard() {
+  const pad = n => String(n).padStart(2, '0');
+  const fmtTs = iso => {
+    const d = new Date(iso);
+    return `${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const recent = [...CHANGE_LOG].reverse().slice(0, 10);
+  const body = recent.length === 0
+    ? `<p class="settings-empty">Keine ausstehenden Änderungen.</p>`
+    : `<ul class="settings-changelog">${recent.map(c => `
+        <li class="settings-changelog-item">
+          <span class="settings-changelog-desc">${esc(c.description)}</span>
+          <span class="settings-changelog-ts">${esc(fmtTs(c.ts))}</span>
+        </li>`).join('')}</ul>`;
+  return `
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><span class="card-title">Letzte Änderungen</span></div>
+      ${body}
+    </div>`;
 }
 
 function disableEncryption() {
