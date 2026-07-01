@@ -326,6 +326,9 @@ async function syncData(opts = {}) {
       await _upload(cfg, storedETag);
     } else if (!storedETag) {
       await _upload(cfg, null);
+    } else if (CHANGE_LOG.length > 0) {
+      // Timestamps couldn't be compared (e.g. encrypted server file) but local changes exist
+      await _upload(cfg, storedETag);
     } else {
       if (!opts.silent) showToast('Bereits synchron ✓', 'info');
     }
