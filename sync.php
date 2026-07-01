@@ -15,6 +15,7 @@
 const SYNC_TOKEN     = 'CHANGE_ME_REPLACE_WITH_LONG_RANDOM_STRING';
 const DATA_FILE      = __DIR__ . '/data/gesundheitsakte.json';
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_BACKUPS    = 10;
 
 // CORS — damit JS die Antwort lesen darf (kein Preflight nötig bei GET/POST ohne custom Header)
 header('Access-Control-Allow-Origin: *');
@@ -30,6 +31,22 @@ if ($token === '' || $token !== SYNC_TOKEN) {
 function etag(): ?string {
     $f = DATA_FILE;
     return file_exists($f) ? '"' . md5(filemtime($f) . '.' . filesize($f)) . '"' : null;
+}
+
+function createBackup(): void {
+    $f = DATA_FILE;
+    if (!file_exists($f)) return;
+    $dir  = dirname($f);
+    $base = basename($f, '.json');
+    $dest = $dir . '/' . $base . '.backup.' . gmdate('Ymd-His') . '.json';
+    @copy($f, $dest);
+    $backups = glob($dir . '/' . $base . '.backup.*.json') ?: [];
+    if (count($backups) > MAX_BACKUPS) {
+        sort($backups); // lexicographic order = chronological for Ymd-His names
+        foreach (array_slice($backups, 0, count($backups) - MAX_BACKUPS) as $old) {
+            @unlink($old);
+        }
+    }
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -65,6 +82,7 @@ switch ($method) {
 
         $dir = dirname(DATA_FILE);
         if (!is_dir($dir) && !mkdir($dir, 0750, true)) { http_response_code(500); exit; }
+        createBackup();
         if (file_put_contents(DATA_FILE, $body, LOCK_EX) === false) { http_response_code(500); exit; }
 
         if (($newEtag = etag())) header('ETag: ' . $newEtag);
