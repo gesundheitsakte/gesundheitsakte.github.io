@@ -796,8 +796,11 @@ function normalizeDatabase(obj) {
       ? obj.customMetrics.map(m => ({ graphable: true, ...m }))
       : [],
     persons:       obj.persons.map(p => ({
-      conditions: [], familyHistory: [], medications: [], vaccinations: [],
-      allergies: [], operations: [], bloodType: null, ...p
+      bloodType: null, socialSecurityNumber: null,
+      color: null, avatarType: null, favoriteMetrics: null, hiddenSections: null,
+      conditions: [], familyHistory: [], medications: [],
+      vaccinations: [], allergies: [], operations: [],
+      ...p
     })),
     entries:       obj.entries.map(e => ({
       entryType: e.entryType || 'doctor',
@@ -1041,7 +1044,10 @@ function addOnboardingPerson() {
   onboardingPersons.push({
     id: genId(),
     name, birthday, gender,
-    bloodType: null, conditions: [], familyHistory: [],
+    bloodType: null, socialSecurityNumber: null,
+    color: null, avatarType: null, favoriteMetrics: null, hiddenSections: null,
+    conditions: [], familyHistory: [], medications: [],
+    vaccinations: [], allergies: [], operations: [],
   });
   renderOnboarding();
 }
@@ -1066,15 +1072,16 @@ async function finishOnboarding() {
     if (password === null) return;   // abgebrochen → Onboarding bleibt offen
   }
 
-  DATA = {
+  DATA = normalizeDatabase({
     version: '2.0',
     createdAt: new Date().toISOString(),
     checkups: [],
     customMetrics: [],
     targets: {},
+    healthImports: {},
     persons: onboardingPersons,
     entries: [],
-  };
+  });
   isDemoMode = false;
   isEncrypted = !!wantEncrypt;
   if (wantEncrypt) setSessionPassword(password);

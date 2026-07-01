@@ -52,6 +52,9 @@
       "bloodType": "A+",
       "socialSecurityNumber": "1234 140385",
       "color": "#2C6E8F",
+      "avatarType": null,
+      "favoriteMetrics": ["blood_pressure_sys", "blood_pressure_dia", "weight", "pulse"],
+      "hiddenSections": null,
       "conditions": [
         {
           "name": "Bluthochdruck",
@@ -156,6 +159,9 @@
       "bloodType": "0+",
       "socialSecurityNumber": "5678 220787",
       "color": "#2A9D8F",
+      "avatarType": null,
+      "favoriteMetrics": ["weight", "tsh", "temperature"],
+      "hiddenSections": null,
       "conditions": [
         {
           "name": "Hashimoto-Thyreoiditis",
@@ -248,7 +254,11 @@
       "birthday": "2015-11-05",
       "gender": "male",
       "bloodType": null,
+      "socialSecurityNumber": null,
       "color": "#E9A23B",
+      "avatarType": null,
+      "favoriteMetrics": ["weight", "height"],
+      "hiddenSections": null,
       "conditions": [],
       "familyHistory": [],
       "medications": [],
@@ -311,7 +321,11 @@
       "birthday": "2018-04-30",
       "gender": "female",
       "bloodType": null,
+      "socialSecurityNumber": null,
       "color": "#F2785C",
+      "avatarType": null,
+      "favoriteMetrics": ["weight", "height"],
+      "hiddenSections": null,
       "conditions": [
         {
           "name": "Laktoseintoleranz",
@@ -365,7 +379,8 @@
           "severity": "Leicht",
           "notes": "Rhinitis bei längerem Kontakt"
         }
-      ]
+      ],
+      "operations": []
     }
   ],
 
