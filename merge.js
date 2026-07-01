@@ -148,7 +148,9 @@ function mergeTargets(ta, tb, merged, conflicts, personsById) {
     else if (va === vb)                            merged.targets[flatKey] = va;
     else {
       merged.targets[flatKey] = va; // Platzhalter = A
-      const [pid, mk] = flatKey.split('__');
+      const sep = flatKey.indexOf('__');
+      const pid = flatKey.slice(0, sep);
+      const mk  = flatKey.slice(sep + 2);
       conflicts.push({
         collection: 'targets',
         id: flatKey,

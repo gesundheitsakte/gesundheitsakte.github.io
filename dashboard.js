@@ -290,7 +290,7 @@ function statTile(label, value, unit, sub, metricKey, arrow, pinned) {
   if (pinned)     cls.push('stat-tile--pinned');
   const emptyAttrs = empty ? 'onclick="nudgeEmptyTile(this)" role="button" tabindex="0"' : '';
   const attrs = clickable
-    ? `onclick="openMetricDiagram('${metricKey}')" class="${cls.join(' ')}"`
+    ? `onclick="openMetricDiagram('${escAttr(metricKey)}')" class="${cls.join(' ')}"`
     : `class="${cls.join(' ')}" ${emptyAttrs}`;
   const targetVal = getTarget(currentPersonId, metricKey || '');
   const tUnit = metricDef(metricKey)?.unit ? ' '+metricDef(metricKey).unit : '';
@@ -298,7 +298,7 @@ function statTile(label, value, unit, sub, metricKey, arrow, pinned) {
   const noTarget = def?.type === 'boolean' || def?.type === 'select';
   const targetBtn = (clickable && !empty && !noTarget)
     ? `<button class="target-btn${targetVal !== null ? ' has-target' : ''}"
-              onclick="event.stopPropagation();openTargetDialog('${metricKey}')"
+              onclick="event.stopPropagation();openTargetDialog('${escAttr(metricKey)}')"
               title="${targetVal !== null ? esc('Ziel: '+targetVal+tUnit) : 'Zielwert setzen'}">${targetVal !== null ? '◉' : '◎'}</button>`
     : '';
   const addEntryBtn = (metricKey && !def?.computed)

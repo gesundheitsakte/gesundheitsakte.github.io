@@ -151,7 +151,7 @@ function openHealthImportModal() {
   if (!persons.length) { showToast('Bitte zuerst eine Person anlegen', 'error'); return; }
 
   const personOpts = persons.map(p =>
-    `<option value="${p.id}" ${p.id===currentPersonId?'selected':''}>${esc(p.name)}</option>`).join('');
+    `<option value="${escAttr(p.id)}" ${p.id===currentPersonId?'selected':''}>${esc(p.name)}</option>`).join('');
 
   const metricRows = Object.keys(_healthParsed.byMetric).map(metric => {
     const def = metricDef(metric);
